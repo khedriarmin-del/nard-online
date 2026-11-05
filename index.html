@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تخته نرد آنلاین</title>
+<script src="/socket.io/socket.io.js"></script>
+<style>
+/* === استایل‌های اصلی === */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --page-bg: linear-gradient(160deg, #1a0033 0%, #0a0020 45%, #150030 100%);
+  --board-bg: linear-gradient(145deg, #6b3e26, #4a2c17);
+  --board-border: #3d2314;
+  --point-odd-up: linear-gradient(180deg, #e8c547, #c9a227);
+  --point-odd-down: linear-gradient(0deg, #e8c547, #c9a227);
+  --point-even-up: linear-gradient(180deg, #8b5a2b, #6b3e1f);
+  --point-even-down: linear-gradient(0deg, #8b5a2b, #6b3e1f);
+  --bar-bg: linear-gradient(90deg, #2c1810, #3d2314, #2c1810);
+}
+body {
+  font-family: Tahoma, Arial, sans-serif; background: var(--page-bg);
+  color: #fff; min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; padding: 16px 12px; overflow-x: hidden;
+}
+.screen { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 420px; }
+.screen.active { display: flex; }
+
+h1 { font-size: 28px; color: #ff6b9d; margin: 20px 0; text-shadow: 0 2px 10px rgba(255,107,157,0.5); }
+p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-height: 1.6; }
+.btn {
+  background: linear-gradient(145deg, #ff6b6b, #e04545); color: #fff;
+  border: none; padding: 14px 28px; font-size: 16px; border-radius: 12px;
+  cursor: pointer; width: 100%; font-family: inherit; font-weight: bold;
+  box-shadow: 0 4px 15px rgba(255,107,107,0.3); transition: 0.2s; margin-bottom: 12px;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary { background: linear-gradient(145deg, #3a5a8a, #2a4068); box-shadow: 0 4px 15px rgba(42,64,104,0.3); }
+.btn-online { background: linear-gradient(145deg, #9d4edd, #6a0572); box-shadow: 0 4px 15px rgba(157,78,221,0.3); }
+.btn-pass { background: linear-gradient(145deg, #ffa500, #cc8400); }
+input {
+  width: 100%; padding: 14px; font-size: 18px; text-align: center;
+  border-radius: 12px; border: 2px solid rgba(255,255,255,0.2);
+  background: rgba(0,0,0,0.3); color: #fff; font-family: inherit;
+  margin-bottom: 12px; letter-spacing: 2px; font-weight: bold; outline: none;
+}
+input:focus { border-color: #ff6b9d; }
+
+.match-bar { display: flex; gap: 14px; align-items: center; background: rgba(0,0,0,0.35); padding: 8px 14px; border-radius: 10px; margin-bottom: 10px; font-size: 13px; flex-wrap: wrap; justify-content: center; }
+.match-bar .match-label { color: #ffd93d; font-weight: bold; }
+.turn-info { font-size: 16px; margin-bottom: 4px; color: #ffd93d; font-weight: bold; }
+.timer-display { font-size: 14px; color: #ffd93d; margin-bottom: 4px; font-weight: bold; min-height: 20px; }
+.message { font-size: 13px; color: #ff8e8e; margin-bottom: 12px; min-height: 18px; text-align: center; padding: 0 10px; }
+
+.board {
+  width: 100%; background: var(--board-bg); border: 6px solid var(--board-border);
+  border-radius: 12px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.row { display: flex; height: 150px; gap: 2px; }
+.point { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; z-index: 1; }
+.row:first-child .point::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 100%; clip-path: polygon(0% 0%, 100% 0%, 50% 100%); z-index: -1; }
+.row:first-child .point:nth-child(odd)::before { background: var(--point-odd-up); }
+.row:first-child .point:nth-child(even)::before { background: var(--point-even-up); }
+.row:first-child .point { justify-content: flex-start; padding-top: 6px; }
+.row:last-child .point::before { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 100%; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); z-index: -1; }
+.row:last-child .point:nth-child(odd)::before { background: var(--point-odd-down); }
+.row:last-child .point:nth-child(even)::before { background: var(--point-even-down); }
+.row:last-child .point { justify-content: flex-end; padding-bottom: 6px; }
+
+.center-bar { width: 18px; background: var(--bar-bg); border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px 0; }
+.checker { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; cursor: pointer; transition: 0.15s; box-shadow: 0 2px 4px rgba(0,0,0,0.45); z-index: 3; }
+.checker:hover { transform: scale(1.18); }
+.checker.selected { border: 3px solid #ffd93d !important; box-shadow: 0 0 12px #ffd93d; transform: scale(1.1); }
+.checker.can-bear-off { outline: 3px solid #4caf50; outline-offset: 2px; animation: pulse 1s infinite; }
+@keyframes pulse { 0%, 100% { outline-color: #4caf50; } 50% { outline-color: #a5ffa8; } }
+.point.legal-target::after { content: ""; position: absolute; inset: 20%; border: 3px dashed #4caf50; border-radius: 50%; pointer-events: none; z-index: 5; animation: targetPulse 1s infinite; }
+@keyframes targetPulse { 0%, 100% { opacity: 0.5; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1); } }
+.white { background: radial-gradient(circle at 35% 35%, #fff, #d0d0d0); border: 2px solid #999; }
+.black { background: radial-gradient(circle at 35% 35%, #444, #111); border: 2px solid #000; }
+
+.controls { width: 100%; margin-top: 16px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.dice-area { display: flex; gap: 22px; }
+.dice { width: 54px; height: 54px; background: linear-gradient(145deg, #fff, #e0e0e0); border-radius: 12px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 8px; gap: 3px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid #ccc; }
+.dice .pip { width: 8px; height: 8px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #666, #111); place-self: center; }
+.dice .pip.hidden { visibility: hidden; }
+
+.overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; padding: 20px; }
+.overlay-content { background: linear-gradient(145deg, #2a2a4e, #1a1a2e); border: 2px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 28px 24px; max-width: 380px; width: 100%; display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center; }
+.overlay-content h2 { font-size: 22px; color: #ffd93d; }
+.overlay-content p { font-size: 14px; color: #ccc; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div id="screen-home" class="screen active">
+  <h1>🎲 نرد آنلاین</h1>
+  <p>برای بازی، ابتدا یک اتاق بسازید یا با کد وارد شوید.</p>
+  <button class="btn btn-online" onclick="showScreen('screen-create')">➕ ساخت اتاق جدید</button>
+  <button class="btn btn-secondary" onclick="showScreen('screen-join')">🔑 ورود با کد اتاق</button>
+</div>
+
+<div id="screen-create" class="screen">
+  <h1>ساخت اتاق</h1>
+  <p>طول مسابقه را انتخاب کنید:</p>
+  <button class="btn btn-online" onclick="createRoom(3)">بازی ۳ امتیازی</button>
+  <button class="btn btn-online" onclick="createRoom(5)">بازی ۵ امتیازی</button>
+  <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
+</div>
+
+<div id="screen-join" class="screen">
+  <h1>ورود به اتاق</h1>
+  <p>کد ۶ رقمی دریافتی را وارد کنید:</p>
+  <input type="text" id="joinCode" placeholder="کد ۶ رقمی" maxlength="6" inputmode="numeric">
+  <button class="btn btn-online" onclick="joinRoom()">ورود به بازی</button>
+  <button class="btn btn-secondary" onclick="showScreen('screen-home')">بازگشت</button>
+</div>
+
+<div id="screen-wait" class="screen">
+  <h1>در انتظار حریف...</h1>
+  <p>این کد را برای دوست خود بفرستید:</p>
+  <h1 id="roomCodeDisplay" style="font-size: 48px; letter-spacing: 5px; color: #fff; margin: 10px 0;">------</h1>
+  <p style="color: #ffd93d;">منتظر اتصال بازیکن دوم باشید...</p>
+</div>
+
+<div id="screen-game" class="screen" style="max-width: 440px;">
+  <div class="match-bar">
+    <span class="match-label" id="matchLabel">بازی آنلاین</span>
+    <span id="myColor">شما: -</span>
+  </div>
+  <div class="turn-info" id="turnInfo">در انتظار شروع...</div>
+  <div class="timer-display" id="timerDisplay"></div>
+  <div class="message" id="message"></div>
+
+  <div class="board">
+    <div class="row">
+      <div class="point" data-point="13"></div><div class="point" data-point="14"></div>
+      <div class="point" data-point="15"></div><div class="point" data-point="16"></div>
+      <div class="point" data-point="17"></div><div class="point" data-point="18"></div>
+      <div class="center-bar" id="topBar"></div>
+      <div class="point" data-point="19"></div><div class="point" data-point="20"></div>
+      <div class="point" data-point="21"></div><div class="point" data-point="22"></div>
+      <div class="point" data-point="23"></div><div class="point" data-point="24"></div>
+    </div>
+    <div class="row">
+      <div class="point" data-point="12"></div><div class="point" data-point="11"></div>
+      <div class="point" data-point="10"></div><div class="point" data-point="9"></div>
+      <div class="point" data-point="8"></div><div class="point" data-point="7"></div>
+      <div class="center-bar" id="bottomBar"></div>
+      <div class="point" data-point="6"></div><div class="point" data-point="5"></div>
+      <div class="point" data-point="4"></div><div class="point" data-point="3"></div>
+      <div class="point" data-point="2"></div><div class="point" data-point="1"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="dice-area">
+      <div class="dice" id="dice1">
+        <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
+        <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
+        <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
+      </div>
+      <div class="dice" id="dice2">
+        <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
+        <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
+        <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
+      </div>
+    </div>
+    <button class="btn btn-pass" id="passBtn" style="display:none;" onclick="passTurn()">پاس بده (حرکتی نداری)</button>
+    <button class="btn" id="rollBtn" onclick="requestRoll()" disabled>تاس بنداز</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="overlay-content">
+    <div id="overlayIcon" style="font-size:56px;"></div>
+    <h2 id="overlayTitle"></h2>
+    <p id="overlayMessage"></p>
+    <button class="btn" onclick="leaveRoom()">بازگشت به منو</button>
+  </div>
+</div>
+
+<script>
+const socket = io();
+const myPlayerId = sessionStorage.getItem('nard_player_id') || Math.random().toString(36).substring(2, 10);
+sessionStorage.setItem('nard_player_id', myPlayerId);
+
+let myColor = sessionStorage.getItem('nard_myColor');
+let roomCode = sessionStorage.getItem('nard_roomCode');
+let currentTurn = "white";
+let selectedChecker = null;
+let diceValues = [];
+let diceRolled = false;
+let gameOver = false;
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showMessage(t) { document.getElementById('message').textContent = t; }
+function leaveRoom() {
+  sessionStorage.removeItem('nard_roomCode');
+  sessionStorage.removeItem('nard_myColor');
+  location.reload();
+}
+
+// منطق بازی
+function hasCheckerOnBar() {
+  if (currentTurn === "white") return document.getElementById("topBar").querySelectorAll(".white").length > 0;
+  return document.getElementById("bottomBar").querySelectorAll(".black").length > 0;
+}
+function canMoveTo(toPoint) {
+  const opp = currentTurn === "white" ? "black" : "white";
+  const el = document.querySelector('.point[data-point="' + toPoint + '"]');
+  if (!el) return false;
+  return el.querySelectorAll("." + opp).length < 2;
+}
+function allCheckersInHome() {
+  const own = document.querySelectorAll(".checker." + currentTurn);
+  for (const c of own) {
+    const p = c.parentElement;
+    if (p.id === "topBar" || p.id === "bottomBar") return false;
+    const pt = parseInt(p.getAttribute("data-point"));
+    if (isNaN(pt)) return false;
+    if (currentTurn === "white" && (pt < 1 || pt > 6)) return false;
+    if (currentTurn === "black" && (pt < 19 || pt > 24)) return false;
+  }
+  return true;
+}
+function hasCheckerFurtherBack(dist) {
+  const own = document.querySelectorAll(".checker." + currentTurn);
+  for (const c of own) {
+    const p = c.parentElement;
+    if (!p.classList.contains("point")) continue;
+    const pt = parseInt(p.getAttribute("data-point"));
+    const d = currentTurn === "white" ? pt : (25 - pt);
+    if (d > dist) return true;
+  }
+  return false;
+}
+function getBearOffDie(checker) {
+  const p = checker.parentElement;
+  if (!p.classList.contains("point")) return null;
+  const from = parseInt(p.getAttribute("data-point"));
+  const dist = currentTurn === "white" ? from : (25 - from);
+  if (diceValues.includes(dist)) return dist;
+  const sorted = [...diceValues].sort((a, b) => b - a);
+  for (const die of sorted) {
+    if (die > dist && !hasCheckerFurtherBack(dist)) return die;
+  }
+  return null;
+}
+function canBearOff(checker) {
+  if (!checker.classList.contains(currentTurn)) return false;
+  const p = checker.parentElement;
+  if (!p.classList.contains("point")) return false;
+  return allCheckersInHome();
+}
+function hasAnyLegalMove() {
+  if (diceValues.length === 0) return false;
+  if (hasCheckerOnBar()) {
+    for (const die of diceValues) {
+      const to = currentTurn === "white" ? (25 - die) : die;
+      if (canMoveTo(to)) return true;
+    }
+    return false;
+  }
+  const own = document.querySelectorAll(".checker." + currentTurn);
+  for (const c of own) {
+    const p = c.parentElement;
+    if (p.id === "topBar" || p.id === "bottomBar") continue;
+    const from = parseInt(p.getAttribute("data-point"));
+    for (const die of diceValues) {
+      const to = currentTurn === "white" ? (from - die) : (from + die);
+      if (to < 1 || to > 24) continue;
+      if (canMoveTo(to)) return true;
+    }
+  }
+  if (allCheckersInHome()) {
+    for (const c of own) {
+      if (!c.parentElement.classList.contains("point")) continue;
+      if (getBearOffDie(c) !== null) return true;
+    }
+  }
+  return false;
+}
+
+function clearHighlights() {
+  document.querySelectorAll('.point.legal-target').forEach(p => p.classList.remove('legal-target'));
+}
+function highlightLegalMoves() {
+  clearHighlights();
+  if (!selectedChecker || !diceRolled || gameOver) return;
+  const parent = selectedChecker.parentElement;
+  const isFromBar = parent.id === "topBar" || parent.id === "bottomBar";
+  const from = isFromBar ? null : parseInt(parent.getAttribute("data-point"));
+  const unique = [...new Set(diceValues)];
+  for (const die of unique) {
+    let to;
+    if (isFromBar) to = currentTurn === "white" ? (25 - die) : die;
+    else to = currentTurn === "white" ? (from - die) : (from + die);
+    if (to < 1 || to > 24) continue;
+    if (!canMoveTo(to)) continue;
+    const el = document.querySelector('.point[data-point="' + to + '"]');
+    if (el) el.classList.add('legal-target');
+  }
+}
+
+const DICE_POSITIONS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+function setDiceFace(el, value) {
+  const cells = el.querySelectorAll('.pip');
+  cells.forEach(c => c.classList.add('hidden'));
+  if (value && DICE_POSITIONS[value]) { for (const pos of DICE_POSITIONS[value]) cells[pos].classList.remove('hidden'); }
+}
+function updateDiceDisplay() {
+  setDiceFace(document.getElementById('dice1'), diceValues[0] || null);
+  setDiceFace(document.getElementById('dice2'), diceValues[1] || null);
+}
+
+function getBoardState() {
+  const state = { points: {}, bar: { white: 0, black: 0 } };
+  document.querySelectorAll('.point').forEach(p => {
+    const pt = p.dataset.point;
+    const w = p.querySelectorAll('.white').length;
+    const b = p.querySelectorAll('.black').length;
+    if (w > 0 || b > 0) state.points[pt] = { white: w, black: b };
+  });
+  state.bar.white = document.getElementById('topBar').querySelectorAll('.white').length;
+  state.bar.black = document.getElementById('bottomBar').querySelectorAll('.black').length;
+  return state;
+}
+function applyBoardState(state) {
+  document.querySelectorAll('.checker').forEach(c => c.remove());
+  for (let pt in state.points) {
+    const el = document.querySelector(`.point[data-point="${pt}"]`);
+    if (!el) continue;
+    for (let i = 0; i < state.points[pt].white; i++) el.innerHTML += '<div class="checker white"></div>';
+    for (let i = 0; i < state.points[pt].black; i++) el.innerHTML += '<div class="checker black"></div>';
+  }
+  const topBar = document.getElementById('topBar'), botBar = document.getElementById('bottomBar');
+  for (let i = 0; i < state.bar.white; i++) topBar.innerHTML += '<div class="checker white"></div>';
+  for (let i = 0; i < state.bar.black; i++) botBar.innerHTML += '<div class="checker black"></div>';
+  setupCheckerClicks();
+}
+
+function setupCheckerClicks() {
+  document.querySelectorAll(".checker").forEach(checker => {
+    checker.onclick = function (event) {
+      event.stopPropagation();
+      if (gameOver || currentTurn !== myColor) return;
+      if (!diceRolled) { showMessage("اول باید تاس بندازی!"); return; }
+      const isW = checker.classList.contains("white");
+      if ((currentTurn === "white" && !isW) || (currentTurn === "black" && isW)) {
+        showMessage("نوبت این مهره نیست!"); return;
+      }
+      if (selectedChecker === checker) { tryBearOff(checker); return; }
+      if (hasCheckerOnBar()) {
+        const p = checker.parentElement;
+        if (p.id !== "topBar" && p.id !== "bottomBar") { showMessage("اول باید مهره‌های روی بار رو وارد کنی!"); return; }
+      }
+      if (selectedChecker) selectedChecker.classList.remove("selected", "can-bear-off");
+      selectedChecker = checker;
+      checker.classList.add("selected");
+      highlightLegalMoves();
+      if (canBearOff(checker) && getBearOffDie(checker) !== null) {
+        checker.classList.add("can-bear-off");
+        showMessage("برای بیرون انداختن، دوباره روی همین مهره بزن.");
+      } else {
+        showMessage("مهره انتخاب شد. خانه مقصد رو انتخاب کن.");
+      }
+    };
+  });
+}
+
+document.querySelectorAll(".point").forEach(point => {
+  point.onclick = function () {
+    if (gameOver || currentTurn !== myColor) return;
+    if (!selectedChecker || !diceRolled) return;
+    const to = parseInt(point.getAttribute("data-point"));
+    const fromParent = selectedChecker.parentElement;
+    const isFromBar = fromParent.id === "topBar" || fromParent.id === "bottomBar";
+    let dist;
+    if (isFromBar) {
+      dist = currentTurn === "white" ? (25 - to) : to;
+      if (dist < 1 || dist > 6) { showMessage("این خانه مجاز نیست!"); return; }
+    } else {
+      const from = parseInt(fromParent.getAttribute("data-point"));
+      dist = Math.abs(to - from);
+      if (currentTurn === "white" && to >= from) { showMessage("سفید به کوچک‌تر!"); return; }
+      if (currentTurn === "black" && to <= from) { showMessage("مشکی به بزرگ‌تر!"); return; }
+    }
+    if (!diceValues.includes(dist)) { showMessage("فاصله با تاس نمی‌خوره!"); return; }
+    const opp = currentTurn === "white" ? "black" : "white";
+    const oppC = point.querySelectorAll("." + opp);
+    if (oppC.length >= 2) { showMessage("این خانه بسته است!"); return; }
+    if (oppC.length === 1) {
+      const bar = document.getElementById(opp === "white" ? "topBar" : "bottomBar");
+      bar.appendChild(oppC[0]);
+      showMessage("مهره حریف زده شد!");
+    }
+    
+    const moved = selectedChecker;
+    point.appendChild(moved);
+    moved.classList.remove("selected", "can-bear-off");
+    selectedChecker = null;
+    clearHighlights();
+    
+    const idx = diceValues.indexOf(dist);
+    if (idx > -1) diceValues.splice(idx, 1);
+    updateDiceDisplay();
+    setupCheckerClicks();
+    
+    syncState();
+
+    if (diceValues.length === 0) {
+      endTurn();
+    } else if (!hasAnyLegalMove()) {
+      document.getElementById("passBtn").style.display = "block";
+      showMessage("هیچ حرکتی نداری! پاس بده.");
+    } else {
+      showMessage("حرکت انجام شد. " + diceValues.length + " حرکت باقی مونده.");
+    }
+  };
+});
+
+function tryBearOff(checker) {
+  if (!canBearOff(checker)) { showMessage("هنوز نمی‌تونی مهره‌ها رو بیرون بندازی."); return; }
+  const die = getBearOffDie(checker);
+  if (die === null) { showMessage("با تاس‌های فعلی نمی‌تونی این مهره رو بیرون بندازی."); return; }
+  checker.remove();
+  const idx = diceValues.indexOf(die);
+  if (idx > -1) diceValues.splice(idx, 1);
+  selectedChecker = null;
+  clearHighlights();
+  updateDiceDisplay();
+  setupCheckerClicks();
+  
+  syncState();
+
+  if (document.querySelectorAll(".checker." + currentTurn).length === 0) {
+    endGame(currentTurn);
+    return;
+  }
+  if (diceValues.length === 0) { endTurn(); }
+  else if (!hasAnyLegalMove()) {
+    document.getElementById("passBtn").style.display = "block";
+    showMessage("هیچ حرکتی نداری! پاس بده.");
+  } else {
+    showMessage("مهره بیرون انداخته شد. " + diceValues.length + " حرکت باقی مونده.");
+  }
+}
+
+function syncState() {
+  socket.emit('stateUpdate', {
+    state: getBoardState(),
+    dice: diceValues,
+    turn: currentTurn
+  });
+}
+
+function endTurn() {
+  document.getElementById("passBtn").style.display = "none";
+  diceValues = [];
+  diceRolled = false;
+  updateDiceDisplay();
+  clearHighlights();
+  if (selectedChecker) { selectedChecker.classList.remove("selected", "can-bear-off"); selectedChecker = null; }
+  
+  currentTurn = currentTurn === "white" ? "black" : "white";
+  document.getElementById("turnInfo").textContent = "نوبت: " + (currentTurn === "white" ? "سفید" : "مشکی");
+  
+  if (currentTurn === myColor) {
+    document.getElementById("rollBtn").disabled = false;
+    showMessage("نوبت شماست. تاس بنداز.");
+  } else {
+    showMessage("نوبت حریف...");
+  }
+  
+  syncState();
+}
+
+function endGame(winner) {
+  gameOver = true;
+  document.getElementById("passBtn").style.display = "none";
+  document.getElementById("rollBtn").disabled = true;
+  socket.emit('gameOver', { winner });
+  showOverlay(winner);
+}
+
+function showOverlay(winner) {
+  const isMe = winner === myColor;
+  document.getElementById('overlayIcon').textContent = isMe ? '🏆' : '😔';
+  document.getElementById('overlayTitle').textContent = isMe ? 'شما برنده شدید!' : 'شما باختید!';
+  document.getElementById('overlayMessage').textContent = isMe ? 'تبریک! بازی را به پایان رساندید.' : 'حریف مهره‌هایش را تمام کرد.';
+  document.getElementById('overlay').style.display = 'flex';
+}
+
+// === اتصال به سرور ===
+function createRoom(target) {
+  socket.emit('createRoom', { target, playerId: myPlayerId }, (res) => {
+    if (res.success) {
+      myColor = res.color;
+      roomCode = res.code;
+      sessionStorage.setItem('nard_roomCode', roomCode);
+      sessionStorage.setItem('nard_myColor', myColor);
+      document.getElementById('roomCodeDisplay').textContent = res.code;
+      document.getElementById('matchLabel').textContent = 'بازی ' + target + ' امتیازی';
+      showScreen('screen-wait');
+    } else { alert(res.error); }
+  });
+}
+
+function joinRoom() {
+  const code = document.getElementById('joinCode').value.trim();
+  if (code.length !== 6) return alert("کد باید ۶ رقم باشد");
+  
+  socket.emit('joinRoom', { code, playerId: myPlayerId }, (res) => {
+    if (res.success) {
+      myColor = res.color;
+      roomCode = res.code;
+      sessionStorage.setItem('nard_roomCode', roomCode);
+      sessionStorage.setItem('nard_myColor', myColor);
+    } else { alert(res.error); }
+  });
+}
+
+function requestRoll() {
+  document.getElementById("passBtn").style.display = "none";
+  document.getElementById("rollBtn").disabled = true;
+  socket.emit('rollDice');
+}
+
+function passTurn() {
+  endTurn();
+}
+
+// === دریافت رویدادها ===
+socket.on('waitingForOpponent', (data) => {
+    showScreen('screen-wait');
+    document.getElementById('roomCodeDisplay').textContent = data.code;
+    document.getElementById('matchLabel').textContent = 'در انتظار حریف';
+});
+
+socket.on('gameStart', (data) => {
+  showScreen('screen-game');
+  document.getElementById('myColor').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
+  
+  const initial = {
+    points: {
+      13: { white: 5, black: 0 }, 17: { white: 0, black: 3 }, 19: { white: 0, black: 5 }, 24: { white: 2, black: 0 },
+      12: { white: 0, black: 5 }, 8: { white: 3, black: 0 }, 6: { white: 5, black: 0 }, 1: { white: 0, black: 2 }
+    },
+    bar: { white: 0, black: 0 }
+  };
+  applyBoardState(initial);
+  
+  currentTurn = 'white';
+  gameOver = false;
+  document.getElementById('turnInfo').textContent = 'نوبت: ' + (currentTurn === 'white' ? 'سفید' : 'مشکی');
+  
+  if (myColor === 'white') {
+    document.getElementById('rollBtn').disabled = false;
+    showMessage("شما سفید هستید. تاس بنداز.");
+  } else {
+    showMessage("در انتظار حرکت سفید...");
+  }
+});
+
+socket.on('diceResult', (data) => {
+  diceValues = data.n1 === data.n2 ? [data.n1, data.n1, data.n1, data.n1] : [data.n1, data.n2];
+  diceRolled = true;
+  updateDiceDisplay();
+  
+  if (data.roller === myColor) {
+    if (!hasAnyLegalMove()) {
+      document.getElementById("passBtn").style.display = "block";
+      showMessage("هیچ حرکتی نداری! پاس بده.");
+    } else {
+      showMessage("تاس انداختی. حرکت کن.");
+    }
+  } else {
+    showMessage("حریف تاس انداخت...");
+  }
+});
+
+socket.on('stateSync', (data) => {
+  applyBoardState(data.state);
+  diceValues = data.dice;
+  updateDiceDisplay();
+  currentTurn = data.turn;
+  
+  document.getElementById('turnInfo').textContent = 'نوبت: ' + (currentTurn === 'white' ? 'سفید' : 'مشکی');
+  document.getElementById("passBtn").style.display = "none";
+  
+  if (currentTurn === myColor) {
+    diceRolled = diceValues.length > 0;
+    if (diceRolled) {
+      if (!hasAnyLegalMove()) {
+        document.getElementById("passBtn").style.display = "block";
+        showMessage("هیچ حرکتی نداری! پاس بده.");
+      } else {
+        showMessage("حریف حرکت کرد. نوبت شماست.");
+      }
+    } else {
+      document.getElementById("rollBtn").disabled = false;
+      showMessage("نوبت شماست. تاس بنداز.");
+    }
+  } else {
+    showMessage("حریف در حال بازی...");
+  }
+});
+
+socket.on('gameOver', (data) => {
+  gameOver = true;
+  showOverlay(data.winner);
+});
+
+socket.on('opponentDisconnected', () => {
+  showMessage("⚠️ حریف قطع شد! ۶۰ ثانیه فرصت دارد برگردد...");
+});
+socket.on('opponentReconnected', () => {
+  showMessage("✅ حریف برگشت! بازی ادامه دارد.");
+});
+socket.on('opponentTimeout', () => {
+  alert("حریف برنگشت. شما برنده شدید!");
+  leaveRoom();
+});
+
+// === بازگشت خودکار به بازی اگر رفرش شد ===
+if (roomCode && myColor) {
+    socket.emit('joinRoom', { code: roomCode, playerId: myPlayerId }, (res) => {
+        if (!res.success) {
+            sessionStorage.removeItem('nard_roomCode');
+            sessionStorage.removeItem('nard_myColor');
+            showScreen('screen-home');
+        }
+    });
+} else {
+    showScreen('screen-home');
+}
+</script>
+</body>
+</html>
