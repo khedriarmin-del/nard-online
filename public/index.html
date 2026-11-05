@@ -3,11 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تخته نرد آنلاین</title>
-<script src="/socket.io/socket.io.js"></script>
+<title>تخته نرد</title>
 <style>
-/* === استایل‌های اصلی === */
 * { margin: 0; padding: 0; box-sizing: border-box; }
+
 :root {
   --page-bg: linear-gradient(160deg, #1a0033 0%, #0a0020 45%, #150030 100%);
   --board-bg: linear-gradient(145deg, #6b3e26, #4a2c17);
@@ -18,139 +17,654 @@
   --point-even-down: linear-gradient(0deg, #8b5a2b, #6b3e1f);
   --bar-bg: linear-gradient(90deg, #2c1810, #3d2314, #2c1810);
 }
+
 body {
-  font-family: Tahoma, Arial, sans-serif; background: var(--page-bg);
-  color: #fff; min-height: 100vh; display: flex; flex-direction: column;
-  align-items: center; padding: 16px 12px; overflow-x: hidden;
+  font-family: Tahoma, Arial, sans-serif;
+  background: var(--page-bg);
+  color: #fff; min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; padding: 16px 12px;
 }
-.screen { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 420px; }
-.screen.active { display: flex; }
 
-h1 { font-size: 28px; color: #ff6b9d; margin: 20px 0; text-shadow: 0 2px 10px rgba(255,107,157,0.5); }
-p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-height: 1.6; }
-.btn {
-  background: linear-gradient(145deg, #ff6b6b, #e04545); color: #fff;
-  border: none; padding: 14px 28px; font-size: 16px; border-radius: 12px;
-  cursor: pointer; width: 100%; font-family: inherit; font-weight: bold;
-  box-shadow: 0 4px 15px rgba(255,107,107,0.3); transition: 0.2s; margin-bottom: 12px;
+/* ================== HOME SCREEN ================== */
+.start-home {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--page-bg);
+  overflow-y: auto;
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 16px 16px 30px;
 }
-.btn:active { transform: scale(0.97); }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-secondary { background: linear-gradient(145deg, #3a5a8a, #2a4068); box-shadow: 0 4px 15px rgba(42,64,104,0.3); }
-.btn-online { background: linear-gradient(145deg, #9d4edd, #6a0572); box-shadow: 0 4px 15px rgba(157,78,221,0.3); }
-.btn-pass { background: linear-gradient(145deg, #ffa500, #cc8400); }
-input {
-  width: 100%; padding: 14px; font-size: 18px; text-align: center;
-  border-radius: 12px; border: 2px solid rgba(255,255,255,0.2);
-  background: rgba(0,0,0,0.3); color: #fff; font-family: inherit;
-  margin-bottom: 12px; letter-spacing: 2px; font-weight: bold; outline: none;
+.start-home::before {
+  content: "";
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(255,107,157,0.22), transparent 45%),
+    radial-gradient(circle at 85% 20%, rgba(107,157,255,0.18), transparent 45%),
+    radial-gradient(circle at 50% 90%, rgba(255,217,61,0.10), transparent 55%);
 }
-input:focus { border-color: #ff6b9d; }
+.start-home > * { position: relative; z-index: 1; }
 
-.match-bar { display: flex; gap: 14px; align-items: center; background: rgba(0,0,0,0.35); padding: 8px 14px; border-radius: 10px; margin-bottom: 10px; font-size: 13px; flex-wrap: wrap; justify-content: center; }
+.top-bar {
+  width: 100%; max-width: 460px;
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px;
+}
+.top-icon-btn {
+  width: 42px; height: 42px; flex-shrink: 0;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  color: #fff; font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: 0.15s;
+  backdrop-filter: blur(10px);
+  position: relative;
+}
+.top-icon-btn:hover { background: rgba(255,107,157,0.15); border-color: rgba(255,107,157,0.4); }
+.top-icon-btn::after {
+  content: "";
+  position: absolute; top: 6px; right: 6px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #ff4757;
+  display: none;
+}
+.top-icon-btn.has-badge::after { display: block; }
+
+.user-chip {
+  flex: 1; display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px 8px 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+  min-width: 0;
+}
+.user-avatar {
+  width: 38px; height: 38px; flex-shrink: 0;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ff6b9d, #d6336c);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 2px 10px rgba(255,107,157,0.4);
+}
+.user-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.user-name { font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-level { font-size: 10px; color: #b0b0d0; }
+
+.home-hero { text-align: center; margin-bottom: 18px; }
+.hero-dice {
+  font-size: 56px;
+  display: inline-block;
+  filter: drop-shadow(0 8px 24px rgba(255,107,157,0.5));
+  animation: floatDice 3s ease-in-out infinite;
+}
+@keyframes floatDice {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-8px) rotate(5deg); }
+}
+.hero-title {
+  font-size: 30px; font-weight: bold;
+  background: linear-gradient(90deg, #ff6b9d, #ffd93d, #6b9dff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 4px 0;
+  letter-spacing: 1px;
+}
+.hero-sub { font-size: 12px; color: #a0a0c0; }
+
+/* ================== MAIN LAYOUT: play + side ================== */
+.home-main {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 460px;
+  margin-bottom: 16px;
+  align-items: stretch;
+}
+
+.play-buttons {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.play-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 12px;
+  border: none; border-radius: 16px;
+  cursor: pointer; font-family: inherit; text-align: right;
+  color: #fff; transition: 0.2s;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  position: relative; overflow: hidden;
+}
+.play-btn::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent 50%);
+  pointer-events: none;
+}
+.play-btn:hover { transform: translateY(-2px); }
+.play-btn:active { transform: translateY(0) scale(0.99); }
+
+.play-btn-online {
+  background: linear-gradient(135deg, #9d4edd 0%, #6a0572 100%);
+  border: 1px solid rgba(157,78,221,0.4);
+  box-shadow: 0 8px 24px rgba(157,78,221,0.35);
+}
+.play-btn-ai {
+  background: linear-gradient(135deg, #3a7bd5 0%, #2a5db5 100%);
+  border: 1px solid rgba(107,157,255,0.4);
+  box-shadow: 0 8px 24px rgba(58,123,213,0.35);
+}
+.play-btn-human {
+  background: linear-gradient(135deg, #ff6b9d 0%, #d6336c 100%);
+  border: 1px solid rgba(255,107,157,0.4);
+  box-shadow: 0 8px 24px rgba(255,107,157,0.35);
+}
+.play-icon {
+  font-size: 22px;
+  background: rgba(255,255,255,0.18);
+  border-radius: 10px;
+  min-width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.play-body { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+.play-title { font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.play-sub { font-size: 10px; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.play-arrow {
+  font-size: 14px;
+  opacity: 0.7;
+  transform: scaleX(-1);
+  flex-shrink: 0;
+}
+
+/* Side icons column */
+.side-icons {
+  width: 72px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.side-icon-btn {
+  flex: 1;
+  min-height: 0;
+  padding: 6px 3px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  color: #fff;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  transition: 0.15s;
+  backdrop-filter: blur(10px);
+}
+.side-icon-btn:hover {
+  background: rgba(255,107,157,0.12);
+  border-color: rgba(255,107,157,0.35);
+}
+.side-icon-btn:active { transform: scale(0.97); }
+.side-icon-emoji { font-size: 20px; line-height: 1; }
+.side-icon-label {
+  font-size: 9px;
+  color: #b0b0d0;
+  text-align: center;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Bottom icons row */
+.bottom-icons {
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.bottom-icon-btn {
+  flex: 1;
+  padding: 10px 4px 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  color: #fff;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  transition: 0.15s;
+  backdrop-filter: blur(10px);
+  min-width: 0;
+}
+.bottom-icon-btn:hover {
+  background: rgba(255,107,157,0.12);
+  border-color: rgba(255,107,157,0.35);
+  transform: translateY(-1px);
+}
+.bottom-icon-btn:active { transform: translateY(0); }
+.bottom-icon-emoji { font-size: 20px; line-height: 1; }
+.bottom-icon-label {
+  font-size: 10px;
+  color: #ccc;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  line-height: 1.1;
+}
+.bottom-icon-soon {
+  font-size: 8px;
+  color: #ffd93d;
+  line-height: 1;
+}
+
+/* Quick stats */
+.quick-stats {
+  width: 100%; max-width: 460px;
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 12px 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(10px);
+}
+.stat-item { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
+.stat-num { font-size: 18px; font-weight: bold; color: #fff; }
+.stat-lbl { font-size: 10px; color: #a0a0c0; }
+.stat-divider { width: 1px; height: 26px; background: rgba(255,255,255,0.1); }
+
+.home-footer {
+  width: 100%; max-width: 460px;
+  text-align: center;
+  font-size: 11px; color: #505070;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+/* ================== TARGET SCREEN ================== */
+.fullscreen-screen {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--page-bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 20px; gap: 18px;
+  overflow-y: auto;
+}
+.fullscreen-screen h1 { font-size: 30px; color: #ff6b9d; text-shadow: 0 2px 12px rgba(255,107,157,0.4); }
+.start-subtitle { font-size: 14px; color: #a0a0c0; margin-top: -10px; }
+.start-buttons { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 340px; }
+.start-btn {
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,255,255,0.15);
+  color: #fff; padding: 16px; border-radius: 14px;
+  cursor: pointer; display: flex; flex-direction: column;
+  align-items: center; gap: 6px;
+  font-family: inherit; transition: 0.2s;
+}
+.start-btn:hover, .start-btn:active {
+  background: rgba(255,107,157,0.15);
+  border-color: #ff6b9d; transform: translateY(-2px);
+}
+.start-icon { font-size: 36px; }
+.start-label { font-size: 17px; font-weight: bold; }
+.start-desc { font-size: 11px; color: #999; }
+.back-btn {
+  background: transparent;
+  border: 2px solid rgba(255,255,255,0.15);
+  color: #a0a0c0; padding: 10px 22px;
+  border-radius: 10px; cursor: pointer;
+  font-family: inherit; font-size: 14px;
+  transition: 0.15s; margin-top: 6px;
+}
+.back-btn:hover { border-color: #ff6b9d; color: #fff; }
+
+/* ================== GAME ================== */
+.game-content { display: none; flex-direction: column; align-items: center; width: 100%; }
+.game-content.active { display: flex; }
+
+.match-bar {
+  display: flex; gap: 14px; align-items: center;
+  background: rgba(0,0,0,0.35);
+  padding: 8px 14px; border-radius: 10px;
+  margin-bottom: 10px; font-size: 13px;
+  flex-wrap: wrap; justify-content: center;
+}
+.match-bar span { white-space: nowrap; }
 .match-bar .match-label { color: #ffd93d; font-weight: bold; }
+
 .turn-info { font-size: 16px; margin-bottom: 4px; color: #ffd93d; font-weight: bold; }
 .timer-display { font-size: 14px; color: #ffd93d; margin-bottom: 4px; font-weight: bold; min-height: 20px; }
 .message { font-size: 13px; color: #ff8e8e; margin-bottom: 12px; min-height: 18px; text-align: center; padding: 0 10px; }
 
 .board {
-  width: 100%; background: var(--board-bg); border: 6px solid var(--board-border);
-  border-radius: 12px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  width: 100%; max-width: 400px;
+  background: var(--board-bg);
+  border: 6px solid var(--board-border);
+  border-radius: 12px; padding: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   display: flex; flex-direction: column; gap: 8px;
 }
-.row { display: flex; height: 150px; gap: 2px; }
-.point { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; z-index: 1; }
-.row:first-child .point::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 100%; clip-path: polygon(0% 0%, 100% 0%, 50% 100%); z-index: -1; }
+.row { display: flex; height: 155px; gap: 2px; }
+.point {
+  flex: 1; position: relative; display: flex; flex-direction: column;
+  align-items: center; gap: 2px; cursor: pointer; z-index: 1;
+}
+.row:first-child .point::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 100%;
+  clip-path: polygon(0% 0%, 100% 0%, 50% 100%); z-index: -1;
+}
 .row:first-child .point:nth-child(odd)::before { background: var(--point-odd-up); }
 .row:first-child .point:nth-child(even)::before { background: var(--point-even-up); }
 .row:first-child .point { justify-content: flex-start; padding-top: 6px; }
-.row:last-child .point::before { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 100%; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); z-index: -1; }
+.row:last-child .point::before {
+  content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 100%;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%); z-index: -1;
+}
 .row:last-child .point:nth-child(odd)::before { background: var(--point-odd-down); }
 .row:last-child .point:nth-child(even)::before { background: var(--point-even-down); }
 .row:last-child .point { justify-content: flex-end; padding-bottom: 6px; }
+.point-number { display: none; }
 
-.center-bar { width: 18px; background: var(--bar-bg); border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px 0; }
-.checker { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; cursor: pointer; transition: 0.15s; box-shadow: 0 2px 4px rgba(0,0,0,0.45); z-index: 3; }
+.center-bar {
+  width: 18px; background: var(--bar-bg);
+  border-radius: 4px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px; padding: 4px 0;
+}
+.checker {
+  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+  cursor: pointer; transition: 0.15s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.15);
+  z-index: 3;
+}
 .checker:hover { transform: scale(1.18); }
-.checker.selected { border: 3px solid #ffd93d !important; box-shadow: 0 0 12px #ffd93d; transform: scale(1.1); }
-.checker.can-bear-off { outline: 3px solid #4caf50; outline-offset: 2px; animation: pulse 1s infinite; }
+.checker.selected {
+  border: 3px solid #ffd93d !important;
+  box-shadow: 0 0 12px #ffd93d, inset 0 0 0 1px rgba(255,255,255,0.2); transform: scale(1.1);
+}
+.checker.can-bear-off {
+  outline: 3px solid #4caf50; outline-offset: 2px; animation: pulse 1s infinite;
+}
 @keyframes pulse { 0%, 100% { outline-color: #4caf50; } 50% { outline-color: #a5ffa8; } }
-.point.legal-target::after { content: ""; position: absolute; inset: 20%; border: 3px dashed #4caf50; border-radius: 50%; pointer-events: none; z-index: 5; animation: targetPulse 1s infinite; }
+.checker.just-moved { animation: popIn 0.25s ease-out; }
+@keyframes popIn { 0% { transform: scale(0.5); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
+.point.legal-target::after {
+  content: ""; position: absolute; inset: 20%;
+  border: 3px dashed #4caf50; border-radius: 50%;
+  pointer-events: none; z-index: 5; animation: targetPulse 1s infinite;
+}
 @keyframes targetPulse { 0%, 100% { opacity: 0.5; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1); } }
 .white { background: radial-gradient(circle at 35% 35%, #fff, #d0d0d0); border: 2px solid #999; }
 .black { background: radial-gradient(circle at 35% 35%, #444, #111); border: 2px solid #000; }
 
-.controls { width: 100%; margin-top: 16px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.controls {
+  width: 100%; max-width: 400px; margin-top: 22px;
+  display: flex; flex-direction: column; gap: 12px; align-items: center;
+}
 .dice-area { display: flex; gap: 22px; }
-.dice { width: 54px; height: 54px; background: linear-gradient(145deg, #fff, #e0e0e0); border-radius: 12px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 8px; gap: 3px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid #ccc; }
-.dice .pip { width: 8px; height: 8px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #666, #111); place-self: center; }
+.dice {
+  width: 58px; height: 58px;
+  background: linear-gradient(145deg, #fff, #e0e0e0);
+  border-radius: 12px; display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  padding: 8px; gap: 3px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid #ccc;
+}
+.dice .pip {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #666, #111);
+  place-self: center; box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+}
 .dice .pip.hidden { visibility: hidden; }
 
-.overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; padding: 20px; }
-.overlay-content { background: linear-gradient(145deg, #2a2a4e, #1a1a2e); border: 2px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 28px 24px; max-width: 380px; width: 100%; display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center; }
+.btn {
+  background: linear-gradient(145deg, #ff6b6b, #e04545); color: #fff;
+  border: none; padding: 14px 28px; font-size: 16px; border-radius: 12px;
+  cursor: pointer; width: 100%; max-width: 270px;
+  font-family: Tahoma, Arial, sans-serif; font-weight: bold;
+  box-shadow: 0 4px 12px rgba(255,107,107,0.3); transition: 0.15s;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary { background: linear-gradient(145deg, #3a5a8a, #2a4068); box-shadow: 0 4px 12px rgba(42,64,104,0.3); }
+.btn-pass { background: linear-gradient(145deg, #ffa500, #cc8400); box-shadow: 0 4px 12px rgba(255,165,0,0.35); }
+.btn-row { display: flex; gap: 10px; width: 100%; max-width: 400px; justify-content: center; }
+.btn-row .btn { max-width: none; flex: 1; font-size: 14px; padding: 12px 10px; }
+
+.overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.85);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.overlay-content {
+  background: linear-gradient(145deg, #2a2a4e, #1a1a2e);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 16px; padding: 28px 24px;
+  max-width: 380px; width: 100%;
+  display: flex; flex-direction: column; gap: 14px;
+  align-items: center; text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
 .overlay-content h2 { font-size: 22px; color: #ffd93d; }
 .overlay-content p { font-size: 14px; color: #ccc; line-height: 1.6; }
+.overlay-buttons { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 8px; }
+
+.toast {
+  position: fixed;
+  bottom: 30px; left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: rgba(30,30,60,0.95);
+  border: 1px solid rgba(255,217,61,0.4);
+  color: #ffd93d;
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-size: 14px;
+  z-index: 999;
+  pointer-events: none;
+  opacity: 0;
+  transition: 0.3s;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  max-width: 90vw;
+  text-align: center;
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
 </style>
 </head>
 <body>
 
-<div id="screen-home" class="screen active">
-  <h1>🎲 نرد آنلاین</h1>
-  <p>برای بازی، ابتدا یک اتاق بسازید یا با کد وارد شوید.</p>
-  <button class="btn btn-online" onclick="showScreen('screen-create')">➕ ساخت اتاق جدید</button>
-  <button class="btn btn-secondary" onclick="showScreen('screen-join')">🔑 ورود با کد اتاق</button>
-</div>
-
-<div id="screen-create" class="screen">
-  <h1>ساخت اتاق</h1>
-  <p>طول مسابقه را انتخاب کنید:</p>
-  <button class="btn btn-online" onclick="createRoom(3)">بازی ۳ امتیازی</button>
-  <button class="btn btn-online" onclick="createRoom(5)">بازی ۵ امتیازی</button>
-  <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
-</div>
-
-<div id="screen-join" class="screen">
-  <h1>ورود به اتاق</h1>
-  <p>کد ۶ رقمی دریافتی را وارد کنید:</p>
-  <input type="text" id="joinCode" placeholder="کد ۶ رقمی" maxlength="6" inputmode="numeric">
-  <button class="btn btn-online" onclick="joinRoom()">ورود به بازی</button>
-  <button class="btn btn-secondary" onclick="showScreen('screen-home')">بازگشت</button>
-</div>
-
-<div id="screen-wait" class="screen">
-  <h1>در انتظار حریف...</h1>
-  <p>این کد را برای دوست خود بفرستید:</p>
-  <h1 id="roomCodeDisplay" style="font-size: 48px; letter-spacing: 5px; color: #fff; margin: 10px 0;">------</h1>
-  <p style="color: #ffd93d;">منتظر اتصال بازیکن دوم باشید...</p>
-</div>
-
-<div id="screen-game" class="screen" style="max-width: 440px;">
-  <div class="match-bar">
-    <span class="match-label" id="matchLabel">بازی آنلاین</span>
-    <span id="myColor">شما: -</span>
+<div id="modeScreen" class="start-home">
+  <div class="top-bar">
+    <button class="top-icon-btn" id="settingsBtn" title="تنظیمات">⚙️</button>
+    <div class="user-chip">
+      <div class="user-avatar">👤</div>
+      <div class="user-info">
+        <span class="user-name">مهمان</span>
+        <span class="user-level">🎲 بازیکن تازه‌کار</span>
+      </div>
+    </div>
+    <button class="top-icon-btn has-badge" id="notifBtn" title="اعلان‌ها">🔔</button>
   </div>
-  <div class="turn-info" id="turnInfo">در انتظار شروع...</div>
+
+  <div class="home-hero">
+    <div class="hero-dice">🎲</div>
+    <h1 class="hero-title">تخته نرد</h1>
+    <p class="hero-sub">بهترین بازی استراتژی جهان</p>
+  </div>
+
+  <div class="home-main">
+    <div class="play-buttons">
+      <button class="play-btn play-btn-online" id="startOnlineBtn">
+        <span class="play-icon">🌐</span>
+        <span class="play-body">
+          <span class="play-title">بازی آنلاین</span>
+          <span class="play-sub">با بازیکنان سراسر جهان</span>
+        </span>
+        <span class="play-arrow">▶</span>
+      </button>
+      <button class="play-btn play-btn-ai" id="startAIBtn">
+        <span class="play-icon">🤖</span>
+        <span class="play-body">
+          <span class="play-title">با کامپیوتر</span>
+          <span class="play-sub">تمرین و چالش</span>
+        </span>
+        <span class="play-arrow">▶</span>
+      </button>
+      <button class="play-btn play-btn-human" id="startHumanBtn">
+        <span class="play-icon">👥</span>
+        <span class="play-body">
+          <span class="play-title">با دوستان</span>
+          <span class="play-sub">روی یک دستگاه</span>
+        </span>
+        <span class="play-arrow">▶</span>
+      </button>
+    </div>
+
+    <div class="side-icons">
+      <button class="feature-btn side-icon-btn" data-feature="chat">
+        <span class="side-icon-emoji">💬</span>
+        <span class="side-icon-label">چت</span>
+      </button>
+      <button class="feature-btn side-icon-btn" data-feature="shop">
+        <span class="side-icon-emoji">🛒</span>
+        <span class="side-icon-label">فروشگاه</span>
+      </button>
+      <button class="feature-btn side-icon-btn" data-feature="leaderboard">
+        <span class="side-icon-emoji">🏆</span>
+        <span class="side-icon-label">رتبه</span>
+      </button>
+      <button class="feature-btn side-icon-btn" data-feature="profile">
+        <span class="side-icon-emoji">👤</span>
+        <span class="side-icon-label">پروفایل</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="bottom-icons">
+    <button class="feature-btn bottom-icon-btn" data-feature="achievements">
+      <span class="bottom-icon-emoji">🎯</span>
+      <span class="bottom-icon-label">دستاورد</span>
+      <span class="bottom-icon-soon">به زودی</span>
+    </button>
+    <button class="feature-btn bottom-icon-btn" data-feature="tutorial">
+      <span class="bottom-icon-emoji">📖</span>
+      <span class="bottom-icon-label">آموزش</span>
+      <span class="bottom-icon-soon">به زودی</span>
+    </button>
+    <button class="feature-btn bottom-icon-btn" data-feature="daily">
+      <span class="bottom-icon-emoji">🎁</span>
+      <span class="bottom-icon-label">جایزه</span>
+      <span class="bottom-icon-soon">به زودی</span>
+    </button>
+    <button class="feature-btn bottom-icon-btn" data-feature="stats">
+      <span class="bottom-icon-emoji">📊</span>
+      <span class="bottom-icon-label">آمار</span>
+      <span class="bottom-icon-soon">به زودی</span>
+    </button>
+  </div>
+
+  <div class="quick-stats">
+    <div class="stat-item">
+      <span class="stat-num" id="statWins">۰</span>
+      <span class="stat-lbl">برد</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-num" id="statLosses">۰</span>
+      <span class="stat-lbl">باخت</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-num" id="statWinRate">۰٪</span>
+      <span class="stat-lbl">نرخ برد</span>
+    </div>
+  </div>
+
+  <div class="home-footer">
+    نسخه ۱.۰.۰ — ساخته‌شده با ❤️
+  </div>
+</div>
+
+<div id="targetScreen" class="fullscreen-screen" style="display:none;">
+  <h1>🎯 طول مسابقه</h1>
+  <p class="start-subtitle">مسابقه تا چند امتیاز باشد؟</p>
+  <div class="start-buttons">
+    <button class="start-btn" id="target3Btn">
+      <span class="start-icon">3️⃣</span>
+      <span class="start-label">بازی ۳ امتیازی</span>
+      <span class="start-desc">کوتاه و سریع</span>
+    </button>
+    <button class="start-btn" id="target5Btn">
+      <span class="start-icon">5️⃣</span>
+      <span class="start-label">بازی ۵ امتیازی</span>
+      <span class="start-desc">استاندارد — چالش بیشتر</span>
+    </button>
+  </div>
+  <button class="back-btn" id="backToModeBtn">← بازگشت</button>
+</div>
+
+<div class="game-content" id="gameContent">
+  <div class="match-bar">
+    <span class="match-label" id="matchLabel">بازی ۳ امتیازی</span>
+    <span>⚪ <span id="whiteScore">۰</span></span>
+    <span>⚫ <span id="blackScore">۰</span></span>
+  </div>
+  
+  <div class="turn-info" id="turnInfo">نوبت: سفید</div>
   <div class="timer-display" id="timerDisplay"></div>
   <div class="message" id="message"></div>
 
   <div class="board">
     <div class="row">
-      <div class="point" data-point="13"></div><div class="point" data-point="14"></div>
-      <div class="point" data-point="15"></div><div class="point" data-point="16"></div>
-      <div class="point" data-point="17"></div><div class="point" data-point="18"></div>
+      <div class="point" data-point="13"></div>
+      <div class="point" data-point="14"></div>
+      <div class="point" data-point="15"></div>
+      <div class="point" data-point="16"></div>
+      <div class="point" data-point="17"></div>
+      <div class="point" data-point="18"></div>
       <div class="center-bar" id="topBar"></div>
-      <div class="point" data-point="19"></div><div class="point" data-point="20"></div>
-      <div class="point" data-point="21"></div><div class="point" data-point="22"></div>
-      <div class="point" data-point="23"></div><div class="point" data-point="24"></div>
+      <div class="point" data-point="19"></div>
+      <div class="point" data-point="20"></div>
+      <div class="point" data-point="21"></div>
+      <div class="point" data-point="22"></div>
+      <div class="point" data-point="23"></div>
+      <div class="point" data-point="24"></div>
     </div>
     <div class="row">
-      <div class="point" data-point="12"></div><div class="point" data-point="11"></div>
-      <div class="point" data-point="10"></div><div class="point" data-point="9"></div>
-      <div class="point" data-point="8"></div><div class="point" data-point="7"></div>
+      <div class="point" data-point="12"></div>
+      <div class="point" data-point="11"></div>
+      <div class="point" data-point="10"></div>
+      <div class="point" data-point="9"></div>
+      <div class="point" data-point="8"></div>
+      <div class="point" data-point="7"></div>
       <div class="center-bar" id="bottomBar"></div>
-      <div class="point" data-point="6"></div><div class="point" data-point="5"></div>
-      <div class="point" data-point="4"></div><div class="point" data-point="3"></div>
-      <div class="point" data-point="2"></div><div class="point" data-point="1"></div>
+      <div class="point" data-point="6"></div>
+      <div class="point" data-point="5"></div>
+      <div class="point" data-point="4"></div>
+      <div class="point" data-point="3"></div>
+      <div class="point" data-point="2"></div>
+      <div class="point" data-point="1"></div>
     </div>
   </div>
 
@@ -167,8 +681,12 @@ input:focus { border-color: #ff6b9d; }
         <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
       </div>
     </div>
-    <button class="btn btn-pass" id="passBtn" style="display:none;" onclick="passTurn()">پاس بده (حرکتی نداری)</button>
-    <button class="btn" id="rollBtn" onclick="requestRoll()" disabled>تاس بنداز</button>
+    <button class="btn" id="rollBtn">تاس بنداز</button>
+    <button class="btn btn-pass" id="passBtn" style="display:none;">پاس بده (حرکتی نداری)</button>
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="newGameBtn">🔄 مسابقه جدید</button>
+      <button class="btn btn-secondary" id="menuBtn">🏠 منوی اصلی</button>
+    </div>
   </div>
 </div>
 
@@ -177,35 +695,187 @@ input:focus { border-color: #ff6b9d; }
     <div id="overlayIcon" style="font-size:56px;"></div>
     <h2 id="overlayTitle"></h2>
     <p id="overlayMessage"></p>
-    <button class="btn" onclick="leaveRoom()">بازگشت به منو</button>
+    <div class="overlay-buttons">
+      <button class="btn" id="overlayPrimaryBtn"></button>
+      <button class="btn btn-secondary" id="overlaySecondaryBtn"></button>
+    </div>
   </div>
 </div>
 
-<script>
-const socket = io();
-const myPlayerId = sessionStorage.getItem('nard_player_id') || Math.random().toString(36).substring(2, 10);
-sessionStorage.setItem('nard_player_id', myPlayerId);
+<div id="toast" class="toast"></div>
 
-let myColor = sessionStorage.getItem('nard_myColor');
-let roomCode = sessionStorage.getItem('nard_roomCode');
+<script>
+const DEBUG = false;
+function log(...args) { if (DEBUG) console.log('[Nard]', ...args); }
+
+function toPersian(n) {
+  return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+let gameMode = null;
+let matchTarget = 3;
+let matchScore = { white: 0, black: 0 };
 let currentTurn = "white";
 let selectedChecker = null;
-let diceValues = [];
 let diceRolled = false;
+let diceValues = [];
 let gameOver = false;
+let matchOver = false;
+let turnTimerId = null;
+let turnTimeLeft = 60;
+let pendingTimeouts = [];
+let diceAnimId = null;
+let generation = 0;
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+function safeTimeout(fn, ms) {
+  const gen = generation;
+  const id = setTimeout(() => {
+    if (gen !== generation) { log('skip stale timeout'); return; }
+    fn();
+  }, ms);
+  pendingTimeouts.push(id);
+  return id;
 }
-function showMessage(t) { document.getElementById('message').textContent = t; }
-function leaveRoom() {
-  sessionStorage.removeItem('nard_roomCode');
-  sessionStorage.removeItem('nard_myColor');
-  location.reload();
+function clearAllTimeouts() {
+  pendingTimeouts.forEach(id => clearTimeout(id));
+  pendingTimeouts = [];
+}
+function stopDiceAnim() {
+  if (diceAnimId) { clearInterval(diceAnimId); diceAnimId = null; }
 }
 
-// منطق بازی
+let audioCtx = null;
+function ensureAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+  }
+  return audioCtx;
+}
+function playSound(name) {
+  const ctx = ensureAudio(); if (!ctx) return;
+  if (ctx.state === 'suspended') ctx.resume();
+  const now = ctx.currentTime;
+  try {
+    if (name === 'win') {
+      [523, 659, 784, 1047].forEach((f, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type = 'sine'; o.frequency.setValueAtTime(f, now + i * 0.12);
+        g.gain.setValueAtTime(0.15, now + i * 0.12);
+        g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.12 + 0.3);
+        o.start(now + i * 0.12); o.stop(now + i * 0.12 + 0.3);
+      });
+      return;
+    }
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    if (name === 'dice') {
+      o.type = 'triangle'; o.frequency.setValueAtTime(300, now);
+      o.frequency.exponentialRampToValueAtTime(100, now + 0.08);
+      g.gain.setValueAtTime(0.2, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+      o.start(now); o.stop(now + 0.1);
+    } else if (name === 'move') {
+      o.type = 'sine'; o.frequency.setValueAtTime(500, now);
+      o.frequency.exponentialRampToValueAtTime(900, now + 0.05);
+      g.gain.setValueAtTime(0.1, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+      o.start(now); o.stop(now + 0.08);
+    } else if (name === 'hit') {
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(200, now);
+      o.frequency.exponentialRampToValueAtTime(60, now + 0.15);
+      g.gain.setValueAtTime(0.25, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+      o.start(now); o.stop(now + 0.18);
+    } else if (name === 'bearoff') {
+      o.type = 'sine'; o.frequency.setValueAtTime(700, now);
+      o.frequency.exponentialRampToValueAtTime(1400, now + 0.1);
+      g.gain.setValueAtTime(0.12, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+      o.start(now); o.stop(now + 0.12);
+    }
+  } catch (e) {}
+}
+
+const DICE_POSITIONS = {
+  1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8],
+  5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8]
+};
+function setDiceFace(el, value) {
+  const cells = el.querySelectorAll('.pip');
+  cells.forEach(c => c.classList.add('hidden'));
+  if (value && DICE_POSITIONS[value]) {
+    for (const pos of DICE_POSITIONS[value]) cells[pos].classList.remove('hidden');
+  }
+}
+function updateDiceDisplay() {
+  setDiceFace(document.getElementById('dice1'), diceValues[0] || null);
+  setDiceFace(document.getElementById('dice2'), diceValues[1] || null);
+}
+function animateDiceThenSet(vals, cb) {
+  stopDiceAnim();
+  const gen = generation;
+  const d1 = document.getElementById('dice1'), d2 = document.getElementById('dice2');
+  let i = 0;
+  diceAnimId = setInterval(() => {
+    if (gen !== generation) { stopDiceAnim(); return; }
+    setDiceFace(d1, Math.floor(Math.random() * 6) + 1);
+    setDiceFace(d2, Math.floor(Math.random() * 6) + 1);
+    i++;
+    if (i >= 8) {
+      stopDiceAnim();
+      setDiceFace(d1, vals[0]);
+      setDiceFace(d2, vals[1]);
+      if (cb) cb();
+    }
+  }, 60);
+}
+
+const INITIAL_CHECKERS = {
+  13: 'white', 17: 'black', 19: 'black', 24: 'white',
+  12: 'black', 8: 'white', 6: 'white', 1: 'black'
+};
+const INITIAL_COUNTS = { 13: 5, 17: 3, 19: 5, 24: 2, 12: 5, 8: 3, 6: 5, 1: 2 };
+function buildBoard() {
+  document.querySelectorAll('.checker').forEach(c => c.remove());
+  for (const pt in INITIAL_COUNTS) {
+    const el = document.querySelector('.point[data-point="' + pt + '"]');
+    if (!el) continue;
+    const color = INITIAL_CHECKERS[pt];
+    for (let i = 0; i < INITIAL_COUNTS[pt]; i++) {
+      const c = document.createElement('div');
+      c.className = 'checker ' + color;
+      el.appendChild(c);
+    }
+  }
+}
+
+function loadStats() {
+  try {
+    return JSON.parse(localStorage.getItem('nard_stats') || '{"aiWins":0,"aiLosses":0}');
+  } catch (e) { return { aiWins: 0, aiLosses: 0 }; }
+}
+function updateStats(type) {
+  const stats = loadStats();
+  if (type === 'aiWin') stats.aiWins++;
+  else if (type === 'aiLoss') stats.aiLosses++;
+  localStorage.setItem('nard_stats', JSON.stringify(stats));
+  displayStats();
+}
+function displayStats() {
+  const stats = loadStats();
+  const total = stats.aiWins + stats.aiLosses;
+  const rate = total > 0 ? Math.round((stats.aiWins / total) * 100) : 0;
+  document.getElementById('statWins').textContent = toPersian(stats.aiWins);
+  document.getElementById('statLosses').textContent = toPersian(stats.aiLosses);
+  document.getElementById('statWinRate').textContent = toPersian(rate) + '٪';
+}
+
+function showMessage(t) { document.getElementById("message").textContent = t; }
 function hasCheckerOnBar() {
   if (currentTurn === "white") return document.getElementById("topBar").querySelectorAll(".white").length > 0;
   return document.getElementById("bottomBar").querySelectorAll(".black").length > 0;
@@ -307,48 +977,335 @@ function highlightLegalMoves() {
   }
 }
 
-const DICE_POSITIONS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
-function setDiceFace(el, value) {
-  const cells = el.querySelectorAll('.pip');
-  cells.forEach(c => c.classList.add('hidden'));
-  if (value && DICE_POSITIONS[value]) { for (const pos of DICE_POSITIONS[value]) cells[pos].classList.remove('hidden'); }
-}
-function updateDiceDisplay() {
-  setDiceFace(document.getElementById('dice1'), diceValues[0] || null);
-  setDiceFace(document.getElementById('dice2'), diceValues[1] || null);
+function updateMatchInfo() {
+  document.getElementById('whiteScore').textContent = toPersian(matchScore.white);
+  document.getElementById('blackScore').textContent = toPersian(matchScore.black);
+  document.getElementById('matchLabel').textContent = 'بازی ' + toPersian(matchTarget) + ' امتیازی';
 }
 
-function getBoardState() {
-  const state = { points: {}, bar: { white: 0, black: 0 } };
-  document.querySelectorAll('.point').forEach(p => {
-    const pt = p.dataset.point;
-    const w = p.querySelectorAll('.white').length;
-    const b = p.querySelectorAll('.black').length;
-    if (w > 0 || b > 0) state.points[pt] = { white: w, black: b };
-  });
-  state.bar.white = document.getElementById('topBar').querySelectorAll('.white').length;
-  state.bar.black = document.getElementById('bottomBar').querySelectorAll('.black').length;
-  return state;
-}
-function applyBoardState(state) {
-  document.querySelectorAll('.checker').forEach(c => c.remove());
-  for (let pt in state.points) {
-    const el = document.querySelector(`.point[data-point="${pt}"]`);
-    if (!el) continue;
-    for (let i = 0; i < state.points[pt].white; i++) el.innerHTML += '<div class="checker white"></div>';
-    for (let i = 0; i < state.points[pt].black; i++) el.innerHTML += '<div class="checker black"></div>';
+function startTurnTimer() {
+  stopTurnTimer();
+  if (gameOver || matchOver) return;
+  if (gameMode === "ai" && currentTurn === "black") {
+    document.getElementById("timerDisplay").textContent = "🤖";
+    document.getElementById("timerDisplay").style.color = "#66d9ef";
+    return;
   }
-  const topBar = document.getElementById('topBar'), botBar = document.getElementById('bottomBar');
-  for (let i = 0; i < state.bar.white; i++) topBar.innerHTML += '<div class="checker white"></div>';
-  for (let i = 0; i < state.bar.black; i++) botBar.innerHTML += '<div class="checker black"></div>';
+  turnTimeLeft = 60;
+  updateTimerDisplay();
+  turnTimerId = setInterval(() => {
+    turnTimeLeft--;
+    updateTimerDisplay();
+    if (turnTimeLeft <= 0) {
+      stopTurnTimer();
+      showMessage("زمان تمام شد! نوبت عوض شد.");
+      endTurn();
+    }
+  }, 1000);
+}
+function stopTurnTimer() {
+  if (turnTimerId) { clearInterval(turnTimerId); turnTimerId = null; }
+}
+function updateTimerDisplay() {
+  const el = document.getElementById("timerDisplay");
+  el.textContent = "⏱ " + toPersian(turnTimeLeft);
+  el.style.color = turnTimeLeft <= 10 ? "#ff4444" : "#ffd93d";
+}
+
+function endTurn() {
+  stopTurnTimer();
+  diceRolled = false;
+  diceValues = [];
+  updateDiceDisplay();
+  clearHighlights();
+  if (selectedChecker) {
+    selectedChecker.classList.remove("selected", "can-bear-off");
+    selectedChecker = null;
+  }
+  currentTurn = currentTurn === "white" ? "black" : "white";
+  document.getElementById("turnInfo").textContent =
+    "نوبت: " + (currentTurn === "white" ? "سفید" : "مشکی");
+  document.getElementById("passBtn").style.display = "none";
+
+  if (gameOver || matchOver) return;
+
+  const isAITurn = (gameMode === "ai" && currentTurn === "black");
+  if (isAITurn) {
+    document.getElementById("rollBtn").disabled = true;
+    startTurnTimer();
+    safeTimeout(() => {
+      if (gameOver || matchOver || currentTurn !== "black" || gameMode !== "ai") return;
+      aiTurn();
+    }, 700);
+  } else {
+    document.getElementById("rollBtn").disabled = false;
+    startTurnTimer();
+  }
+}
+
+function calculateGamePoints(winner) {
+  const loser = winner === 'white' ? 'black' : 'white';
+  const loserRemaining = document.querySelectorAll('.checker.' + loser).length;
+  const loserBorneOff = 15 - loserRemaining;
+  if (loserBorneOff === 0) return 2;
+  return 1;
+}
+
+function endGame(winner) {
+  if (gameOver) return;
+  gameOver = true;
+  stopTurnTimer();
+  clearAllTimeouts();
+  stopDiceAnim();
+  playSound('win');
+  
+  const points = calculateGamePoints(winner);
+  matchScore[winner] += points;
+  updateMatchInfo();
+  
+  const typeLabel = points === 2 ? 'مارش' : '';
+  
+  if (matchScore[winner] >= matchTarget) {
+    matchOver = true;
+    if (gameMode === 'ai') updateStats(winner === 'white' ? 'aiWin' : 'aiLoss');
+    showMatchOver(winner);
+  } else {
+    showGameOver(winner, points, typeLabel);
+  }
+}
+
+function showGameOver(winner, points, reason) {
+  const winnerName = winner === 'white' ? 'سفید' : 'مشکی';
+  document.getElementById('overlayIcon').textContent = '🏁';
+  document.getElementById('overlayTitle').textContent = winnerName + ' این بازی را برد';
+  let msg = 'امتیاز این بازی: <strong>' + toPersian(points) + '</strong>';
+  if (reason) msg += ' (' + reason + ')';
+  msg += '<br>امتیاز مسابقه: سفید ' + toPersian(matchScore.white) + ' — ' + toPersian(matchScore.black) + ' مشکی';
+  document.getElementById('overlayMessage').innerHTML = msg;
+  
+  const primaryBtn = document.getElementById('overlayPrimaryBtn');
+  const secondaryBtn = document.getElementById('overlaySecondaryBtn');
+  primaryBtn.textContent = 'بازی بعدی';
+  primaryBtn.onclick = () => {
+    document.getElementById('overlay').style.display = 'none';
+    startNextGame(winner);
+  };
+  secondaryBtn.textContent = 'منوی اصلی';
+  secondaryBtn.onclick = () => {
+    document.getElementById('overlay').style.display = 'none';
+    returnToMenu();
+  };
+  document.getElementById('overlay').style.display = 'flex';
+}
+
+function showMatchOver(winner) {
+  const winnerName = winner === 'white' ? 'سفید' : 'مشکی';
+  document.getElementById('overlayIcon').textContent = '🏆';
+  document.getElementById('overlayTitle').textContent = winnerName + ' برنده مسابقه شد!';
+  let msg = 'امتیاز نهایی: سفید <strong>' + toPersian(matchScore.white) + '</strong> — <strong>' + toPersian(matchScore.black) + '</strong> مشکی';
+  if (gameMode === 'ai') {
+    if (winner === 'white') msg += '<br><br>🎉 تبریک! این مسابقه را بردی.';
+    else msg += '<br><br>😔 این مسابقه را باختی. دوباره تلاش کن!';
+  }
+  document.getElementById('overlayMessage').innerHTML = msg;
+  
+  const primaryBtn = document.getElementById('overlayPrimaryBtn');
+  const secondaryBtn = document.getElementById('overlaySecondaryBtn');
+  primaryBtn.textContent = 'مسابقه جدید';
+  primaryBtn.onclick = () => {
+    document.getElementById('overlay').style.display = 'none';
+    resetGame();
+  };
+  secondaryBtn.textContent = 'منوی اصلی';
+  secondaryBtn.onclick = () => {
+    document.getElementById('overlay').style.display = 'none';
+    returnToMenu();
+  };
+  document.getElementById('overlay').style.display = 'flex';
+}
+
+function tryBearOff(checker) {
+  if (!canBearOff(checker)) { showMessage("هنوز نمی‌تونی مهره‌ها رو بیرون بندازی."); return; }
+  const die = getBearOffDie(checker);
+  if (die === null) { showMessage("با تاس‌های فعلی نمی‌تونی این مهره رو بیرون بندازی."); return; }
+  checker.remove();
+  const idx = diceValues.indexOf(die);
+  if (idx > -1) diceValues.splice(idx, 1);
+  selectedChecker = null;
+  clearHighlights();
+  playSound('bearoff');
+  updateDiceDisplay();
   setupCheckerClicks();
+
+  if (document.querySelectorAll(".checker." + currentTurn).length === 0) {
+    endGame(currentTurn);
+    return;
+  }
+  if (diceValues.length === 0) { endTurn(); showMessage("نوبت تمام شد."); }
+  else if (!hasAnyLegalMove()) { endTurn(); showMessage("حرکتی نداری. نوبت عوض شد."); }
+  else showMessage("مهره بیرون انداخته شد. " + toPersian(diceValues.length) + " حرکت باقی مونده.");
+}
+
+function aiGetMoves() {
+  const moves = [];
+  if (hasCheckerOnBar()) {
+    for (const die of [...new Set(diceValues)]) {
+      const to = currentTurn === "white" ? (25 - die) : die;
+      if (canMoveTo(to)) moves.push({ type: 'bar', to, die });
+    }
+    return moves;
+  }
+  const seen = new Set();
+  document.querySelectorAll(".checker." + currentTurn).forEach(c => {
+    const p = c.parentElement;
+    if (!p.classList.contains("point")) return;
+    const from = parseInt(p.getAttribute("data-point"));
+    if (seen.has(from)) return;
+    seen.add(from);
+    for (const die of [...new Set(diceValues)]) {
+      const to = currentTurn === "white" ? (from - die) : (from + die);
+      if (to < 1 || to > 24) continue;
+      if (!canMoveTo(to)) continue;
+      moves.push({ type: 'move', from, to, die });
+    }
+  });
+  if (allCheckersInHome()) {
+    document.querySelectorAll(".checker." + currentTurn).forEach(c => {
+      if (!c.parentElement.classList.contains("point")) return;
+      const from = parseInt(c.parentElement.getAttribute("data-point"));
+      const die = getBearOffDie(c);
+      if (die !== null) moves.push({ type: 'bearoff', from, die });
+    });
+  }
+  return moves;
+}
+
+function isInOpponentHome(pt) {
+  return currentTurn === 'white' ? (pt >= 19 && pt <= 24) : (pt >= 1 && pt <= 6);
+}
+
+function aiScoreMove(m) {
+  if (m.type === 'bearoff') return 1000;
+  const opp = currentTurn === "white" ? "black" : "white";
+  let score = 0;
+  const target = document.querySelector('.point[data-point="' + m.to + '"]');
+  if (!target) return -1000;
+  
+  const myOnTarget = target.querySelectorAll('.' + currentTurn).length;
+  const oppOnTarget = target.querySelectorAll('.' + opp).length;
+  
+  if (oppOnTarget === 1) score += 500;
+  if (myOnTarget >= 1) score += 200;
+  else if (myOnTarget === 0 && !isInOpponentHome(m.to)) score += 30;
+  if (myOnTarget === 0 && isInOpponentHome(m.to)) score -= 150;
+  if (myOnTarget === 0 && oppOnTarget === 0 && isInOpponentHome(m.to)) score -= 50;
+  
+  if (m.type === 'move') {
+    const fromEl = document.querySelector('.point[data-point="' + m.from + '"]');
+    if (fromEl) {
+      const fromCount = fromEl.querySelectorAll('.' + currentTurn).length;
+      if (fromCount === 2) score -= 200;
+      else if (fromCount >= 3) score += 60;
+    }
+  }
+  if (m.type === 'bar') score += 180;
+  if (m.type === 'move') {
+    const adv = currentTurn === "white" ? (m.from - m.to) : (m.to - m.from);
+    score += adv * 4;
+  }
+  return score;
+}
+
+function aiPickMove(moves) {
+  const scored = moves.map(m => ({ m, s: aiScoreMove(m) })).sort((a, b) => b.s - a.s);
+  const top = scored.slice(0, Math.min(2, scored.length));
+  return top[Math.floor(Math.random() * top.length)].m;
+}
+
+function aiTurn() {
+  if (gameOver || matchOver || currentTurn !== "black" || gameMode !== "ai") return;
+  const n1 = Math.floor(Math.random() * 6) + 1;
+  const n2 = Math.floor(Math.random() * 6) + 1;
+  diceValues = n1 === n2 ? [n1, n1, n1, n1] : [n1, n2];
+  playSound('dice');
+  animateDiceThenSet([n1, n2], () => {
+    diceRolled = true;
+    showMessage("کامپیوتر تاس انداخت...");
+    safeTimeout(() => aiMakeMove(), 300);
+  });
+}
+
+function aiMakeMove() {
+  if (gameOver || matchOver || currentTurn !== "black") return;
+  const moves = aiGetMoves();
+  if (moves.length === 0) {
+    safeTimeout(() => {
+      if (gameOver || matchOver || currentTurn !== "black") return;
+      endTurn();
+      showMessage("کامپیوتر حرکتی نداشت. نوبت تو شد.");
+    }, 400);
+    return;
+  }
+  const move = aiPickMove(moves);
+  aiExecuteMove(move);
+}
+
+function aiExecuteMove(move) {
+  if (gameOver || matchOver) return;
+  
+  if (move.type === "bearoff") {
+    const fromEl = document.querySelector('.point[data-point="' + move.from + '"]');
+    if (!fromEl) return;
+    const checker = fromEl.querySelector(".black");
+    if (!checker) return;
+    checker.remove();
+    playSound('bearoff');
+  } else {
+    let checker, toEl = document.querySelector('.point[data-point="' + move.to + '"]');
+    if (!toEl) return;
+    if (move.type === "bar") checker = document.getElementById("bottomBar").querySelector(".black");
+    else {
+      const fromEl = document.querySelector('.point[data-point="' + move.from + '"]');
+      if (!fromEl) return;
+      checker = fromEl.querySelector(".black");
+    }
+    if (!checker) return;
+    const whiteOnTarget = toEl.querySelectorAll(".white");
+    if (whiteOnTarget.length === 1) {
+      document.getElementById("topBar").appendChild(whiteOnTarget[0]);
+      playSound('hit');
+      showMessage("کامپیوتر مهره‌ات رو زد!");
+    } else playSound('move');
+    toEl.appendChild(checker);
+  }
+  
+  const idx = diceValues.indexOf(move.die);
+  if (idx > -1) diceValues.splice(idx, 1);
+  updateDiceDisplay();
+  setupCheckerClicks();
+  
+  if (document.querySelectorAll(".checker.black").length === 0) {
+    endGame('black');
+    return;
+  }
+  
+  if (diceValues.length === 0) {
+    safeTimeout(() => {
+      if (gameOver || matchOver) return;
+      endTurn();
+      showMessage("نوبت تو شد. تاس بنداز.");
+    }, 400);
+    return;
+  }
+  safeTimeout(() => aiMakeMove(), 400);
 }
 
 function setupCheckerClicks() {
   document.querySelectorAll(".checker").forEach(checker => {
     checker.onclick = function (event) {
       event.stopPropagation();
-      if (gameOver || currentTurn !== myColor) return;
+      if (gameOver || matchOver) return;
+      if (gameMode === "ai" && currentTurn === "black") return;
       if (!diceRolled) { showMessage("اول باید تاس بندازی!"); return; }
       const isW = checker.classList.contains("white");
       if ((currentTurn === "white" && !isW) || (currentTurn === "black" && isW)) {
@@ -357,7 +1314,9 @@ function setupCheckerClicks() {
       if (selectedChecker === checker) { tryBearOff(checker); return; }
       if (hasCheckerOnBar()) {
         const p = checker.parentElement;
-        if (p.id !== "topBar" && p.id !== "bottomBar") { showMessage("اول باید مهره‌های روی بار رو وارد کنی!"); return; }
+        if (p.id !== "topBar" && p.id !== "bottomBar") {
+          showMessage("اول باید مهره‌های روی بار رو وارد کنی!"); return;
+        }
       }
       if (selectedChecker) selectedChecker.classList.remove("selected", "can-bear-off");
       selectedChecker = checker;
@@ -375,7 +1334,8 @@ function setupCheckerClicks() {
 
 document.querySelectorAll(".point").forEach(point => {
   point.onclick = function () {
-    if (gameOver || currentTurn !== myColor) return;
+    if (gameOver || matchOver) return;
+    if (gameMode === "ai" && currentTurn === "black") return;
     if (!selectedChecker || !diceRolled) return;
     const to = parseInt(point.getAttribute("data-point"));
     const fromParent = selectedChecker.parentElement;
@@ -397,12 +1357,15 @@ document.querySelectorAll(".point").forEach(point => {
     if (oppC.length === 1) {
       const bar = document.getElementById(opp === "white" ? "topBar" : "bottomBar");
       bar.appendChild(oppC[0]);
+      playSound('hit');
       showMessage("مهره حریف زده شد!");
-    }
+    } else playSound('move');
     
     const moved = selectedChecker;
     point.appendChild(moved);
     moved.classList.remove("selected", "can-bear-off");
+    moved.classList.add("just-moved");
+    setTimeout(() => moved.classList.remove("just-moved"), 250);
     selectedChecker = null;
     clearHighlights();
     
@@ -411,234 +1374,197 @@ document.querySelectorAll(".point").forEach(point => {
     updateDiceDisplay();
     setupCheckerClicks();
     
-    syncState();
+    if (diceValues.length === 0) { endTurn(); showMessage("نوبت تمام شد."); }
+    else if (!hasAnyLegalMove()) { endTurn(); showMessage("حرکتی دیگه نداری."); }
+    else showMessage("حرکت انجام شد. " + toPersian(diceValues.length) + " حرکت باقی مونده.");
+  };
+});
 
-    if (diceValues.length === 0) {
-      endTurn();
-    } else if (!hasAnyLegalMove()) {
-      document.getElementById("passBtn").style.display = "block";
-      showMessage("هیچ حرکتی نداری! پاس بده.");
-    } else {
-      showMessage("حرکت انجام شد. " + diceValues.length + " حرکت باقی مونده.");
+document.getElementById("rollBtn").onclick = function () {
+  if (gameOver || matchOver) return;
+  if (gameMode === "ai" && currentTurn === "black") return;
+  if (diceRolled && diceValues.length > 0) { showMessage("اول حرکاتت رو تموم کن!"); return; }
+  const n1 = Math.floor(Math.random() * 6) + 1;
+  const n2 = Math.floor(Math.random() * 6) + 1;
+  if (n1 === n2) { diceValues = [n1, n1, n1, n1]; showMessage("جفت آوردی!"); }
+  else { diceValues = [n1, n2]; showMessage("تاس انداختی!"); }
+  playSound('dice');
+  animateDiceThenSet([n1, n2], () => {
+    diceRolled = true;
+    if (selectedChecker) {
+      selectedChecker.classList.remove("selected", "can-bear-off");
+      selectedChecker = null;
     }
-  };
-});
-
-function tryBearOff(checker) {
-  if (!canBearOff(checker)) { showMessage("هنوز نمی‌تونی مهره‌ها رو بیرون بندازی."); return; }
-  const die = getBearOffDie(checker);
-  if (die === null) { showMessage("با تاس‌های فعلی نمی‌تونی این مهره رو بیرون بندازی."); return; }
-  checker.remove();
-  const idx = diceValues.indexOf(die);
-  if (idx > -1) diceValues.splice(idx, 1);
-  selectedChecker = null;
-  clearHighlights();
-  updateDiceDisplay();
-  setupCheckerClicks();
-  
-  syncState();
-
-  if (document.querySelectorAll(".checker." + currentTurn).length === 0) {
-    endGame(currentTurn);
-    return;
-  }
-  if (diceValues.length === 0) { endTurn(); }
-  else if (!hasAnyLegalMove()) {
-    document.getElementById("passBtn").style.display = "block";
-    showMessage("هیچ حرکتی نداری! پاس بده.");
-  } else {
-    showMessage("مهره بیرون انداخته شد. " + diceValues.length + " حرکت باقی مونده.");
-  }
-}
-
-function syncState() {
-  socket.emit('stateUpdate', {
-    state: getBoardState(),
-    dice: diceValues,
-    turn: currentTurn
-  });
-}
-
-function endTurn() {
-  document.getElementById("passBtn").style.display = "none";
-  diceValues = [];
-  diceRolled = false;
-  updateDiceDisplay();
-  clearHighlights();
-  if (selectedChecker) { selectedChecker.classList.remove("selected", "can-bear-off"); selectedChecker = null; }
-  
-  currentTurn = currentTurn === "white" ? "black" : "white";
-  document.getElementById("turnInfo").textContent = "نوبت: " + (currentTurn === "white" ? "سفید" : "مشکی");
-  
-  if (currentTurn === myColor) {
-    document.getElementById("rollBtn").disabled = false;
-    showMessage("نوبت شماست. تاس بنداز.");
-  } else {
-    showMessage("نوبت حریف...");
-  }
-  
-  syncState();
-}
-
-function endGame(winner) {
-  gameOver = true;
-  document.getElementById("passBtn").style.display = "none";
-  document.getElementById("rollBtn").disabled = true;
-  socket.emit('gameOver', { winner });
-  showOverlay(winner);
-}
-
-function showOverlay(winner) {
-  const isMe = winner === myColor;
-  document.getElementById('overlayIcon').textContent = isMe ? '🏆' : '😔';
-  document.getElementById('overlayTitle').textContent = isMe ? 'شما برنده شدید!' : 'شما باختید!';
-  document.getElementById('overlayMessage').textContent = isMe ? 'تبریک! بازی را به پایان رساندید.' : 'حریف مهره‌هایش را تمام کرد.';
-  document.getElementById('overlay').style.display = 'flex';
-}
-
-// === اتصال به سرور ===
-function createRoom(target) {
-  socket.emit('createRoom', { target, playerId: myPlayerId }, (res) => {
-    if (res.success) {
-      myColor = res.color;
-      roomCode = res.code;
-      sessionStorage.setItem('nard_roomCode', roomCode);
-      sessionStorage.setItem('nard_myColor', myColor);
-      document.getElementById('roomCodeDisplay').textContent = res.code;
-      document.getElementById('matchLabel').textContent = 'بازی ' + target + ' امتیازی';
-      showScreen('screen-wait');
-    } else { alert(res.error); }
-  });
-}
-
-function joinRoom() {
-  const code = document.getElementById('joinCode').value.trim();
-  if (code.length !== 6) return alert("کد باید ۶ رقم باشد");
-  
-  socket.emit('joinRoom', { code, playerId: myPlayerId }, (res) => {
-    if (res.success) {
-      myColor = res.color;
-      roomCode = res.code;
-      sessionStorage.setItem('nard_roomCode', roomCode);
-      sessionStorage.setItem('nard_myColor', myColor);
-    } else { alert(res.error); }
-  });
-}
-
-function requestRoll() {
-  document.getElementById("passBtn").style.display = "none";
-  document.getElementById("rollBtn").disabled = true;
-  socket.emit('rollDice');
-}
-
-function passTurn() {
-  endTurn();
-}
-
-// === دریافت رویدادها ===
-socket.on('waitingForOpponent', (data) => {
-    showScreen('screen-wait');
-    document.getElementById('roomCodeDisplay').textContent = data.code;
-    document.getElementById('matchLabel').textContent = 'در انتظار حریف';
-});
-
-socket.on('gameStart', (data) => {
-  showScreen('screen-game');
-  document.getElementById('myColor').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
-  
-  const initial = {
-    points: {
-      13: { white: 5, black: 0 }, 17: { white: 0, black: 3 }, 19: { white: 0, black: 5 }, 24: { white: 2, black: 0 },
-      12: { white: 0, black: 5 }, 8: { white: 3, black: 0 }, 6: { white: 5, black: 0 }, 1: { white: 0, black: 2 }
-    },
-    bar: { white: 0, black: 0 }
-  };
-  applyBoardState(initial);
-  
-  currentTurn = 'white';
-  gameOver = false;
-  document.getElementById('turnInfo').textContent = 'نوبت: ' + (currentTurn === 'white' ? 'سفید' : 'مشکی');
-  
-  if (myColor === 'white') {
-    document.getElementById('rollBtn').disabled = false;
-    showMessage("شما سفید هستید. تاس بنداز.");
-  } else {
-    showMessage("در انتظار حرکت سفید...");
-  }
-});
-
-socket.on('diceResult', (data) => {
-  diceValues = data.n1 === data.n2 ? [data.n1, data.n1, data.n1, data.n1] : [data.n1, data.n2];
-  diceRolled = true;
-  updateDiceDisplay();
-  
-  if (data.roller === myColor) {
     if (!hasAnyLegalMove()) {
       document.getElementById("passBtn").style.display = "block";
       showMessage("هیچ حرکتی نداری! پاس بده.");
-    } else {
-      showMessage("تاس انداختی. حرکت کن.");
     }
-  } else {
-    showMessage("حریف تاس انداخت...");
-  }
-});
+  });
+};
 
-socket.on('stateSync', (data) => {
-  applyBoardState(data.state);
-  diceValues = data.dice;
-  updateDiceDisplay();
-  currentTurn = data.turn;
-  
-  document.getElementById('turnInfo').textContent = 'نوبت: ' + (currentTurn === 'white' ? 'سفید' : 'مشکی');
-  document.getElementById("passBtn").style.display = "none";
-  
-  if (currentTurn === myColor) {
-    diceRolled = diceValues.length > 0;
-    if (diceRolled) {
-      if (!hasAnyLegalMove()) {
-        document.getElementById("passBtn").style.display = "block";
-        showMessage("هیچ حرکتی نداری! پاس بده.");
-      } else {
-        showMessage("حریف حرکت کرد. نوبت شماست.");
-      }
-    } else {
-      document.getElementById("rollBtn").disabled = false;
-      showMessage("نوبت شماست. تاس بنداز.");
-    }
-  } else {
-    showMessage("حریف در حال بازی...");
-  }
-});
+document.getElementById("passBtn").onclick = function () {
+  if (gameOver || matchOver) return;
+  endTurn();
+  showMessage("نوبت عوض شد.");
+};
 
-socket.on('gameOver', (data) => {
-  gameOver = true;
-  showOverlay(data.winner);
-});
-
-socket.on('opponentDisconnected', () => {
-  showMessage("⚠️ حریف قطع شد! ۶۰ ثانیه فرصت دارد برگردد...");
-});
-socket.on('opponentReconnected', () => {
-  showMessage("✅ حریف برگشت! بازی ادامه دارد.");
-});
-socket.on('opponentTimeout', () => {
-  alert("حریف برنگشت. شما برنده شدید!");
-  leaveRoom();
-});
-
-// === بازگشت خودکار به بازی اگر رفرش شد ===
-if (roomCode && myColor) {
-    socket.emit('joinRoom', { code: roomCode, playerId: myPlayerId }, (res) => {
-        if (!res.success) {
-            sessionStorage.removeItem('nard_roomCode');
-            sessionStorage.removeItem('nard_myColor');
-            showScreen('screen-home');
-        }
-    });
-} else {
-    showScreen('screen-home');
+function showModeScreen() {
+  document.getElementById('modeScreen').style.display = 'flex';
+  document.getElementById('targetScreen').style.display = 'none';
+  document.getElementById('gameContent').classList.remove('active');
+  document.getElementById('overlay').style.display = 'none';
+  displayStats();
 }
+function showTargetScreen() {
+  document.getElementById('modeScreen').style.display = 'none';
+  document.getElementById('targetScreen').style.display = 'flex';
+  document.getElementById('gameContent').classList.remove('active');
+  document.getElementById('overlay').style.display = 'none';
+}
+
+function resetGame() {
+  generation++;
+  stopTurnTimer();
+  clearAllTimeouts();
+  stopDiceAnim();
+  
+  matchScore = { white: 0, black: 0 };
+  matchOver = false;
+  currentTurn = "white";
+  selectedChecker = null;
+  diceRolled = false;
+  diceValues = [];
+  gameOver = false;
+  turnTimeLeft = 60;
+  
+  buildBoard();
+  updateDiceDisplay();
+  updateMatchInfo();
+  
+  document.getElementById("turnInfo").textContent = "نوبت: سفید";
+  document.getElementById("timerDisplay").textContent = "";
+  document.getElementById("message").textContent = "";
+  document.getElementById("passBtn").style.display = "none";
+  document.getElementById("rollBtn").disabled = false;
+  
+  clearHighlights();
+  setupCheckerClicks();
+  
+  document.getElementById('modeScreen').style.display = 'none';
+  document.getElementById('targetScreen').style.display = 'none';
+  document.getElementById('gameContent').classList.add('active');
+  document.getElementById('overlay').style.display = 'none';
+  
+  startTurnTimer();
+}
+
+function startNextGame(winner) {
+  generation++;
+  stopTurnTimer();
+  clearAllTimeouts();
+  stopDiceAnim();
+  
+  currentTurn = winner;
+  selectedChecker = null;
+  diceRolled = false;
+  diceValues = [];
+  gameOver = false;
+  turnTimeLeft = 60;
+  
+  buildBoard();
+  updateDiceDisplay();
+  
+  document.getElementById("turnInfo").textContent = "نوبت: " + (currentTurn === "white" ? "سفید" : "مشکی");
+  document.getElementById("timerDisplay").textContent = "";
+  document.getElementById("message").textContent = "";
+  document.getElementById("passBtn").style.display = "none";
+  document.getElementById("rollBtn").disabled = false;
+  
+  clearHighlights();
+  setupCheckerClicks();
+  document.getElementById("overlay").style.display = "none";
+  
+  startTurnTimer();
+  
+  if (gameMode === "ai" && currentTurn === "black" && !gameOver) {
+    document.getElementById("rollBtn").disabled = true;
+    safeTimeout(() => {
+      if (gameOver || currentTurn !== "black") return;
+      aiTurn();
+    }, 900);
+  }
+}
+
+function returnToMenu() {
+  stopTurnTimer();
+  clearAllTimeouts();
+  stopDiceAnim();
+  generation++;
+  gameOver = true;
+  matchOver = false;
+  showModeScreen();
+}
+
+document.getElementById("startOnlineBtn").onclick = () => {
+  window.location.href = 'https://nard-online.onrender.com/';
+};
+document.getElementById("startAIBtn").onclick = () => {
+  gameMode = "ai";
+  showTargetScreen();
+};
+document.getElementById("startHumanBtn").onclick = () => {
+  gameMode = "human";
+  showTargetScreen();
+};
+
+document.getElementById("target3Btn").onclick = () => {
+  matchTarget = 3;
+  ensureAudio();
+  resetGame();
+};
+document.getElementById("target5Btn").onclick = () => {
+  matchTarget = 5;
+  ensureAudio();
+  resetGame();
+};
+document.getElementById("backToModeBtn").onclick = () => {
+  showModeScreen();
+};
+
+const FEATURE_LABELS = {
+  chat: 'اتاق چت',
+  shop: 'فروشگاه',
+  leaderboard: 'رتبه‌بندی',
+  profile: 'پروفایل',
+  achievements: 'دستاوردها',
+  tutorial: 'آموزش',
+  daily: 'جایزه روزانه',
+  stats: 'آمار کامل'
+};
+document.querySelectorAll('.feature-btn').forEach(tile => {
+  tile.onclick = () => {
+    const feature = tile.dataset.feature;
+    const label = FEATURE_LABELS[feature] || 'این بخش';
+    showToast('🔧 ' + label + ' — به زودی فعال می‌شود');
+  };
+});
+
+document.getElementById('settingsBtn').onclick = () => {
+  showToast('🔧 تنظیمات — به زودی فعال می‌شود');
+};
+document.getElementById('notifBtn').onclick = () => {
+  showToast('🔔 اعلان‌ها — به زودی فعال می‌شود');
+};
+
+document.getElementById("newGameBtn").onclick = function () {
+  resetGame();
+};
+document.getElementById("menuBtn").onclick = function () {
+  returnToMenu();
+};
+
+displayStats();
 </script>
+
 </body>
 </html>
