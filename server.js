@@ -18,7 +18,6 @@ function generateCode() {
 }
 
 io.on('connection', (socket) => {
-  // ساخت اتاق
   socket.on('createRoom', ({ target, playerId }, cb) => {
     const code = generateCode();
     const room = {
@@ -37,12 +36,10 @@ io.on('connection', (socket) => {
     if (typeof cb === 'function') cb({ success: true, code, color: 'white', target: room.target });
   });
 
-  // ورود یا بازگشت به اتاق
   socket.on('joinRoom', ({ code, playerId }, cb) => {
     const room = rooms.get(String(code));
     if (!room) return cb({ success: false, error: 'اتاق پیدا نشد' });
 
-    // اگر بازیکن سفید بود (بازگشت)
     if (room.playerIds.white === playerId) {
       room.players.white = socket.id;
       socket.join(room.code);
@@ -64,7 +61,6 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // اگر بازیکن مشکی بود (بازگشت)
     if (room.playerIds.black === playerId) {
       room.players.black = socket.id;
       socket.join(room.code);
@@ -72,18 +68,17 @@ io.on('connection', (socket) => {
       socket.color = 'black';
       
       if (room.gameState) {
-            return cb({ success: false, error: 'اتاق پر است! اگر می‌خواهید به بازی قبلی برگردید، صفحه (F5) را رفرش کنید.' });
+        cb({ success: true, code, color: 'black', target: room.target, resumed: true });
         io.to(socket.id).emit('gameStart', { target: room.target });
         io.to(socket.id).emit('stateSync', room.gameState);
         io.to(room.code).emit('opponentReconnected');
       } else {
-        cb({ success: true, code, color: 'black', target:    return cb({ success: false, error: 'اتاق پر است! اگر می‌خواهید به بازی قبلی برگردید، صفحه (F5) را رفرش کنید.' }); room.target, resumed: true });
+        cb({ success: true, code, color: 'black', target: room.target, resumed: true });
         io.to(socket.id).emit('gameStart', { target: room.target });
       }
       return;
     }
 
-    // بازیکن مشکی جدید (ورود اولیه)
     if (!room.playerIds.black) {
       room.players.black = socket.id;
       room.playerIds.black = playerId;
@@ -96,7 +91,7 @@ io.on('connection', (socket) => {
       return;
     }
 
-    return cb({ success: false, error: 'اتاق پر است یا این بازی در حال انجام است' });
+    return cb({ success: false, error: 'اتاق پر است! اگر می‌خواهید به بازی قبلی برگردید، صفحه (F5) را رفرش کنید.' });
   });
 
   socket.on('rollDice', () => {
