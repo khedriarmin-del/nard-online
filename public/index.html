@@ -52,22 +52,12 @@ input:focus { border-color: #ff6b9d; }
 .timer-display { font-size: 14px; color: #ffd93d; margin-bottom: 4px; font-weight: bold; min-height: 20px; }
 .message { font-size: 13px; color: #ff8e8e; margin-bottom: 12px; min-height: 18px; text-align: center; padding: 0 10px; }
 
-/* ===== Board & Perspective Flip ===== */
-.board-wrapper {
-  width: 100%;
-}
+.board-wrapper { width: 100%; }
 .board {
   width: 100%; background: var(--board-bg); border: 6px solid var(--board-border);
   border-radius: 12px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   display: flex; flex-direction: column; gap: 8px;
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.board.flipped { transform: rotate(180deg); }
-
-/* چرخش معکوس مهره‌ها تا نور و سایه‌شان همیشه از بالا سمت چپ باشد */
-.board.flipped .checker { transform: rotate(180deg); }
-.board.flipped .checker:hover { transform: rotate(180deg) scale(1.18); }
-.board.flipped .checker.selected { transform: rotate(180deg) scale(1.1); }
 
 .row { display: flex; height: 150px; gap: 2px; }
 .point { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; z-index: 1; }
@@ -82,7 +72,7 @@ input:focus { border-color: #ff6b9d; }
 
 .center-bar { width: 18px; background: var(--bar-bg); border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px 0; }
 
-/* استایل جدید و کاملاً سه‌بعدی مهره‌ها */
+/* مهره‌های کاملاً طبیعی و سه‌بعدی بدون چرخش */
 .checker { 
   width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; 
   cursor: pointer; transition: 0.15s; z-index: 3; 
@@ -97,7 +87,7 @@ input:focus { border-color: #ff6b9d; }
   border: 2px solid #000; 
   box-shadow: 0 3px 5px rgba(0,0,0,0.7), inset 0 0 4px rgba(255,255,255,0.3);
 }
-.checker.selected { border: 3px solid #ffd93d !important; box-shadow: 0 0 12px #ffd93d; }
+.checker.selected { border: 3px solid #ffd93d !important; box-shadow: 0 0 12px #ffd93d; transform: scale(1.1); }
 .checker.can-bear-off { outline: 3px solid #4caf50; outline-offset: 2px; animation: pulse 1s infinite; }
 @keyframes pulse { 0%, 100% { outline-color: #4caf50; } 50% { outline-color: #a5ffa8; } }
 .point.legal-target::after { content: ""; position: absolute; inset: 20%; border: 3px dashed #4caf50; border-radius: 50%; pointer-events: none; z-index: 5; animation: targetPulse 1s infinite; }
@@ -266,6 +256,29 @@ function triggerWinEffect(isMe) {
   }
 }
 
+// ==== سیستم تغییر دیدگاه (Swap Perspective) ====
+function setupLocalView() {
+    // ریست کردن تمام نقاط به حالت اولیه (بر اساس دیتا اورجینال)
+    document.querySelectorAll('.point').forEach(el => {
+        if (!el.dataset.orig) el.dataset.orig = el.dataset.point;
+        el.dataset.point = el.dataset.orig;
+    });
+
+    // اگر بازیکن مشکی است، جای خانه‌ها را به صورت منطقی عوض می‌کنیم
+    if (myColor === 'black') {
+        const mapping = {
+            13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7,
+            19: 6, 20: 5, 21: 4, 22: 3, 23: 2, 24: 1,
+            12: 13, 11: 14, 10: 15, 9: 16, 8: 17, 7: 18,
+            6: 19, 5: 20, 4: 21, 3: 22, 2: 23, 1: 24
+        };
+        document.querySelectorAll('.point').forEach(el => {
+            const orig = parseInt(el.dataset.orig);
+            el.dataset.point = mapping[orig];
+        });
+    }
+}
+
 function hasCheckerOnBar() {
   if (currentTurn === "white") return document.getElementById("topBar").querySelectorAll(".white").length > 0;
   return document.getElementById("bottomBar").querySelectorAll(".black").length > 0;
@@ -381,7 +394,7 @@ function updateDiceDisplay() {
 function getBoardState() {
   const state = { points: {}, bar: { white: 0, black: 0 } };
   document.querySelectorAll('.point').forEach(p => {
-    const pt = p.dataset.point;
+    const pt = p.dataset.point; // از داده منطقی استفاده می‌کند
     const w = p.querySelectorAll('.white').length;
     const b = p.querySelectorAll('.black').length;
     if (w > 0 || b > 0) state.points[pt] = { white: w, black: b };
@@ -637,12 +650,8 @@ socket.on('gameStart', (data) => {
   updateMatchInfo();
   document.getElementById('myColorDisplay').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
   
-  const board = document.getElementById('gameBoard');
-  if (myColor === 'black') {
-    board.classList.add('flipped');
-  } else {
-    board.classList.remove('flipped');
-  }
+  // تنظیم دیدگاه محلی (تعویض مکان‌ها در صورت نیاز)
+  setupLocalView();
 
   const initial = {
     points: {
@@ -670,6 +679,8 @@ socket.on('startNextGame', (data) => {
   matchScore = data.scores;
   updateMatchInfo();
   
+  setupLocalView();
+
   const initial = {
     points: {
       13: { white: 5, black: 0 }, 17: { white: 0, black: 3 }, 19: { white: 0, black: 5 }, 24: { white: 2, black: 0 },
@@ -763,7 +774,7 @@ socket.on('opponentReconnected', () => {
   showMessage("✅ حریف برگشت! بازی ادامه دارد.");
 });
 socket.on('opponentTimeout', () => {
-  alert("حریف برنگشت. شما برنده شدید!");
+  alert("حریف برگشت. شما برنده شدید!");
   leaveRoom();
 });
 
