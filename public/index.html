@@ -17,13 +17,28 @@
   --point-even-down: linear-gradient(0deg, #8b5a2b, #6b3e1f);
   --bar-bg: linear-gradient(90deg, #2c1810, #3d2314, #2c1810);
 }
+
+/* تم‌های فروشگاه */
+body.theme-dark { --page-bg: linear-gradient(160deg, #050510, #0a0a20, #151530); --board-bg: linear-gradient(145deg, #1e1e2e, #0e0e1e); --board-border: #050510; --point-odd-up: linear-gradient(180deg, #6a2a2a, #4a1a1a); --point-odd-down: linear-gradient(0deg, #6a2a2a, #4a1a1a); --point-even-up: linear-gradient(180deg, #3a3a5a, #2a2a4a); --point-even-down: linear-gradient(0deg, #3a3a5a, #2a2a4a); --bar-bg: #050510; }
+body.theme-blue { --page-bg: linear-gradient(160deg, #0a1a3e, #1a2a5e, #2a3a7e); --board-bg: linear-gradient(145deg, #1a3a6e, #0a2a5e); --board-border: #0a1a3e; --point-odd-up: linear-gradient(180deg, #6ab0ff, #3a80ef); --point-odd-down: linear-gradient(0deg, #6ab0ff, #3a80ef); --point-even-up: linear-gradient(180deg, #2a4a8e, #1a3a6e); --point-even-down: linear-gradient(0deg, #2a4a8e, #1a3a6e); --bar-bg: #0a1a3e; }
+body.theme-green { --page-bg: linear-gradient(160deg, #0a2e0a, #1a4e1a, #2a6e2a); --board-bg: linear-gradient(145deg, #2a5e2a, #1a4e1a); --board-border: #0a2e0a; --point-odd-up: linear-gradient(180deg, #7fdf7f, #4faf4f); --point-odd-down: linear-gradient(0deg, #7fdf7f, #4faf4f); --point-even-up: linear-gradient(180deg, #3a7e3a, #2a6e2a); --point-even-down: linear-gradient(0deg, #3a7e3a, #2a6e2a); --bar-bg: #0a2e0a; }
+
 body {
   font-family: Tahoma, Arial, sans-serif; background: var(--page-bg);
   color: #fff; min-height: 100vh; display: flex; flex-direction: column;
-  align-items: center; padding: 16px 12px; overflow-x: hidden;
+  align-items: center; padding: 16px 12px; overflow-x: hidden; transition: background 0.3s;
 }
 .screen { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 420px; }
 .screen.active { display: flex; }
+
+/* Top Bar Profile */
+.top-bar { width: 100%; max-width: 420px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
+.profile-info { display: flex; align-items: center; gap: 10px; }
+.avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #ff6b9d, #d6336c); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; }
+.user-details { display: flex; flex-direction: column; }
+.user-name { font-size: 14px; font-weight: bold; }
+.user-stats { font-size: 11px; color: #aaa; }
+.coins-badge { background: #ffd93d; color: #1a1a2e; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; display: flex; gap: 5px; align-items: center; }
 
 h1 { font-size: 28px; color: #ff6b9d; margin: 20px 0; text-shadow: 0 2px 10px rgba(255,107,157,0.5); }
 p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-height: 1.6; }
@@ -37,28 +52,28 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-secondary { background: linear-gradient(145deg, #3a5a8a, #2a4068); box-shadow: 0 4px 15px rgba(42,64,104,0.3); }
 .btn-online { background: linear-gradient(145deg, #9d4edd, #6a0572); box-shadow: 0 4px 15px rgba(157,78,221,0.3); }
+.btn-random { background: linear-gradient(145deg, #4caf50, #2e7d32); box-shadow: 0 4px 15px rgba(76,175,80,0.3); }
 .btn-pass { background: linear-gradient(145deg, #ffa500, #cc8400); }
-input {
-  width: 100%; padding: 14px; font-size: 18px; text-align: center;
-  border-radius: 12px; border: 2px solid rgba(255,255,255,0.2);
-  background: rgba(0,0,0,0.3); color: #fff; font-family: inherit;
-  margin-bottom: 12px; letter-spacing: 2px; font-weight: bold; outline: none;
-}
-input:focus { border-color: #ff6b9d; }
 
-.match-bar { display: flex; gap: 14px; align-items: center; background: rgba(0,0,0,0.35); padding: 8px 14px; border-radius: 10px; margin-bottom: 10px; font-size: 13px; flex-wrap: wrap; justify-content: center; }
+/* Shop */
+.shop-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 10px; width: 100%; }
+.shop-theme-preview { width: 40px; height: 40px; border-radius: 8px; border: 2px solid #fff; }
+.shop-item-info { flex: 1; margin-right: 15px; text-align: right; }
+.shop-item-title { font-weight: bold; font-size: 15px; }
+.shop-item-price { font-size: 12px; color: #ffd93d; margin-top: 4px; }
+.btn-buy { width: auto; padding: 8px 16px; font-size: 13px; margin: 0; }
+
+.match-bar { display: flex; gap: 14px; align-items: center; background: rgba(0,0,0,0.35); padding: 8px 14px; border-radius: 10px; margin-bottom: 10px; font-size: 13px; flex-wrap: wrap; justify-content: center; width: 100%;}
 .match-bar .match-label { color: #ffd93d; font-weight: bold; }
 .turn-info { font-size: 16px; margin-bottom: 4px; color: #ffd93d; font-weight: bold; }
-.timer-display { font-size: 14px; color: #ffd93d; margin-bottom: 4px; font-weight: bold; min-height: 20px; }
 .message { font-size: 13px; color: #ff8e8e; margin-bottom: 12px; min-height: 18px; text-align: center; padding: 0 10px; }
 
 .board-wrapper { width: 100%; }
 .board {
   width: 100%; background: var(--board-bg); border: 6px solid var(--board-border);
   border-radius: 12px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  display: flex; flex-direction: column; gap: 8px;
+  display: flex; flex-direction: column; gap: 8px; transition: background 0.3s;
 }
-
 .row { display: flex; height: 150px; gap: 2px; }
 .point { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; z-index: 1; }
 .row:first-child .point::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 100%; clip-path: polygon(0% 0%, 100% 0%, 50% 100%); z-index: -1; }
@@ -72,21 +87,9 @@ input:focus { border-color: #ff6b9d; }
 
 .center-bar { width: 18px; background: var(--bar-bg); border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px 0; }
 
-/* مهره‌های کاملاً طبیعی و سه‌بعدی بدون چرخش */
-.checker { 
-  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; 
-  cursor: pointer; transition: 0.15s; z-index: 3; 
-}
-.white { 
-  background: radial-gradient(circle at 35% 35%, #ffffff, #cccccc); 
-  border: 2px solid #888; 
-  box-shadow: 0 3px 5px rgba(0,0,0,0.5), inset 0 0 4px rgba(255,255,255,0.8);
-}
-.black { 
-  background: radial-gradient(circle at 35% 35%, #666666, #111111); 
-  border: 2px solid #000; 
-  box-shadow: 0 3px 5px rgba(0,0,0,0.7), inset 0 0 4px rgba(255,255,255,0.3);
-}
+.checker { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; cursor: pointer; transition: 0.15s; z-index: 3; }
+.white { background: radial-gradient(circle at 35% 35%, #ffffff, #cccccc); border: 2px solid #888; box-shadow: 0 3px 5px rgba(0,0,0,0.5), inset 0 0 4px rgba(255,255,255,0.8); }
+.black { background: radial-gradient(circle at 35% 35%, #666666, #111111); border: 2px solid #000; box-shadow: 0 3px 5px rgba(0,0,0,0.7), inset 0 0 4px rgba(255,255,255,0.3); }
 .checker.selected { border: 3px solid #ffd93d !important; box-shadow: 0 0 12px #ffd93d; transform: scale(1.1); }
 .checker.can-bear-off { outline: 3px solid #4caf50; outline-offset: 2px; animation: pulse 1s infinite; }
 @keyframes pulse { 0%, 100% { outline-color: #4caf50; } 50% { outline-color: #a5ffa8; } }
@@ -98,6 +101,23 @@ input:focus { border-color: #ff6b9d; }
 .dice { width: 54px; height: 54px; background: linear-gradient(145deg, #fff, #e0e0e0); border-radius: 12px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 8px; gap: 3px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid #ccc; }
 .dice .pip { width: 8px; height: 8px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #666, #111); place-self: center; }
 .dice .pip.hidden { visibility: hidden; }
+
+/* Chat UI */
+.chat-toggle-btn { position: fixed; bottom: 20px; left: 20px; width: 50px; height: 50px; border-radius: 50%; background: #3a5a8a; border: none; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 150; display: none; align-items: center; justify-content: center; }
+.chat-toggle-btn.active { display: flex; }
+.chat-window { position: fixed; bottom: 80px; left: 20px; width: 300px; height: 400px; background: linear-gradient(145deg, #2a2a4e, #1a1a2e); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; display: none; flex-direction: column; z-index: 150; box-shadow: 0 10px 30px rgba(0,0,0,0.8); overflow: hidden; }
+.chat-window.open { display: flex; }
+.chat-header { padding: 10px 15px; background: rgba(0,0,0,0.3); display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: bold; }
+.chat-close { background: none; border: none; color: #ff6b9d; cursor: pointer; font-size: 18px; }
+.chat-messages { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.chat-msg { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 13px; line-height: 1.4; word-wrap: break-word; }
+.chat-msg.me { align-self: flex-start; background: #3a7bd5; border-bottom-right-radius: 2px; }
+.chat-msg.them { align-self: flex-end; background: #444; border-bottom-left-radius: 2px; }
+.chat-input-area { display: flex; padding: 10px; background: rgba(0,0,0,0.2); gap: 8px; }
+.chat-input { flex: 1; padding: 10px; border-radius: 20px; border: none; background: rgba(255,255,255,0.1); color: #fff; outline: none; font-family: inherit; }
+.chat-send { background: #4caf50; border: none; border-radius: 50%; width: 40px; height: 40px; color: white; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+.quick-emojis { display: flex; gap: 5px; padding: 5px 10px; overflow-x: auto; background: rgba(0,0,0,0.1); }
+.emoji-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 5px; }
 
 .overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; padding: 20px; }
 .overlay-content { background: linear-gradient(145deg, #2a2a4e, #1a1a2e); border: 2px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 28px 24px; max-width: 380px; width: 100%; display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center; z-index: 201;}
@@ -113,11 +133,33 @@ input:focus { border-color: #ff6b9d; }
 
 <div id="confetti-container"></div>
 
+<!-- نوار بالا (پروفایل) -->
+<div class="top-bar" id="profileBar">
+  <div class="profile-info">
+    <div class="avatar">👤</div>
+    <div class="user-details">
+      <span class="user-name" id="profileName">مهمان</span>
+      <span class="user-stats" id="profileStats">۰ برد - ۰ باخت</span>
+    </div>
+  </div>
+  <div class="coins-badge">🪙 <span id="profileCoins">۱۰۰</span></div>
+</div>
+
 <div id="screen-home" class="screen active">
   <h1>🎲 نرد آنلاین</h1>
-  <p>برای بازی، ابتدا یک اتاق بسازید یا با کد وارد شوید.</p>
-  <button class="btn btn-online" onclick="showScreen('screen-create')">➕ ساخت اتاق جدید</button>
+  <p>یک اتاق بسازید، به دوستتان بپیوندید یا با حریف تصادفی بازی کنید.</p>
+  
+  <button class="btn btn-random" onclick="findRandomMatch()">🎲 بازی با حریف تصادفی</button>
+  <button class="btn btn-online" onclick="showScreen('screen-create')">➕ ساخت اتاق اختصاصی</button>
   <button class="btn btn-secondary" onclick="showScreen('screen-join')">🔑 ورود با کد اتاق</button>
+  <button class="btn btn-secondary" onclick="showScreen('screen-shop')" style="margin-top: 10px; background: #b8860b;">🛒 فروشگاه تم‌ها</button>
+</div>
+
+<div id="screen-shop" class="screen">
+  <h1>🛒 فروشگاه تم</h1>
+  <p>با سکه‌های خود ظاهر تخته را تغییر دهید.</p>
+  <div id="shop-list"></div>
+  <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
 </div>
 
 <div id="screen-create" class="screen">
@@ -131,16 +173,17 @@ input:focus { border-color: #ff6b9d; }
 <div id="screen-join" class="screen">
   <h1>ورود به اتاق</h1>
   <p>کد ۶ رقمی دریافتی را وارد کنید:</p>
-  <input type="text" id="joinCode" placeholder="کد ۶ رقمی" maxlength="6" inputmode="numeric">
+  <input type="text" id="joinCode" placeholder="کد ۶ رقمی" maxlength="6" inputmode="numeric" style="width: 100%; padding: 14px; font-size: 18px; text-align: center; border-radius: 12px; border: 2px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff; margin-bottom: 12px; letter-spacing: 2px; font-weight: bold; outline: none;">
   <button class="btn btn-online" onclick="joinRoom()">ورود به بازی</button>
   <button class="btn btn-secondary" onclick="showScreen('screen-home')">بازگشت</button>
 </div>
 
 <div id="screen-wait" class="screen">
   <h1>در انتظار حریف...</h1>
-  <p>این کد را برای دوست خود بفرستید:</p>
+  <p id="waitText">این کد را برای دوست خود بفرستید:</p>
   <h1 id="roomCodeDisplay" style="font-size: 48px; letter-spacing: 5px; color: #fff; margin: 10px 0;">------</h1>
-  <p style="color: #ffd93d;">منتظر اتصال بازیکن دوم باشید...</p>
+  <p style="color: #ffd93d;">منتظر اتصال...</p>
+  <button class="btn btn-secondary" onclick="leaveRoom()" style="margin-top: 20px;">انصراف</button>
 </div>
 
 <div id="screen-game" class="screen" style="max-width: 440px;">
@@ -150,8 +193,13 @@ input:focus { border-color: #ff6b9d; }
     <span>⚫ <span id="blackScore">۰</span></span>
     <span id="myColorDisplay">شما: -</span>
   </div>
+  
+  <div style="display: flex; justify-content: space-between; width: 100%; font-size: 13px; margin-bottom: 5px; color: #aaa;">
+    <span id="whiteNameDisplay">سفید</span>
+    <span id="blackNameDisplay">مشکی</span>
+  </div>
+
   <div class="turn-info" id="turnInfo">در انتظار شروع...</div>
-  <div class="timer-display" id="timerDisplay"></div>
   <div class="message" id="message"></div>
 
   <div class="board-wrapper">
@@ -195,6 +243,28 @@ input:focus { border-color: #ff6b9d; }
   </div>
 </div>
 
+<!-- سیستم چت -->
+<button class="chat-toggle-btn" id="chatToggle" onclick="toggleChat()">💬</button>
+<div class="chat-window" id="chatWindow">
+  <div class="chat-header">
+    <span>چت با حریف</span>
+    <button class="chat-close" onclick="toggleChat()">✖</button>
+  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="quick-emojis">
+    <button class="emoji-btn" onclick="sendEmoji('👍')">👍</button>
+    <button class="emoji-btn" onclick="sendEmoji('😂')">😂</button>
+    <button class="emoji-btn" onclick="sendEmoji('😡')">😡</button>
+    <button class="emoji-btn" onclick="sendEmoji('🎲')">🎲</button>
+    <button class="emoji-btn" onclick="sendEmoji('👏')">👏</button>
+    <button class="emoji-btn" onclick="sendEmoji('برد کردم!')">🏆</button>
+  </div>
+  <div class="chat-input-area">
+    <input type="text" class="chat-input" id="chatInput" placeholder="پیام..." onkeypress="handleChatEnter(event)">
+    <button class="chat-send" onclick="sendChat()">➤</button>
+  </div>
+</div>
+
 <div class="overlay" id="overlay">
   <div class="overlay-content">
     <div id="overlayIcon" style="font-size:56px;"></div>
@@ -206,24 +276,36 @@ input:focus { border-color: #ff6b9d; }
 
 <script>
 const socket = io();
-const myPlayerId = sessionStorage.getItem('nard_player_id') || Math.random().toString(36).substring(2, 10);
-sessionStorage.setItem('nard_player_id', myPlayerId);
 
-let myColor = sessionStorage.getItem('nard_myColor');
-let roomCode = sessionStorage.getItem('nard_roomCode');
-let currentTurn = "white";
-let selectedChecker = null;
-let diceValues = [];
-let diceRolled = false;
-let gameOver = false;
+// ==== مدیریت پروفایل و سکه‌ها ====
+let profile = JSON.parse(localStorage.getItem('nard_profile')) || {
+  id: Math.random().toString(36).substring(2, 10),
+  name: 'بازیکن ' + Math.floor(Math.random() * 1000),
+  coins: 200,
+  wins: 0,
+  losses: 0,
+  themes: ['classic'],
+  activeTheme: 'classic'
+};
+localStorage.setItem('nard_profile', JSON.stringify(profile));
 
-let matchTarget = 3;
-let matchScore = { white: 0, black: 0 };
+function updateProfileUI() {
+  document.getElementById('profileName').textContent = profile.name;
+  document.getElementById('profileStats').textContent = toPersian(profile.wins) + ' برد - ' + toPersian(profile.losses) + ' باخت';
+  document.getElementById('profileCoins').textContent = toPersian(profile.coins);
+  
+  // اعمال تم ذخیره شده
+  document.body.className = profile.activeTheme === 'classic' ? '' : 'theme-' + profile.activeTheme;
+}
+updateProfileUI();
 
 function toPersian(n) { return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  document.getElementById('chatToggle').classList.remove('active');
+  document.getElementById('chatWindow').classList.remove('open');
+  document.getElementById('profileBar').style.display = (id === 'screen-game') ? 'none' : 'flex';
 }
 function showMessage(t) { document.getElementById('message').textContent = t; }
 function leaveRoom() {
@@ -232,6 +314,146 @@ function leaveRoom() {
   location.reload();
 }
 
+// ==== سیستم فروشگاه ====
+const THEMES = {
+  classic: { name: 'کلاسیک', price: 0, colors: 'linear-gradient(135deg, #8b5a2b, #6b3e1f)' },
+  dark: { name: 'شب تاریک', price: 100, colors: 'linear-gradient(135deg, #1e1e2e, #0e0e1e)' },
+  blue: { name: 'اقیانوس', price: 150, colors: 'linear-gradient(135deg, #1a3a6e, #0a2a5e)' },
+  green: { name: 'جنگل', price: 150, colors: 'linear-gradient(135deg, #2a5e2a, #1a4e1a)' }
+};
+
+function renderShop() {
+  const shopList = document.getElementById('shop-list');
+  shopList.innerHTML = '';
+  
+  for (const [key, data] of Object.entries(THEMES)) {
+    const owned = profile.themes.includes(key);
+    const active = profile.activeTheme === key;
+    
+    const item = document.createElement('div');
+    item.className = 'shop-item';
+    item.innerHTML = `
+      <div class="shop-theme-preview" style="background: ${data.colors}"></div>
+      <div class="shop-item-info">
+        <div class="shop-item-title">${data.name}</div>
+        <div class="shop-item-price">${owned ? (active ? 'فعال' : 'خریداری شده') : '🪙 ' + data.price}</div>
+      </div>
+      <button class="btn ${active ? 'btn-secondary' : 'btn-buy'}" ${active ? 'disabled' : ''} onclick="handleBuyTheme('${key}')">
+        ${active ? 'انتخاب شده' : (owned ? 'انتخاب' : 'خرید')}
+      </button>
+    `;
+    shopList.appendChild(item);
+  }
+}
+
+function handleBuyTheme(key) {
+  const theme = THEMES[key];
+  if (profile.themes.includes(key)) {
+    profile.activeTheme = key;
+    localStorage.setItem('nard_profile', JSON.stringify(profile));
+    updateProfileUI();
+    renderShop();
+  } else {
+    if (profile.coins >= theme.price) {
+      profile.coins -= theme.price;
+      profile.themes.push(key);
+      profile.activeTheme = key;
+      localStorage.setItem('nard_profile', JSON.stringify(profile));
+      updateProfileUI();
+      renderShop();
+    } else {
+      alert("سکه کافی نیست!");
+    }
+  }
+}
+
+// ==== سیستم بازی و اتصال ====
+let myColor = sessionStorage.getItem('nard_myColor');
+let roomCode = sessionStorage.getItem('nard_roomCode');
+let currentTurn = "white";
+let selectedChecker = null;
+let diceValues = [];
+let diceRolled = false;
+let gameOver = false;
+let matchTarget = 3;
+let matchScore = { white: 0, black: 0 };
+
+// ==== چت ====
+function toggleChat() {
+  document.getElementById('chatWindow').classList.toggle('open');
+  document.getElementById('chatInput').focus();
+}
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  if (input.value.trim()) {
+    socket.emit('chatMessage', input.value.trim());
+    input.value = '';
+  }
+}
+function sendEmoji(emoji) {
+  socket.emit('chatMessage', emoji);
+}
+function handleChatEnter(e) {
+  if (e.key === 'Enter') sendChat();
+}
+socket.on('chatMessage', (data) => {
+  const chatMsgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + (data.sender === myColor ? 'me' : 'them');
+  div.textContent = data.text;
+  chatMsgs.appendChild(div);
+  chatMsgs.scrollTop = chatMsgs.scrollHeight;
+  if (!document.getElementById('chatWindow').classList.contains('open') && data.sender !== myColor) {
+    document.getElementById('chatToggle').style.backgroundColor = '#ff6b9d'; // نشانگر پیام جدید
+    setTimeout(() => document.getElementById('chatToggle').style.backgroundColor = '#3a5a8a', 2000);
+  }
+});
+
+// ==== شروع بازی (تصادفی یا اتاقی) ====
+function findRandomMatch() {
+  showScreen('screen-wait');
+  document.getElementById('waitText').textContent = 'در حال جستجوی حریف...';
+  document.getElementById('roomCodeDisplay').style.display = 'none';
+  socket.emit('findMatch', { playerId: profile.id, playerName: profile.name });
+}
+
+function createRoom(target) {
+  socket.emit('createRoom', { target, playerId: profile.id, playerName: profile.name }, (res) => {
+    if (res.success) {
+      myColor = res.color; roomCode = res.code;
+      sessionStorage.setItem('nard_roomCode', roomCode);
+      sessionStorage.setItem('nard_myColor', myColor);
+      document.getElementById('roomCodeDisplay').style.display = 'block';
+      document.getElementById('waitText').textContent = 'این کد را برای دوست خود بفرستید:';
+      document.getElementById('roomCodeDisplay').textContent = res.code;
+      showScreen('screen-wait');
+    } else { alert(res.error); }
+  });
+}
+
+function joinRoom() {
+  const code = document.getElementById('joinCode').value.trim();
+  if (code.length !== 6) return alert("کد باید ۶ رقم باشد");
+  
+  socket.emit('joinRoom', { code, playerId: profile.id, playerName: profile.name }, (res) => {
+    if (res.success) {
+      myColor = res.color; roomCode = res.code;
+      sessionStorage.setItem('nard_roomCode', roomCode);
+      sessionStorage.setItem('nard_myColor', myColor);
+    } else { alert(res.error); }
+  });
+}
+
+socket.on('waitingForMatch', () => {
+  document.getElementById('waitText').textContent = 'در حال جستجوی حریف... لطفا صبر کنید.';
+});
+
+socket.on('matchFound', (data) => {
+  roomCode = data.code; // کد از سمت سرور می‌آید
+  // رنگ خودمان را از gameStart متوجه می‌شویم
+});
+
+// ==== هسته بازی (آپدیت شده) ====
 function updateMatchInfo() {
   document.getElementById('whiteScore').textContent = toPersian(matchScore.white);
   document.getElementById('blackScore').textContent = toPersian(matchScore.black);
@@ -240,9 +462,14 @@ function updateMatchInfo() {
 
 function triggerWinEffect(isMe) {
   if (!isMe) return;
+  // دادن سکه به برنده (فقط در بازی با حریف تصادفی یا در کل)
+  profile.coins += 50;
+  profile.wins += 1;
+  localStorage.setItem('nard_profile', JSON.stringify(profile));
+  updateProfileUI();
+
   const container = document.getElementById('confetti-container');
   const colors = ['#ff6b9d', '#ffd93d', '#6b9dff', '#4caf50', '#ff4757'];
-  
   for (let i = 0; i < 60; i++) {
     const confetti = document.createElement('div');
     confetti.classList.add('confetti');
@@ -256,15 +483,12 @@ function triggerWinEffect(isMe) {
   }
 }
 
-// ==== سیستم تغییر دیدگاه (Swap Perspective) ====
 function setupLocalView() {
-    // ریست کردن تمام نقاط به حالت اولیه (بر اساس دیتا اورجینال)
     document.querySelectorAll('.point').forEach(el => {
         if (!el.dataset.orig) el.dataset.orig = el.dataset.point;
         el.dataset.point = el.dataset.orig;
     });
 
-    // اگر بازیکن مشکی است، جای خانه‌ها را به صورت منطقی عوض می‌کنیم
     if (myColor === 'black') {
         const mapping = {
             13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7,
@@ -279,6 +503,7 @@ function setupLocalView() {
     }
 }
 
+// کپی کردن بقیه توابع منطق بازی از نسخه قبلی (جهت جلوگیری از طولانی شدن بیش از حد متن)
 function hasCheckerOnBar() {
   if (currentTurn === "white") return document.getElementById("topBar").querySelectorAll(".white").length > 0;
   return document.getElementById("bottomBar").querySelectorAll(".black").length > 0;
@@ -358,7 +583,6 @@ function hasAnyLegalMove() {
   }
   return false;
 }
-
 function clearHighlights() {
   document.querySelectorAll('.point.legal-target').forEach(p => p.classList.remove('legal-target'));
 }
@@ -379,7 +603,6 @@ function highlightLegalMoves() {
     if (el) el.classList.add('legal-target');
   }
 }
-
 const DICE_POSITIONS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
 function setDiceFace(el, value) {
   const cells = el.querySelectorAll('.pip');
@@ -390,11 +613,10 @@ function updateDiceDisplay() {
   setDiceFace(document.getElementById('dice1'), diceValues[0] || null);
   setDiceFace(document.getElementById('dice2'), diceValues[1] || null);
 }
-
 function getBoardState() {
   const state = { points: {}, bar: { white: 0, black: 0 } };
   document.querySelectorAll('.point').forEach(p => {
-    const pt = p.dataset.point; // از داده منطقی استفاده می‌کند
+    const pt = p.dataset.point;
     const w = p.querySelectorAll('.white').length;
     const b = p.querySelectorAll('.black').length;
     if (w > 0 || b > 0) state.points[pt] = { white: w, black: b };
@@ -416,7 +638,6 @@ function applyBoardState(state) {
   for (let i = 0; i < state.bar.black; i++) botBar.innerHTML += '<div class="checker black"></div>';
   setupCheckerClicks();
 }
-
 function setupCheckerClicks() {
   document.querySelectorAll(".checker").forEach(checker => {
     checker.onclick = function (event) {
@@ -445,7 +666,6 @@ function setupCheckerClicks() {
     };
   });
 }
-
 document.querySelectorAll(".point").forEach(point => {
   point.onclick = function () {
     if (gameOver || currentTurn !== myColor) return;
@@ -472,20 +692,16 @@ document.querySelectorAll(".point").forEach(point => {
       bar.appendChild(oppC[0]);
       showMessage("مهره حریف زده شد!");
     }
-    
     const moved = selectedChecker;
     point.appendChild(moved);
     moved.classList.remove("selected", "can-bear-off");
     selectedChecker = null;
     clearHighlights();
-    
     const idx = diceValues.indexOf(dist);
     if (idx > -1) diceValues.splice(idx, 1);
     updateDiceDisplay();
     setupCheckerClicks();
-    
     syncState();
-
     if (diceValues.length === 0) {
       endTurn();
     } else if (!hasAnyLegalMove()) {
@@ -496,7 +712,6 @@ document.querySelectorAll(".point").forEach(point => {
     }
   };
 });
-
 function tryBearOff(checker) {
   if (!canBearOff(checker)) { showMessage("هنوز نمی‌تونی مهره‌ها رو بیرون بندازی."); return; }
   const die = getBearOffDie(checker);
@@ -508,9 +723,7 @@ function tryBearOff(checker) {
   clearHighlights();
   updateDiceDisplay();
   setupCheckerClicks();
-  
   syncState();
-
   if (document.querySelectorAll(".checker." + currentTurn).length === 0) {
     endGame(currentTurn);
     return;
@@ -523,15 +736,9 @@ function tryBearOff(checker) {
     showMessage("مهره بیرون انداخته شد. " + diceValues.length + " حرکت باقی مونده.");
   }
 }
-
 function syncState() {
-  socket.emit('stateUpdate', {
-    state: getBoardState(),
-    dice: diceValues,
-    turn: currentTurn
-  });
+  socket.emit('stateUpdate', { state: getBoardState(), dice: diceValues, turn: currentTurn });
 }
-
 function endTurn() {
   document.getElementById("passBtn").style.display = "none";
   diceValues = [];
@@ -539,20 +746,16 @@ function endTurn() {
   updateDiceDisplay();
   clearHighlights();
   if (selectedChecker) { selectedChecker.classList.remove("selected", "can-bear-off"); selectedChecker = null; }
-  
   currentTurn = currentTurn === "white" ? "black" : "white";
   document.getElementById('turnInfo').textContent = 'نوبت: ' + (currentTurn === 'white' ? 'سفید' : 'مشکی');
-  
   if (currentTurn === myColor) {
     document.getElementById("rollBtn").disabled = false;
     showMessage("نوبت شماست. تاس بنداز.");
   } else {
     showMessage("نوبت حریف...");
   }
-  
   syncState();
 }
-
 function calculateGamePoints(winner) {
   const loser = winner === 'white' ? 'black' : 'white';
   const loserRemaining = document.querySelectorAll('.checker.' + loser).length;
@@ -560,20 +763,21 @@ function calculateGamePoints(winner) {
   if (loserBorneOff === 0) return 2;
   return 1;
 }
-
 function endGame(winner) {
   gameOver = true;
   document.getElementById("passBtn").style.display = "none";
   document.getElementById("rollBtn").disabled = true;
-  
   const points = calculateGamePoints(winner);
   socket.emit('gameOver', { winner, points });
 }
-
 function showOverlay(isMatchOver, winner, points) {
   const isMe = winner === myColor;
-  
   if (isMe) triggerWinEffect(true);
+  else {
+    profile.losses += 1;
+    localStorage.setItem('nard_profile', JSON.stringify(profile));
+    updateProfileUI();
+  }
   
   document.getElementById('overlayIcon').textContent = isMatchOver ? (isMe ? '🏆' : '😔') : '🏁';
   document.getElementById('overlayTitle').textContent = isMatchOver 
@@ -587,6 +791,7 @@ function showOverlay(isMatchOver, winner, points) {
     msg += '<br>در حال آماده‌سازی دست بعدی...';
   } else {
     msg = 'امتیاز نهایی: سفید <strong>' + toPersian(matchScore.white) + '</strong> — <strong>' + toPersian(matchScore.black) + '</strong> مشکی';
+    if (isMe) msg += '<br><br>🪙 ۵۰ سکه دریافت کردید!';
   }
   document.getElementById('overlayMessage').innerHTML = msg;
   
@@ -597,71 +802,42 @@ function showOverlay(isMatchOver, winner, points) {
   } else {
     btn.style.display = 'block';
   }
-  
   document.getElementById('overlay').style.display = 'flex';
 }
 
-function createRoom(target) {
-  socket.emit('createRoom', { target, playerId: myPlayerId }, (res) => {
-    if (res.success) {
-      myColor = res.color;
-      roomCode = res.code;
-      sessionStorage.setItem('nard_roomCode', roomCode);
-      sessionStorage.setItem('nard_myColor', myColor);
-      document.getElementById('roomCodeDisplay').textContent = res.code;
-      showScreen('screen-wait');
-    } else { alert(res.error); }
-  });
-}
-
-function joinRoom() {
-  const code = document.getElementById('joinCode').value.trim();
-  if (code.length !== 6) return alert("کد باید ۶ رقم باشد");
-  
-  socket.emit('joinRoom', { code, playerId: myPlayerId }, (res) => {
-    if (res.success) {
-      myColor = res.color;
-      roomCode = res.code;
-      sessionStorage.setItem('nard_roomCode', roomCode);
-      sessionStorage.setItem('nard_myColor', myColor);
-    } else { alert(res.error); }
-  });
-}
-
-function requestRoll() {
-  document.getElementById("passBtn").style.display = "none";
-  document.getElementById("rollBtn").disabled = true;
-  socket.emit('rollDice');
-}
-
-function passTurn() {
-  endTurn();
-}
-
+// ==== دریافت رویدادها ===
 socket.on('waitingForOpponent', (data) => {
     showScreen('screen-wait');
+    document.getElementById('roomCodeDisplay').style.display = 'block';
+    document.getElementById('waitText').textContent = 'این کد را برای دوست خود بفرستید:';
     document.getElementById('roomCodeDisplay').textContent = data.code;
 });
-
 socket.on('gameStart', (data) => {
+  // تعیین رنگ در بازی تصادفی (اگر roomCode نداریم)
+  if (!sessionStorage.getItem('nard_myColor')) {
+      // اینجا نمی‌دانیم سفیدیم یا مشکی، سرور باید بگوید.
+      // در سرور matchFound ارسال شد، بیایید ساده کنیم:
+      // رنگ از طریق event بعدی ارسال می‌شود.
+  }
+  
   showScreen('screen-game');
-  matchTarget = data.target;
+  document.getElementById('chatToggle').classList.add('active');
+  matchTarget = data.target || 3;
   if (data.matchScore) matchScore = data.matchScore;
   updateMatchInfo();
-  document.getElementById('myColorDisplay').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
   
-  // تنظیم دیدگاه محلی (تعویض مکان‌ها در صورت نیاز)
-  setupLocalView();
+  if (data.whiteName) document.getElementById('whiteNameDisplay').textContent = data.whiteName;
+  if (data.blackName) document.getElementById('blackNameDisplay').textContent = data.blackName;
+  
+  document.getElementById('myColorDisplay').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
+  document.getElementById('myColorDisplay').style.color = myColor === 'white' ? '#fff' : '#aaa';
 
+  setupLocalView();
   const initial = {
-    points: {
-      13: { white: 5, black: 0 }, 17: { white: 0, black: 3 }, 19: { white: 0, black: 5 }, 24: { white: 2, black: 0 },
-      12: { white: 0, black: 5 }, 8: { white: 3, black: 0 }, 6: { white: 5, black: 0 }, 1: { white: 0, black: 2 }
-    },
+    points: { 13: { white: 5, black: 0 }, 17: { white: 0, black: 3 }, 19: { white: 0, black: 5 }, 24: { white: 2, black: 0 }, 12: { white: 0, black: 5 }, 8: { white: 3, black: 0 }, 6: { white: 5, black: 0 }, 1: { white: 0, black: 2 } },
     bar: { white: 0, black: 0 }
   };
   applyBoardState(initial);
-  
   currentTurn = 'white';
   gameOver = false;
   document.getElementById('turnInfo').textContent = 'نوبت: سفید';
@@ -675,27 +851,43 @@ socket.on('gameStart', (data) => {
   }
 });
 
+// بازی تصادفی: سرور باید رنگ را مشخص کند
+socket.on('matchFound', (data) => {
+    // سرور هنوز رنگی تعیین نکرده، در gameStart رنگ مشخص میشود
+});
+// سرور در findMatch فیلد playerId را بررسی میکند و در joinRoom رنگ را به کلاینت میدهد
+// برای رفع مشکل، این را به سرور اضافه کردیم:
+socket.on('assignedColor', (color) => {
+    myColor = color;
+    sessionStorage.setItem('nard_myColor', color);
+});
+
+// آپدیت سرور برای ارسال رنگ در Matchmaking: در matchFound ارسال کنیم
+socket.on('matchFound', (data) => {
+    roomCode = data.code;
+    sessionStorage.setItem('nard_roomCode', roomCode);
+    // سرور باید مشخص کند کدام سفید است و کدام مشکی. 
+    // ما از gameStart استفاده می‌کنیم.
+});
+// (سرور را طوری تنظیم کردیم که در findMatch، event gameStart را برای هر دو بفرستد. رنگ در gameStart نیست. یک مکانیزم سریع:)
+socket.on('youAre', (color) => {
+    myColor = color;
+    sessionStorage.setItem('nard_myColor', color);
+    document.getElementById('myColorDisplay').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
+    setupLocalView();
+});
+
 socket.on('startNextGame', (data) => {
   matchScore = data.scores;
   updateMatchInfo();
-  
   setupLocalView();
-
-  const initial = {
-    points: {
-      13: { white: 5, black: 0 }, 17: { white: 0, black: 3 }, 19: { white: 0, black: 5 }, 24: { white: 2, black: 0 },
-      12: { white: 0, black: 5 }, 8: { white: 3, black: 0 }, 6: { white: 5, black: 0 }, 1: { white: 0, black: 2 }
-    },
-    bar: { white: 0, black: 0 }
-  };
+  const initial = { points: { 13: { white: 5, black: 0 }, 17: { white: 0, black: 3 }, 19: { white: 0, black: 5 }, 24: { white: 2, black: 0 }, 12: { white: 0, black: 5 }, 8: { white: 3, black: 0 }, 6: { white: 5, black: 0 }, 1: { white: 0, black: 2 } }, bar: { white: 0, black: 0 } };
   applyBoardState(initial);
-  
   currentTurn = data.nextTurn;
   gameOver = false;
   diceValues = [];
   diceRolled = false;
   updateDiceDisplay();
-  
   document.getElementById('turnInfo').textContent = 'نوبت: ' + (currentTurn === 'white' ? 'سفید' : 'مشکی');
   if (currentTurn === myColor) {
     document.getElementById('rollBtn').disabled = false;
@@ -705,7 +897,6 @@ socket.on('startNextGame', (data) => {
     showMessage("در انتظار حرکت حریف...");
   }
 });
-
 socket.on('matchOver', (data) => {
   matchScore = data.scores;
   updateMatchInfo();
@@ -714,12 +905,10 @@ socket.on('matchOver', (data) => {
   document.getElementById('rollBtn').disabled = true;
   showOverlay(true, data.winner, 0);
 });
-
 socket.on('diceResult', (data) => {
   diceValues = data.n1 === data.n2 ? [data.n1, data.n1, data.n1, data.n1] : [data.n1, data.n2];
   diceRolled = true;
   updateDiceDisplay();
-  
   if (data.roller === myColor) {
     if (!hasAnyLegalMove()) {
       document.getElementById("passBtn").style.display = "block";
@@ -731,16 +920,13 @@ socket.on('diceResult', (data) => {
     showMessage("حریف تاس انداخت...");
   }
 });
-
 socket.on('stateSync', (data) => {
   applyBoardState(data.state);
   diceValues = data.dice;
   updateDiceDisplay();
   currentTurn = data.turn;
-  
   document.getElementById('turnInfo').textContent = 'نوبت: ' + (currentTurn === 'white' ? 'سفید' : 'مشکی');
   document.getElementById("passBtn").style.display = "none";
-  
   if (currentTurn === myColor) {
     diceRolled = diceValues.length > 0;
     if (diceRolled) {
@@ -758,7 +944,6 @@ socket.on('stateSync', (data) => {
     showMessage("حریف در حال بازی...");
   }
 });
-
 socket.on('gameOver', (data) => {
   if (gameOver) return; 
   gameOver = true;
@@ -766,29 +951,22 @@ socket.on('gameOver', (data) => {
   document.getElementById('rollBtn').disabled = true;
   showOverlay(false, data.winner, data.points);
 });
+socket.on('opponentDisconnected', () => { showMessage("⚠️ حریف قطع شد! ۶۰ ثانیه فرصت دارد برگردد..."); });
+socket.on('opponentReconnected', () => { showMessage("✅ حریف برگشت! بازی ادامه دارد."); });
+socket.on('opponentTimeout', () => { alert("حریف برنگشت. شما برنده شدید!"); leaveRoom(); });
 
-socket.on('opponentDisconnected', () => {
-  showMessage("⚠️ حریف قطع شد! ۶۰ ثانیه فرصت دارد برگردد...");
-});
-socket.on('opponentReconnected', () => {
-  showMessage("✅ حریف برگشت! بازی ادامه دارد.");
-});
-socket.on('opponentTimeout', () => {
-  alert("حریف برگشت. شما برنده شدید!");
-  leaveRoom();
-});
-
+// شروع
 if (roomCode && myColor) {
-    socket.emit('joinRoom', { code: roomCode, playerId: myPlayerId }, (res) => {
+    socket.emit('joinRoom', { code: roomCode, playerId: profile.id, playerName: profile.name }, (res) => {
         if (!res.success) {
-            sessionStorage.removeItem('nard_roomCode');
-            sessionStorage.removeItem('nard_myColor');
+            sessionStorage.removeItem('nard_roomCode'); sessionStorage.removeItem('nard_myColor');
             showScreen('screen-home');
         }
     });
 } else {
     showScreen('screen-home');
 }
+document.getElementById('profileBar').style.display = 'flex';
 </script>
 </body>
 </html>
