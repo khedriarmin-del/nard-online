@@ -10,6 +10,7 @@ const io = new Server(server);
 app.use(express.static(path.join(__dirname, 'public')));
 
 const rooms = new Map();
+let matchmakingQueue = [];
 
 function generateCode() {
   let code;
@@ -18,13 +19,65 @@ function generateCode() {
 }
 
 io.on('connection', (socket) => {
-  socket.on('createRoom', ({ target, playerId }, cb) => {
+  // === بازی با حریف تصادفی ===
+  socket.on('findMatch', ({ playerId, playerName }) => {
+    matchmakingQueue.push({ socketId: socket.id, playerId, playerName });
+    
+    if (matchmakingQueue.length >= 2) {
+      const p1 = matchmakingQueue.shift();
+      const p2 = matchmakingQueue.shift();
+      
+      const code = generateCode();
+      const room = {
+        code,
+        target: 3, // بازی تصادفی پیش‌فرض ۳ امتیازی است
+        players: { white: p1.socketId, black: p2.socketId },
+        playerIds: { white: p1.playerId, black: p2.playerId },
+        playerNames: { white: p1.playerName, black: p2.playerName },
+        gameState: null,
+        matchScore: { white: 0, black: 0 },
+        disconnectedAt: null
+      };
+      rooms.set(code, room);
+      
+      const s1 = io.sockets.sockets.get(p1.socketId);
+      const s2 = io.sockets.sockets.get(p2.socketId);
+      
+      if (s1) { s1.join(code); s1.roomCode = code; s1.color = 'white'; }
+      if (s2) { s2.join(code); s2.roomCode = code; s2.color = 'black'; }
+      
+      io.to(code).emit('matchFound', { 
+        code, 
+        target: 3,
+        whiteName: p1.playerName,
+        blackName: p2.playerName
+      });
+      io.to(code).emit('gameStart', { target: 3, matchScore: room.matchScore });
+    } else {
+      socket.emit('waitingForMatch');
+    }
+  });
+
+  // === چت ===
+  socket.on('chatMessage', (msg) => {
+    const room = rooms.get(socket.roomCode);
+    if (!room) return;
+    // ارسال پیام به هر دو بازیکن
+    io.to(room.code).emit('chatMessage', {
+      sender: socket.color,
+      text: msg
+    });
+  });
+
+  // === ساخت اتاق اختصاصی ===
+  socket.on('createRoom', ({ target, playerId, playerName }, cb) => {
     const code = generateCode();
     const room = {
       code,
       target: target === 5 ? 5 : 3,
       players: { white: socket.id, black: null },
       playerIds: { white: playerId, black: null },
+      playerNames: { white: playerName, black: null },
       gameState: null,
       matchScore: { white: 0, black: 0 },
       disconnectedAt: null
@@ -37,24 +90,24 @@ io.on('connection', (socket) => {
     if (typeof cb === 'function') cb({ success: true, code, color: 'white', target: room.target });
   });
 
-  socket.on('joinRoom', ({ code, playerId }, cb) => {
+  // === ورود به اتاق اختصاصی ===
+  socket.on('joinRoom', ({ code, playerId, playerName }, cb) => {
     const room = rooms.get(String(code));
     if (!room) return cb({ success: false, error: 'اتاق پیدا نشد' });
 
+    // اگر بازیکن قبلی بود (Reconnect)
     if (room.playerIds.white === playerId) {
       room.players.white = socket.id;
-      socket.join(room.code);
-      socket.roomCode = room.code;
-      socket.color = 'white';
+      socket.join(room.code); socket.roomCode = room.code; socket.color = 'white';
       
       if (room.gameState) {
         cb({ success: true, code, color: 'white', target: room.target, resumed: true });
-        io.to(socket.id).emit('gameStart', { target: room.target, matchScore: room.matchScore });
+        io.to(socket.id).emit('gameStart', { target: room.target, matchScore: room.matchScore, whiteName: room.playerNames.white, blackName: room.playerNames.black });
         io.to(socket.id).emit('stateSync', room.gameState);
         io.to(room.code).emit('opponentReconnected');
       } else if (room.players.black) {
         cb({ success: true, code, color: 'white', target: room.target, resumed: true });
-        io.to(socket.id).emit('gameStart', { target: room.target, matchScore: room.matchScore });
+        io.to(socket.id).emit('gameStart', { target: room.target, matchScore: room.matchScore, whiteName: room.playerNames.white, blackName: room.playerNames.black });
       } else {
         cb({ success: true, code, color: 'white', target: room.target, resumed: true });
         io.to(socket.id).emit('waitingForOpponent', { code: room.code });
@@ -64,37 +117,36 @@ io.on('connection', (socket) => {
 
     if (room.playerIds.black === playerId) {
       room.players.black = socket.id;
-      socket.join(room.code);
-      socket.roomCode = room.code;
-      socket.color = 'black';
+      socket.join(room.code); socket.roomCode = room.code; socket.color = 'black';
       
       if (room.gameState) {
         cb({ success: true, code, color: 'black', target: room.target, resumed: true });
-        io.to(socket.id).emit('gameStart', { target: room.target, matchScore: room.matchScore });
+        io.to(socket.id).emit('gameStart', { target: room.target, matchScore: room.matchScore, whiteName: room.playerNames.white, blackName: room.playerNames.black });
         io.to(socket.id).emit('stateSync', room.gameState);
         io.to(room.code).emit('opponentReconnected');
       } else {
         cb({ success: true, code, color: 'black', target: room.target, resumed: true });
-        io.to(socket.id).emit('gameStart', { target: room.target, matchScore: room.matchScore });
+        io.to(socket.id).emit('gameStart', { target: room.target, matchScore: room.matchScore, whiteName: room.playerNames.white, blackName: room.playerNames.black });
       }
       return;
     }
 
+    // ورود بازیکن جدید (مشکی)
     if (!room.playerIds.black) {
       room.players.black = socket.id;
       room.playerIds.black = playerId;
-      socket.join(room.code);
-      socket.roomCode = room.code;
-      socket.color = 'black';
+      room.playerNames.black = playerName;
+      socket.join(room.code); socket.roomCode = room.code; socket.color = 'black';
       
       cb({ success: true, code, color: 'black', target: room.target });
-      io.to(room.code).emit('gameStart', { target: room.target, matchScore: room.matchScore });
+      io.to(room.code).emit('gameStart', { target: room.target, matchScore: room.matchScore, whiteName: room.playerNames.white, blackName: room.playerNames.black });
       return;
     }
 
-    return cb({ success: false, error: 'اتاق پر است! اگر می‌خواهید به بازی قبلی برگردید، صفحه (F5) را رفرش کنید.' });
+    return cb({ success: false, error: 'اتاق پر است!' });
   });
 
+  // === مکانیزم‌های بازی ===
   socket.on('rollDice', () => {
     const room = rooms.get(socket.roomCode);
     if (!room) return;
@@ -123,7 +175,11 @@ io.on('connection', (socket) => {
     }
   });
 
+  // === قطع اتصال ===
   socket.on('disconnect', () => {
+    // حذف از صف بازی تصادفی (اگر آنجا بود)
+    matchmakingQueue = matchmakingQueue.filter(p => p.socketId !== socket.id);
+
     const code = socket.roomCode;
     if (!code) return;
     const room = rooms.get(code);
