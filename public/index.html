@@ -64,10 +64,6 @@ input:focus { border-color: #ff6b9d; }
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .board.flipped { transform: rotate(180deg); }
-/* مهره‌ها را در حالت چرخیده، برمی‌گردانیم تا آویزان به نظر نرسند (اختیاری) */
-.board.flipped .checker { transform: rotate(180deg); }
-.board.flipped .checker.selected { transform: rotate(180deg) scale(1.1); }
-.board.flipped .checker:hover { transform: rotate(180deg) scale(1.18); }
 
 .row { display: flex; height: 150px; gap: 2px; }
 .point { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; z-index: 1; }
@@ -82,7 +78,8 @@ input:focus { border-color: #ff6b9d; }
 
 .center-bar { width: 18px; background: var(--bar-bg); border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px 0; }
 .checker { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; cursor: pointer; transition: 0.15s; box-shadow: 0 2px 4px rgba(0,0,0,0.45); z-index: 3; }
-.checker.selected { border: 3px solid #ffd93d !important; box-shadow: 0 0 12px #ffd93d; }
+.checker:hover { transform: scale(1.18); }
+.checker.selected { border: 3px solid #ffd93d !important; box-shadow: 0 0 12px #ffd93d; transform: scale(1.1); }
 .checker.can-bear-off { outline: 3px solid #4caf50; outline-offset: 2px; animation: pulse 1s infinite; }
 @keyframes pulse { 0%, 100% { outline-color: #4caf50; } 50% { outline-color: #a5ffa8; } }
 .point.legal-target::after { content: ""; position: absolute; inset: 20%; border: 3px dashed #4caf50; border-radius: 50%; pointer-events: none; z-index: 5; animation: targetPulse 1s infinite; }
@@ -255,12 +252,8 @@ function triggerWinEffect(isMe) {
     confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
     confetti.style.animationDuration = (Math.random() * 1.5 + 1.5) + 's';
     confetti.style.animationDelay = (Math.random() * 0.5) + 's';
-    // تنوع در شکل
     if (Math.random() > 0.5) confetti.style.borderRadius = '50%';
-    
     container.appendChild(confetti);
-    
-    // حذف بعد از پایان انیمیشن
     setTimeout(() => confetti.remove(), 3500);
   }
 }
@@ -528,7 +521,7 @@ function endTurn() {
   if (selectedChecker) { selectedChecker.classList.remove("selected", "can-bear-off"); selectedChecker = null; }
   
   currentTurn = currentTurn === "white" ? "black" : "white";
-  document.getElementById("turnInfo").textContent = "نوبت: " + (currentTurn === "white" ? "سفید" : "مشکی");
+  document.getElementById('turnInfo').textContent = 'نوبت: ' + (currentTurn === 'white' ? 'سفید' : 'مشکی');
   
   if (currentTurn === myColor) {
     document.getElementById("rollBtn").disabled = false;
@@ -561,7 +554,7 @@ function endGame(winner) {
 function showOverlay(isMatchOver, winner, points) {
   const isMe = winner === myColor;
   
-  if (isMe) triggerWinEffect(true); // اجرای افکت جشن
+  if (isMe) triggerWinEffect(true);
   
   document.getElementById('overlayIcon').textContent = isMatchOver ? (isMe ? '🏆' : '😔') : '🏁';
   document.getElementById('overlayTitle').textContent = isMatchOver 
@@ -683,7 +676,7 @@ socket.on('startNextGame', (data) => {
   };
   applyBoardState(initial);
   
-  currentTurn = data.nextTurn; // برنده دست قبل شروع می‌کند
+  currentTurn = data.nextTurn;
   gameOver = false;
   diceValues = [];
   diceRolled = false;
