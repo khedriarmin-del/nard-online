@@ -52,11 +52,23 @@ input:focus { border-color: #ff6b9d; }
 .timer-display { font-size: 14px; color: #ffd93d; margin-bottom: 4px; font-weight: bold; min-height: 20px; }
 .message { font-size: 13px; color: #ff8e8e; margin-bottom: 12px; min-height: 18px; text-align: center; padding: 0 10px; }
 
+/* ===== Board & Perspective Flip ===== */
+.board-wrapper {
+  width: 100%;
+  perspective: 1000px;
+}
 .board {
   width: 100%; background: var(--board-bg); border: 6px solid var(--board-border);
   border-radius: 12px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   display: flex; flex-direction: column; gap: 8px;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
+.board.flipped { transform: rotate(180deg); }
+/* مهره‌ها را در حالت چرخیده، برمی‌گردانیم تا آویزان به نظر نرسند (اختیاری) */
+.board.flipped .checker { transform: rotate(180deg); }
+.board.flipped .checker.selected { transform: rotate(180deg) scale(1.1); }
+.board.flipped .checker:hover { transform: rotate(180deg) scale(1.18); }
+
 .row { display: flex; height: 150px; gap: 2px; }
 .point { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; z-index: 1; }
 .row:first-child .point::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 100%; clip-path: polygon(0% 0%, 100% 0%, 50% 100%); z-index: -1; }
@@ -70,8 +82,7 @@ input:focus { border-color: #ff6b9d; }
 
 .center-bar { width: 18px; background: var(--bar-bg); border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px 0; }
 .checker { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; cursor: pointer; transition: 0.15s; box-shadow: 0 2px 4px rgba(0,0,0,0.45); z-index: 3; }
-.checker:hover { transform: scale(1.18); }
-.checker.selected { border: 3px solid #ffd93d !important; box-shadow: 0 0 12px #ffd93d; transform: scale(1.1); }
+.checker.selected { border: 3px solid #ffd93d !important; box-shadow: 0 0 12px #ffd93d; }
 .checker.can-bear-off { outline: 3px solid #4caf50; outline-offset: 2px; animation: pulse 1s infinite; }
 @keyframes pulse { 0%, 100% { outline-color: #4caf50; } 50% { outline-color: #a5ffa8; } }
 .point.legal-target::after { content: ""; position: absolute; inset: 20%; border: 3px dashed #4caf50; border-radius: 50%; pointer-events: none; z-index: 5; animation: targetPulse 1s infinite; }
@@ -86,12 +97,25 @@ input:focus { border-color: #ff6b9d; }
 .dice .pip.hidden { visibility: hidden; }
 
 .overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; padding: 20px; }
-.overlay-content { background: linear-gradient(145deg, #2a2a4e, #1a1a2e); border: 2px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 28px 24px; max-width: 380px; width: 100%; display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center; }
+.overlay-content { background: linear-gradient(145deg, #2a2a4e, #1a1a2e); border: 2px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 28px 24px; max-width: 380px; width: 100%; display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center; z-index: 201;}
 .overlay-content h2 { font-size: 22px; color: #ffd93d; }
 .overlay-content p { font-size: 14px; color: #ccc; line-height: 1.6; }
+
+/* ===== Confetti Effect ===== */
+#confetti-container { position: fixed; inset: 0; pointer-events: none; z-index: 199; overflow: hidden; }
+.confetti {
+  position: absolute; width: 10px; height: 10px; opacity: 0.9;
+  animation: fall linear forwards;
+}
+@keyframes fall {
+  0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
 </style>
 </head>
 <body>
+
+<div id="confetti-container"></div>
 
 <div id="screen-home" class="screen active">
   <h1>🎲 نرد آنلاین</h1>
@@ -128,30 +152,32 @@ input:focus { border-color: #ff6b9d; }
     <span class="match-label" id="matchLabel">بازی ۳ امتیازی</span>
     <span>⚪ <span id="whiteScore">۰</span></span>
     <span>⚫ <span id="blackScore">۰</span></span>
-    <span id="myColor">شما: -</span>
+    <span id="myColorDisplay">شما: -</span>
   </div>
   <div class="turn-info" id="turnInfo">در انتظار شروع...</div>
   <div class="timer-display" id="timerDisplay"></div>
   <div class="message" id="message"></div>
 
-  <div class="board">
-    <div class="row">
-      <div class="point" data-point="13"></div><div class="point" data-point="14"></div>
-      <div class="point" data-point="15"></div><div class="point" data-point="16"></div>
-      <div class="point" data-point="17"></div><div class="point" data-point="18"></div>
-      <div class="center-bar" id="topBar"></div>
-      <div class="point" data-point="19"></div><div class="point" data-point="20"></div>
-      <div class="point" data-point="21"></div><div class="point" data-point="22"></div>
-      <div class="point" data-point="23"></div><div class="point" data-point="24"></div>
-    </div>
-    <div class="row">
-      <div class="point" data-point="12"></div><div class="point" data-point="11"></div>
-      <div class="point" data-point="10"></div><div class="point" data-point="9"></div>
-      <div class="point" data-point="8"></div><div class="point" data-point="7"></div>
-      <div class="center-bar" id="bottomBar"></div>
-      <div class="point" data-point="6"></div><div class="point" data-point="5"></div>
-      <div class="point" data-point="4"></div><div class="point" data-point="3"></div>
-      <div class="point" data-point="2"></div><div class="point" data-point="1"></div>
+  <div class="board-wrapper">
+    <div class="board" id="gameBoard">
+      <div class="row">
+        <div class="point" data-point="13"></div><div class="point" data-point="14"></div>
+        <div class="point" data-point="15"></div><div class="point" data-point="16"></div>
+        <div class="point" data-point="17"></div><div class="point" data-point="18"></div>
+        <div class="center-bar" id="topBar"></div>
+        <div class="point" data-point="19"></div><div class="point" data-point="20"></div>
+        <div class="point" data-point="21"></div><div class="point" data-point="22"></div>
+        <div class="point" data-point="23"></div><div class="point" data-point="24"></div>
+      </div>
+      <div class="row">
+        <div class="point" data-point="12"></div><div class="point" data-point="11"></div>
+        <div class="point" data-point="10"></div><div class="point" data-point="9"></div>
+        <div class="point" data-point="8"></div><div class="point" data-point="7"></div>
+        <div class="center-bar" id="bottomBar"></div>
+        <div class="point" data-point="6"></div><div class="point" data-point="5"></div>
+        <div class="point" data-point="4"></div><div class="point" data-point="3"></div>
+        <div class="point" data-point="2"></div><div class="point" data-point="1"></div>
+      </div>
     </div>
   </div>
 
@@ -214,6 +240,29 @@ function updateMatchInfo() {
   document.getElementById('whiteScore').textContent = toPersian(matchScore.white);
   document.getElementById('blackScore').textContent = toPersian(matchScore.black);
   document.getElementById('matchLabel').textContent = 'بازی ' + toPersian(matchTarget) + ' امتیازی';
+}
+
+// ==== افکت جشن (Confetti) ====
+function triggerWinEffect(isMe) {
+  if (!isMe) return;
+  const container = document.getElementById('confetti-container');
+  const colors = ['#ff6b9d', '#ffd93d', '#6b9dff', '#4caf50', '#ff4757'];
+  
+  for (let i = 0; i < 60; i++) {
+    const confetti = document.createElement('div');
+    confetti.classList.add('confetti');
+    confetti.style.left = Math.random() * 100 + 'vw';
+    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDuration = (Math.random() * 1.5 + 1.5) + 's';
+    confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+    // تنوع در شکل
+    if (Math.random() > 0.5) confetti.style.borderRadius = '50%';
+    
+    container.appendChild(confetti);
+    
+    // حذف بعد از پایان انیمیشن
+    setTimeout(() => confetti.remove(), 3500);
+  }
 }
 
 // منطق بازی
@@ -511,6 +560,9 @@ function endGame(winner) {
 
 function showOverlay(isMatchOver, winner, points) {
   const isMe = winner === myColor;
+  
+  if (isMe) triggerWinEffect(true); // اجرای افکت جشن
+  
   document.getElementById('overlayIcon').textContent = isMatchOver ? (isMe ? '🏆' : '😔') : '🏁';
   document.getElementById('overlayTitle').textContent = isMatchOver 
     ? (isMe ? 'شما برنده مسابقه شدید!' : 'شما باختید!') 
@@ -526,7 +578,6 @@ function showOverlay(isMatchOver, winner, points) {
   }
   document.getElementById('overlayMessage').innerHTML = msg;
   
-  // اگر مسابقه تمام نشده، دکمه بازگشت را مخفی می‌کنیم (چون خودکار دست بعدی شروع می‌شود)
   const btn = document.querySelector('#overlay button');
   if (!isMatchOver) {
     btn.style.display = 'none';
@@ -587,8 +638,16 @@ socket.on('gameStart', (data) => {
   matchTarget = data.target;
   if (data.matchScore) matchScore = data.matchScore;
   updateMatchInfo();
-  document.getElementById('myColor').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
+  document.getElementById('myColorDisplay').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
   
+  // ==== چرخش تخته برای بازیکن مشکی ====
+  const board = document.getElementById('gameBoard');
+  if (myColor === 'black') {
+    board.classList.add('flipped');
+  } else {
+    board.classList.remove('flipped');
+  }
+
   const initial = {
     points: {
       13: { white: 5, black: 0 }, 17: { white: 0, black: 3 }, 19: { white: 0, black: 5 }, 24: { white: 2, black: 0 },
@@ -694,7 +753,6 @@ socket.on('stateSync', (data) => {
 });
 
 socket.on('gameOver', (data) => {
-  // اگر حریف بازی را تمام کرد (پیام برای اطلاع ما)
   if (gameOver) return; 
   gameOver = true;
   document.getElementById('passBtn').style.display = "none";
