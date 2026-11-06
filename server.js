@@ -26,6 +26,7 @@ io.on('connection', (socket) => {
       players: { white: socket.id, black: null },
       playerIds: { white: playerId, black: null },
       gameState: null,
+      matchScore: { white: 0, black: 0 },
       disconnectedAt: null
     };
     rooms.set(code, room);
@@ -48,12 +49,12 @@ io.on('connection', (socket) => {
       
       if (room.gameState) {
         cb({ success: true, code, color: 'white', target: room.target, resumed: true });
-        io.to(socket.id).emit('gameStart', { target: room.target });
+        io.to(socket.id).emit('gameStart', { target: room.target, matchScore: room.matchScore });
         io.to(socket.id).emit('stateSync', room.gameState);
         io.to(room.code).emit('opponentReconnected');
       } else if (room.players.black) {
         cb({ success: true, code, color: 'white', target: room.target, resumed: true });
-        io.to(socket.id).emit('gameStart', { target: room.target });
+        io.to(socket.id).emit('gameStart', { target: room.target, matchScore: room.matchScore });
       } else {
         cb({ success: true, code, color: 'white', target: room.target, resumed: true });
         io.to(socket.id).emit('waitingForOpponent', { code: room.code });
@@ -69,12 +70,12 @@ io.on('connection', (socket) => {
       
       if (room.gameState) {
         cb({ success: true, code, color: 'black', target: room.target, resumed: true });
-        io.to(socket.id).emit('gameStart', { target: room.target });
+        io.to(socket.id).emit('gameStart', { target: room.target, matchScore: room.matchScore });
         io.to(socket.id).emit('stateSync', room.gameState);
         io.to(room.code).emit('opponentReconnected');
       } else {
         cb({ success: true, code, color: 'black', target: room.target, resumed: true });
-        io.to(socket.id).emit('gameStart', { target: room.target });
+        io.to(socket.id).emit('gameStart', { target: room.target, matchScore: room.matchScore });
       }
       return;
     }
@@ -87,7 +88,7 @@ io.on('connection', (socket) => {
       socket.color = 'black';
       
       cb({ success: true, code, color: 'black', target: room.target });
-      io.to(room.code).emit('gameStart', { target: room.target });
+      io.to(room.code).emit('gameStart', { target: room.target, matchScore: room.matchScore });
       return;
     }
 
@@ -109,11 +110,17 @@ io.on('connection', (socket) => {
     socket.to(room.code).emit('stateSync', data);
   });
 
-  socket.on('gameOver', (data) => {
+  socket.on('gameOver', ({ winner, points }) => {
     const room = rooms.get(socket.roomCode);
     if (!room) return;
-    socket.to(room.code).emit('gameOver', data);
     room.gameState = null;
+    room.matchScore[winner] += points;
+    
+    if (room.matchScore[winner] >= room.target) {
+      io.to(room.code).emit('matchOver', { winner, scores: room.matchScore });
+    } else {
+      io.to(room.code).emit('startNextGame', { scores: room.matchScore, nextTurn: winner });
+    }
   });
 
   socket.on('disconnect', () => {
