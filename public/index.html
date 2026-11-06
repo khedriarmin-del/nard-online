@@ -125,7 +125,9 @@ input:focus { border-color: #ff6b9d; }
 
 <div id="screen-game" class="screen" style="max-width: 440px;">
   <div class="match-bar">
-    <span class="match-label" id="matchLabel">بازی آنلاین</span>
+    <span class="match-label" id="matchLabel">بازی ۳ امتیازی</span>
+    <span>⚪ <span id="whiteScore">۰</span></span>
+    <span>⚫ <span id="blackScore">۰</span></span>
     <span id="myColor">شما: -</span>
   </div>
   <div class="turn-info" id="turnInfo">در انتظار شروع...</div>
@@ -193,6 +195,10 @@ let diceValues = [];
 let diceRolled = false;
 let gameOver = false;
 
+let matchTarget = 3;
+let matchScore = { white: 0, black: 0 };
+
+function toPersian(n) { return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -202,6 +208,12 @@ function leaveRoom() {
   sessionStorage.removeItem('nard_roomCode');
   sessionStorage.removeItem('nard_myColor');
   location.reload();
+}
+
+function updateMatchInfo() {
+  document.getElementById('whiteScore').textContent = toPersian(matchScore.white);
+  document.getElementById('blackScore').textContent = toPersian(matchScore.black);
+  document.getElementById('matchLabel').textContent = 'بازی ' + toPersian(matchTarget) + ' امتیازی';
 }
 
 // منطق بازی
@@ -479,19 +491,50 @@ function endTurn() {
   syncState();
 }
 
+// محاسبه امتیاز (مارش ۲ امتیاز)
+function calculateGamePoints(winner) {
+  const loser = winner === 'white' ? 'black' : 'white';
+  const loserRemaining = document.querySelectorAll('.checker.' + loser).length;
+  const loserBorneOff = 15 - loserRemaining;
+  if (loserBorneOff === 0) return 2;
+  return 1;
+}
+
 function endGame(winner) {
   gameOver = true;
   document.getElementById("passBtn").style.display = "none";
   document.getElementById("rollBtn").disabled = true;
-  socket.emit('gameOver', { winner });
-  showOverlay(winner);
+  
+  const points = calculateGamePoints(winner);
+  socket.emit('gameOver', { winner, points });
 }
 
-function showOverlay(winner) {
+function showOverlay(isMatchOver, winner, points) {
   const isMe = winner === myColor;
-  document.getElementById('overlayIcon').textContent = isMe ? '🏆' : '😔';
-  document.getElementById('overlayTitle').textContent = isMe ? 'شما برنده شدید!' : 'شما باختید!';
-  document.getElementById('overlayMessage').textContent = isMe ? 'تبریک! بازی را به پایان رساندید.' : 'حریف مهره‌هایش را تمام کرد.';
+  document.getElementById('overlayIcon').textContent = isMatchOver ? (isMe ? '🏆' : '😔') : '🏁';
+  document.getElementById('overlayTitle').textContent = isMatchOver 
+    ? (isMe ? 'شما برنده مسابقه شدید!' : 'شما باختید!') 
+    : (winner === 'white' ? 'سفید این دست را برد' : 'مشکی این دست را برد');
+    
+  let msg = '';
+  if (!isMatchOver) {
+    msg = 'امتیاز این دست: <strong>' + toPersian(points) + '</strong>';
+    if (points === 2) msg += ' (مارش)';
+    msg += '<br>در حال آماده‌سازی دست بعدی...';
+  } else {
+    msg = 'امتیاز نهایی: سفید <strong>' + toPersian(matchScore.white) + '</strong> — <strong>' + toPersian(matchScore.black) + '</strong> مشکی';
+  }
+  document.getElementById('overlayMessage').innerHTML = msg;
+  
+  // اگر مسابقه تمام نشده، دکمه بازگشت را مخفی می‌کنیم (چون خودکار دست بعدی شروع می‌شود)
+  const btn = document.querySelector('#overlay button');
+  if (!isMatchOver) {
+    btn.style.display = 'none';
+    setTimeout(() => { document.getElementById('overlay').style.display = 'none'; btn.style.display = 'block'; }, 2500);
+  } else {
+    btn.style.display = 'block';
+  }
+  
   document.getElementById('overlay').style.display = 'flex';
 }
 
@@ -504,7 +547,6 @@ function createRoom(target) {
       sessionStorage.setItem('nard_roomCode', roomCode);
       sessionStorage.setItem('nard_myColor', myColor);
       document.getElementById('roomCodeDisplay').textContent = res.code;
-      document.getElementById('matchLabel').textContent = 'بازی ' + target + ' امتیازی';
       showScreen('screen-wait');
     } else { alert(res.error); }
   });
@@ -538,11 +580,13 @@ function passTurn() {
 socket.on('waitingForOpponent', (data) => {
     showScreen('screen-wait');
     document.getElementById('roomCodeDisplay').textContent = data.code;
-    document.getElementById('matchLabel').textContent = 'در انتظار حریف';
 });
 
 socket.on('gameStart', (data) => {
   showScreen('screen-game');
+  matchTarget = data.target;
+  if (data.matchScore) matchScore = data.matchScore;
+  updateMatchInfo();
   document.getElementById('myColor').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
   
   const initial = {
@@ -556,14 +600,53 @@ socket.on('gameStart', (data) => {
   
   currentTurn = 'white';
   gameOver = false;
-  document.getElementById('turnInfo').textContent = 'نوبت: ' + (currentTurn === 'white' ? 'سفید' : 'مشکی');
+  document.getElementById('turnInfo').textContent = 'نوبت: سفید';
   
   if (myColor === 'white') {
     document.getElementById('rollBtn').disabled = false;
     showMessage("شما سفید هستید. تاس بنداز.");
   } else {
+    document.getElementById('rollBtn').disabled = true;
     showMessage("در انتظار حرکت سفید...");
   }
+});
+
+socket.on('startNextGame', (data) => {
+  matchScore = data.scores;
+  updateMatchInfo();
+  
+  const initial = {
+    points: {
+      13: { white: 5, black: 0 }, 17: { white: 0, black: 3 }, 19: { white: 0, black: 5 }, 24: { white: 2, black: 0 },
+      12: { white: 0, black: 5 }, 8: { white: 3, black: 0 }, 6: { white: 5, black: 0 }, 1: { white: 0, black: 2 }
+    },
+    bar: { white: 0, black: 0 }
+  };
+  applyBoardState(initial);
+  
+  currentTurn = data.nextTurn; // برنده دست قبل شروع می‌کند
+  gameOver = false;
+  diceValues = [];
+  diceRolled = false;
+  updateDiceDisplay();
+  
+  document.getElementById('turnInfo').textContent = 'نوبت: ' + (currentTurn === 'white' ? 'سفید' : 'مشکی');
+  if (currentTurn === myColor) {
+    document.getElementById('rollBtn').disabled = false;
+    showMessage("نوبت شماست. تاس بنداز.");
+  } else {
+    document.getElementById('rollBtn').disabled = true;
+    showMessage("در انتظار حرکت حریف...");
+  }
+});
+
+socket.on('matchOver', (data) => {
+  matchScore = data.scores;
+  updateMatchInfo();
+  gameOver = true;
+  document.getElementById('passBtn').style.display = "none";
+  document.getElementById('rollBtn').disabled = true;
+  showOverlay(true, data.winner, 0);
 });
 
 socket.on('diceResult', (data) => {
@@ -611,8 +694,12 @@ socket.on('stateSync', (data) => {
 });
 
 socket.on('gameOver', (data) => {
+  // اگر حریف بازی را تمام کرد (پیام برای اطلاع ما)
+  if (gameOver) return; 
   gameOver = true;
-  showOverlay(data.winner);
+  document.getElementById('passBtn').style.display = "none";
+  document.getElementById('rollBtn').disabled = true;
+  showOverlay(false, data.winner, data.points);
 });
 
 socket.on('opponentDisconnected', () => {
