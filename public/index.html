@@ -55,7 +55,6 @@ input:focus { border-color: #ff6b9d; }
 /* ===== Board & Perspective Flip ===== */
 .board-wrapper {
   width: 100%;
-  perspective: 1000px;
 }
 .board {
   width: 100%; background: var(--board-bg); border: 6px solid var(--board-border);
@@ -64,6 +63,11 @@ input:focus { border-color: #ff6b9d; }
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .board.flipped { transform: rotate(180deg); }
+
+/* چرخش معکوس مهره‌ها تا نور و سایه‌شان همیشه از بالا سمت چپ باشد */
+.board.flipped .checker { transform: rotate(180deg); }
+.board.flipped .checker:hover { transform: rotate(180deg) scale(1.18); }
+.board.flipped .checker.selected { transform: rotate(180deg) scale(1.1); }
 
 .row { display: flex; height: 150px; gap: 2px; }
 .point { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; z-index: 1; }
@@ -78,14 +82,14 @@ input:focus { border-color: #ff6b9d; }
 
 .center-bar { width: 18px; background: var(--bar-bg); border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px 0; }
 .checker { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; cursor: pointer; transition: 0.15s; box-shadow: 0 2px 4px rgba(0,0,0,0.45); z-index: 3; }
-.checker:hover { transform: scale(1.18); }
-.checker.selected { border: 3px solid #ffd93d !important; box-shadow: 0 0 12px #ffd93d; transform: scale(1.1); }
+.checker.selected { border: 3px solid #ffd93d !important; box-shadow: 0 0 12px #ffd93d; }
 .checker.can-bear-off { outline: 3px solid #4caf50; outline-offset: 2px; animation: pulse 1s infinite; }
 @keyframes pulse { 0%, 100% { outline-color: #4caf50; } 50% { outline-color: #a5ffa8; } }
 .point.legal-target::after { content: ""; position: absolute; inset: 20%; border: 3px dashed #4caf50; border-radius: 50%; pointer-events: none; z-index: 5; animation: targetPulse 1s infinite; }
 @keyframes targetPulse { 0%, 100% { opacity: 0.5; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1); } }
 .white { background: radial-gradient(circle at 35% 35%, #fff, #d0d0d0); border: 2px solid #999; }
-.black { background: radial-gradient(circle at 35% 35%, #444, #111); border: 2px solid #000; }
+/* رنگ مهره مشکی کمی روشن‌تر شد تا روی تخته گم نشود */
+.black { background: radial-gradient(circle at 35% 35%, #666, #222); border: 2px solid #000; }
 
 .controls { width: 100%; margin-top: 16px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
 .dice-area { display: flex; gap: 22px; }
@@ -98,16 +102,9 @@ input:focus { border-color: #ff6b9d; }
 .overlay-content h2 { font-size: 22px; color: #ffd93d; }
 .overlay-content p { font-size: 14px; color: #ccc; line-height: 1.6; }
 
-/* ===== Confetti Effect ===== */
 #confetti-container { position: fixed; inset: 0; pointer-events: none; z-index: 199; overflow: hidden; }
-.confetti {
-  position: absolute; width: 10px; height: 10px; opacity: 0.9;
-  animation: fall linear forwards;
-}
-@keyframes fall {
-  0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-}
+.confetti { position: absolute; width: 10px; height: 10px; opacity: 0.9; animation: fall linear forwards; }
+@keyframes fall { 0% { transform: translateY(-100px) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
 </style>
 </head>
 <body>
@@ -239,7 +236,6 @@ function updateMatchInfo() {
   document.getElementById('matchLabel').textContent = 'بازی ' + toPersian(matchTarget) + ' امتیازی';
 }
 
-// ==== افکت جشن (Confetti) ====
 function triggerWinEffect(isMe) {
   if (!isMe) return;
   const container = document.getElementById('confetti-container');
@@ -258,7 +254,6 @@ function triggerWinEffect(isMe) {
   }
 }
 
-// منطق بازی
 function hasCheckerOnBar() {
   if (currentTurn === "white") return document.getElementById("topBar").querySelectorAll(".white").length > 0;
   return document.getElementById("bottomBar").querySelectorAll(".black").length > 0;
@@ -533,7 +528,6 @@ function endTurn() {
   syncState();
 }
 
-// محاسبه امتیاز (مارش ۲ امتیاز)
 function calculateGamePoints(winner) {
   const loser = winner === 'white' ? 'black' : 'white';
   const loserRemaining = document.querySelectorAll('.checker.' + loser).length;
@@ -582,7 +576,6 @@ function showOverlay(isMatchOver, winner, points) {
   document.getElementById('overlay').style.display = 'flex';
 }
 
-// === اتصال به سرور ===
 function createRoom(target) {
   socket.emit('createRoom', { target, playerId: myPlayerId }, (res) => {
     if (res.success) {
@@ -620,7 +613,6 @@ function passTurn() {
   endTurn();
 }
 
-// === دریافت رویدادها ===
 socket.on('waitingForOpponent', (data) => {
     showScreen('screen-wait');
     document.getElementById('roomCodeDisplay').textContent = data.code;
@@ -633,7 +625,6 @@ socket.on('gameStart', (data) => {
   updateMatchInfo();
   document.getElementById('myColorDisplay').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
   
-  // ==== چرخش تخته برای بازیکن مشکی ====
   const board = document.getElementById('gameBoard');
   if (myColor === 'black') {
     board.classList.add('flipped');
@@ -764,7 +755,6 @@ socket.on('opponentTimeout', () => {
   leaveRoom();
 });
 
-// === بازگشت خودکار به بازی اگر رفرش شد ===
 if (roomCode && myColor) {
     socket.emit('joinRoom', { code: roomCode, playerId: myPlayerId }, (res) => {
         if (!res.success) {
