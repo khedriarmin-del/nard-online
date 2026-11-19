@@ -74,6 +74,7 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 .btn-pass { background: linear-gradient(145deg, #ffa500, #cc8400); }
 .btn-ai { background: linear-gradient(145deg, #3a7bd5, #2a5db5); box-shadow: 0 4px 15px rgba(58,123,213,0.3); }
 .btn-exit { background: linear-gradient(145deg, #555, #333); box-shadow: 0 4px 15px rgba(0,0,0,0.4); font-size: 14px; padding: 10px; margin-top: 10px;}
+.btn-rank { background: linear-gradient(145deg, #ffd700, #b8860b); color: #1a1a2e; box-shadow: 0 4px 15px rgba(255,215,0,0.3); font-size: 15px; margin-bottom: 10px;}
 
 .shop-tabs { display: flex; gap: 5px; width: 100%; margin-bottom: 15px; }
 .shop-tab { flex: 1; padding: 10px; background: rgba(255,255,255,0.1); border: none; color: #ccc; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: bold; transition: 0.2s; }
@@ -159,6 +160,10 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 .admin-row-title { font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #ffd93d;}
 .file-input-wrapper { margin-top: 5px; font-size: 11px; color: #aaa; }
 input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 10px; font-family: inherit;}
+
+/* Ranking Screen */
+.rank-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 16px; width: 100%; text-align: center; margin-bottom: 20px; }
+.rank-score { font-size: 48px; font-weight: bold; color: #ffd93d; margin: 10px 0; text-shadow: 0 0 20px rgba(255,217,61,0.5); }
 </style>
 </head>
 <body>
@@ -170,10 +175,10 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
     <div class="avatar">👤</div>
     <div class="user-details">
       <span class="user-name" id="profileName">مهمان</span>
-      <span class="user-stats" id="profileStats">۰ برد - ۰ باخت</span>
+      <span class="user-stats" id="profileStats">رتبه: ۱۰۰۰ | ۰ برد - ۰ باخت</span>
     </div>
   </div>
-  <div class="coins-badge">🪙 <span id="profileCoins">۱۰۰</span></div>
+  <div class="coins-badge">🪙 <span id="profileCoins">۱۰۰۰</span></div>
   <button class="admin-btn" onclick="openAdminPanel()" title="پنل مدیریت">⚙️</button>
 </div>
 
@@ -185,7 +190,24 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-random" onclick="findRandomMatch()">🎲 بازی با حریف تصادفی</button>
   <button class="btn btn-online" onclick="showScreen('screen-create')">➕ ساخت اتاق اختصاصی</button>
   <button class="btn btn-secondary" onclick="showScreen('screen-join')">🔑 ورود با کد اتاق</button>
-  <button class="btn btn-secondary" onclick="showScreen('screen-shop')" style="margin-top: 10px; background: #b8860b;">🛒 فروشگاه</button>
+  
+  <div style="display: flex; gap: 10px; width: 100%; margin-top: 10px;">
+    <button class="btn btn-rank" onclick="showScreen('screen-ranking')" style="flex: 1;">🏆 رتبه‌بندی</button>
+    <button class="btn btn-secondary" onclick="showScreen('screen-shop')" style="flex: 1; background: #b8860b;">🛒 فروشگاه</button>
+  </div>
+</div>
+
+<div id="screen-ranking" class="screen">
+  <h1>🏆 رتبه‌بندی</h1>
+  <div class="rank-card">
+    <div style="font-size: 16px; color: #aaa;">رتبه شما در بازی</div>
+    <div class="rank-score" id="myRankScore">۱۰۰۰</div>
+    <div style="font-size: 14px; color: #4caf50;">با هر برد +۱۵ امتیاز</div>
+    <div style="font-size: 14px; color: #ff4757;">با هر باخت -۵ امتیاز</div>
+  </div>
+  
+  <p style="font-size: 12px; color: #888;">(جدول برترین‌های جهان به زودی با اتصال به دیتابیس فعال می‌شود)</p>
+  <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
 </div>
 
 <div id="screen-ai-setup" class="screen">
@@ -210,7 +232,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
 
 <div id="screen-admin" class="screen">
   <h1>⚙️ پنل مدیریت</h1>
-  <p style="color:#ff6b9d; font-size:12px;">عکس‌ها را از سیستم خود انتخاب کنید. (برای جلوگیری از پر شدن حافظه، از عکس‌های کوچک زیر ۲۰۰ کیلوبایت استفاده کنید)</p>
+  <p style="color:#ff6b9d; font-size:12px;">عکس‌ها را از سیستم خود انتخاب کنید. (زیر ۲۰۰ کیلوبایت)</p>
   <div class="shop-tabs">
     <button class="shop-tab active" onclick="switchAdminTab('boards')">تخته</button>
     <button class="shop-tab" onclick="switchAdminTab('dice')">تاس</button>
@@ -299,7 +321,6 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
     </div>
     <button class="btn btn-pass" id="passBtn" style="display:none;" onclick="passTurn()">پاس بده (حرکتی نداری)</button>
     <button class="btn" id="rollBtn" onclick="requestRoll()" disabled>تاس بنداز</button>
-    <!-- دکمه خروج از بازی اینجا اضافه شد -->
     <button class="btn btn-exit" onclick="confirmExitGame()">🚪 خروج از بازی</button>
   </div>
 </div>
@@ -337,19 +358,14 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
 <script>
 const socket = io();
 
-// ==== تابع خروج با تاییدیه ====
 function confirmExitGame() {
   if (confirm('آیا مطمئن هستید که می‌خواهید از بازی خارج شوید؟ (مسابقه لغو می‌شود)')) {
     leaveRoom();
   }
 }
 
-// ==== سیستم صدا ====
 let audioCtx = null;
-function ensureAudio() {
-  if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
-  return audioCtx;
-}
+function ensureAudio() { if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } return audioCtx; }
 function playSound(name) {
   const ctx = ensureAudio(); if (!ctx) return;
   if (ctx.state === 'suspended') ctx.resume();
@@ -360,88 +376,49 @@ function playSound(name) {
         const o = ctx.createOscillator(), g = ctx.createGain();
         o.connect(g); g.connect(ctx.destination);
         o.type = 'sine'; o.frequency.setValueAtTime(f, now + i * 0.12);
-        g.gain.setValueAtTime(0.15, now + i * 0.12);
-        g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.12 + 0.3);
+        g.gain.setValueAtTime(0.15, now + i * 0.12); g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.12 + 0.3);
         o.start(now + i * 0.12); o.stop(now + i * 0.12 + 0.3);
-      });
-      return;
+      }); return;
     }
     const o = ctx.createOscillator(), g = ctx.createGain();
     o.connect(g); g.connect(ctx.destination);
-    if (name === 'dice') {
-      o.type = 'triangle'; o.frequency.setValueAtTime(300, now);
-      o.frequency.exponentialRampToValueAtTime(100, now + 0.08);
-      g.gain.setValueAtTime(0.2, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-      o.start(now); o.stop(now + 0.1);
-    } else if (name === 'move') {
-      o.type = 'sine'; o.frequency.setValueAtTime(500, now);
-      o.frequency.exponentialRampToValueAtTime(900, now + 0.05);
-      g.gain.setValueAtTime(0.1, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-      o.start(now); o.stop(now + 0.08);
-    } else if (name === 'hit') {
-      o.type = 'sawtooth'; o.frequency.setValueAtTime(200, now);
-      o.frequency.exponentialRampToValueAtTime(60, now + 0.15);
-      g.gain.setValueAtTime(0.25, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
-      o.start(now); o.stop(now + 0.18);
-    } else if (name === 'bearoff') {
-      o.type = 'sine'; o.frequency.setValueAtTime(700, now);
-      o.frequency.exponentialRampToValueAtTime(1400, now + 0.1);
-      g.gain.setValueAtTime(0.12, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-      o.start(now); o.stop(now + 0.12);
-    }
+    if (name === 'dice') { o.type = 'triangle'; o.frequency.setValueAtTime(300, now); o.frequency.exponentialRampToValueAtTime(100, now + 0.08); g.gain.setValueAtTime(0.2, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.1); o.start(now); o.stop(now + 0.1); }
+    else if (name === 'move') { o.type = 'sine'; o.frequency.setValueAtTime(500, now); o.frequency.exponentialRampToValueAtTime(900, now + 0.05); g.gain.setValueAtTime(0.1, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.08); o.start(now); o.stop(now + 0.08); }
+    else if (name === 'hit') { o.type = 'sawtooth'; o.frequency.setValueAtTime(200, now); o.frequency.exponentialRampToValueAtTime(60, now + 0.15); g.gain.setValueAtTime(0.25, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.18); o.start(now); o.stop(now + 0.18); }
+    else if (name === 'bearoff') { o.type = 'sine'; o.frequency.setValueAtTime(700, now); o.frequency.exponentialRampToValueAtTime(1400, now + 0.1); g.gain.setValueAtTime(0.12, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.12); o.start(now); o.stop(now + 0.12); }
   } catch (e) {}
 }
 
-// ==== مدیریت پروفایل و سکه‌ها ====
+// ==== مدیریت پروفایل و سکه‌ها و رتبه ====
 let profile = JSON.parse(localStorage.getItem('nard_profile')) || {
   id: Math.random().toString(36).substring(2, 10),
   name: 'بازیکن ' + Math.floor(Math.random() * 1000),
-  coins: 500,
+  coins: 1000, // سکه شروع
   wins: 0,
   losses: 0,
-  ownedBoards: ['classic'],
-  activeBoard: 'classic',
-  ownedDice: ['classic'],
-  activeDice: 'classic',
-  ownedCheckers: ['classic'],
-  activeCheckers: 'classic'
+  rating: 1000, // امتیاز شروع
+  ownedBoards: ['classic'], activeBoard: 'classic',
+  ownedDice: ['classic'], activeDice: 'classic',
+  ownedCheckers: ['classic'], activeCheckers: 'classic'
 };
 
-if (!profile.ownedBoards) {
-  profile.ownedBoards = profile.themes || ['classic'];
-  profile.activeBoard = profile.activeTheme || 'classic';
-  profile.ownedDice = ['classic']; profile.activeDice = 'classic';
-  profile.ownedCheckers = ['classic']; profile.activeCheckers = 'classic';
-}
+if (profile.rating === undefined) profile.rating = 1000;
+if (profile.coins === undefined) profile.coins = 1000;
 localStorage.setItem('nard_profile', JSON.stringify(profile));
 
 const DEFAULT_SHOP_DATA = {
-  boards: {
-    classic: { name: 'کلاسیک', price: 0, image: '', colors: 'linear-gradient(135deg, #8b5a2b, #6b3e1f)' },
-    dark: { name: 'شب تاریک', price: 100, image: '', colors: 'linear-gradient(135deg, #1e1e2e, #0e0e1e)' },
-    blue: { name: 'اقیانوس', price: 150, image: '', colors: 'linear-gradient(135deg, #1a3a6e, #0a2a5e)' },
-    green: { name: 'جنگل', price: 150, image: '', colors: 'linear-gradient(135deg, #2a5e2a, #1a4e1a)' },
-    neon: { name: 'نئون', price: 300, image: '', colors: 'linear-gradient(135deg, #ff00ff, #00ffff)' }
-  },
-  dice: {
-    classic: { name: 'سفید کلاسیک', price: 0, image: '', bg: '#fff', pip: '#111' },
-    gold: { name: 'طلایی', price: 100, image: '', bg: '#ffd700', pip: '#fff' },
-    red: { name: 'یاقوتی', price: 100, image: '', bg: '#ff4757', pip: '#fff' },
-    neon: { name: 'نئون آبی', price: 200, image: '', bg: '#00ffff', pip: '#000' }
-  },
-  checkers: {
-    classic: { name: 'کلاسیک', price: 0, image: '', w: '#fff', b: '#111' },
-    gold: { name: 'طلا و نقره', price: 150, image: '', w: '#ffd700', b: '#c0c0c0' },
-    glass: { name: 'شیشه‌ای', price: 250, image: '', w: 'rgba(255,255,255,0.5)', b: 'rgba(50,50,50,0.5)' }
-  }
+  boards: { classic: { name: 'کلاسیک', price: 0, image: '', colors: 'linear-gradient(135deg, #8b5a2b, #6b3e1f)' }, dark: { name: 'شب تاریک', price: 100, image: '', colors: 'linear-gradient(135deg, #1e1e2e, #0e0e1e)' }, blue: { name: 'اقیانوس', price: 150, image: '', colors: 'linear-gradient(135deg, #1a3a6e, #0a2a5e)' }, green: { name: 'جنگل', price: 150, image: '', colors: 'linear-gradient(135deg, #2a5e2a, #1a4e1a)' }, neon: { name: 'نئون', price: 300, image: '', colors: 'linear-gradient(135deg, #ff00ff, #00ffff)' } },
+  dice: { classic: { name: 'سفید کلاسیک', price: 0, image: '', bg: '#fff', pip: '#111' }, gold: { name: 'طلایی', price: 100, image: '', bg: '#ffd700', pip: '#fff' }, red: { name: 'یاقوتی', price: 100, image: '', bg: '#ff4757', pip: '#fff' }, neon: { name: 'نئون آبی', price: 200, image: '', bg: '#00ffff', pip: '#000' } },
+  checkers: { classic: { name: 'کلاسیک', price: 0, image: '', w: '#fff', b: '#111' }, gold: { name: 'طلا و نقره', price: 150, image: '', w: '#ffd700', b: '#c0c0c0' }, glass: { name: 'شیشه‌ای', price: 250, image: '', w: 'rgba(255,255,255,0.5)', b: 'rgba(50,50,50,0.5)' } }
 };
 
 let SHOP_DATA = JSON.parse(localStorage.getItem('nard_shop_custom_data')) || JSON.parse(JSON.stringify(DEFAULT_SHOP_DATA));
 
 function updateProfileUI() {
   document.getElementById('profileName').textContent = profile.name;
-  document.getElementById('profileStats').textContent = toPersian(profile.wins) + ' برد - ' + toPersian(profile.losses) + ' باخت';
+  document.getElementById('profileStats').textContent = 'رتبه: ' + toPersian(profile.rating) + ' | ' + toPersian(profile.wins) + ' برد - ' + toPersian(profile.losses) + ' باخت';
   document.getElementById('profileCoins').textContent = toPersian(profile.coins);
+  document.getElementById('myRankScore').textContent = toPersian(profile.rating);
   
   document.body.className = ''; 
   if (profile.activeBoard !== 'classic') document.body.classList.add('theme-' + profile.activeBoard);
@@ -450,27 +427,14 @@ function updateProfileUI() {
 
   const boardItem = SHOP_DATA.boards[profile.activeBoard];
   const gameBoard = document.getElementById('gameBoard');
-  if (boardItem && boardItem.image) {
-      gameBoard.style.backgroundImage = `url('${boardItem.image}')`;
-      gameBoard.style.backgroundSize = 'cover';
-      gameBoard.style.backgroundPosition = 'center';
-  } else {
-      gameBoard.style.backgroundImage = 'none';
-      gameBoard.style.background = 'var(--board-bg)';
-  }
+  if (boardItem && boardItem.image) { gameBoard.style.backgroundImage = `url('${boardItem.image}')`; gameBoard.style.backgroundSize = 'cover'; gameBoard.style.backgroundPosition = 'center'; } 
+  else { gameBoard.style.backgroundImage = 'none'; gameBoard.style.background = 'var(--board-bg)'; }
 
   const diceItem = SHOP_DATA.dice[profile.activeDice];
   const diceEls = [document.getElementById('dice1'), document.getElementById('dice2')];
   diceEls.forEach(d => {
-      if (diceItem && diceItem.image) {
-          d.style.backgroundImage = `url('${diceItem.image}')`;
-          d.style.backgroundSize = 'cover';
-          d.querySelectorAll('.pip').forEach(p => p.style.display = 'none');
-      } else {
-          d.style.backgroundImage = 'none';
-          d.style.background = 'var(--dice-bg)';
-          d.querySelectorAll('.pip').forEach(p => p.style.display = 'block');
-      }
+      if (diceItem && diceItem.image) { d.style.backgroundImage = `url('${diceItem.image}')`; d.style.backgroundSize = 'cover'; d.querySelectorAll('.pip').forEach(p => p.style.display = 'none'); } 
+      else { d.style.backgroundImage = 'none'; d.style.background = 'var(--dice-bg)'; d.querySelectorAll('.pip').forEach(p => p.style.display = 'block'); }
   });
 }
 updateProfileUI();
@@ -484,11 +448,11 @@ function showScreen(id) {
   document.getElementById('profileBar').style.display = (id === 'screen-game') ? 'none' : 'flex';
   if (id === 'screen-shop') renderShop();
   if (id === 'screen-admin') renderAdminPanel();
+  if (id === 'screen-ranking') updateProfileUI();
 }
 function showMessage(t) { document.getElementById('message').textContent = t; }
 function leaveRoom() {
-  sessionStorage.removeItem('nard_roomCode');
-  sessionStorage.removeItem('nard_myColor');
+  sessionStorage.removeItem('nard_roomCode'); sessionStorage.removeItem('nard_myColor');
   location.reload();
 }
 
@@ -505,24 +469,16 @@ function switchAdminTab(tab) {
   renderAdminPanel();
 }
 function handleImageUpload(event, category, key) {
-    const file = event.target.files[0];
-    if (!file) return;
-    if (file.size > 200 * 1024) {
-        alert("عکس انتخاب شده بزرگ است! لطفاً عکسی زیر ۲۰۰ کیلوبایت انتخاب کنید.");
-        event.target.value = '';
-        return;
-    }
+    const file = event.target.files[0]; if (!file) return;
+    if (file.size > 200 * 1024) { alert("عکس بزرگ است! (زیر ۲۰۰ کیلوبایت)"); event.target.value = ''; return; }
     const reader = new FileReader();
-    reader.onload = function(e) {
-        document.getElementById(`image-${key}`).value = e.target.result;
-    };
+    reader.onload = function(e) { document.getElementById(`image-${key}`).value = e.target.result; };
     reader.readAsDataURL(file);
 }
 function renderAdminPanel() {
   const list = document.getElementById('admin-list');
   list.innerHTML = '';
   const data = SHOP_DATA[currentAdminTab];
-
   for (const [key, item] of Object.entries(data)) {
     const row = document.createElement('div');
     row.className = 'admin-row';
@@ -543,18 +499,11 @@ function renderAdminPanel() {
 function saveAdminConfig() {
   const data = SHOP_DATA[currentAdminTab];
   for (const key in data) {
-    const price = parseInt(document.getElementById(`price-${key}`).value) || 0;
-    const image = document.getElementById(`image-${key}`).value;
-    data[key].price = price;
-    data[key].image = image;
+    data[key].price = parseInt(document.getElementById(`price-${key}`).value) || 0;
+    data[key].image = document.getElementById(`image-${key}`).value;
   }
-  try {
-      localStorage.setItem('nard_shop_custom_data', JSON.stringify(SHOP_DATA));
-      alert("تغییرات با موفقیت ذخیره شد! (صفحه را رفرش کنید)");
-      updateProfileUI();
-  } catch (e) {
-      alert("خطا در ذخیره‌سازی! حافظه مرورگر شما پر شده است. لطفاً از عکس‌های با حجم کمتر استفاده کنید.");
-  }
+  try { localStorage.setItem('nard_shop_custom_data', JSON.stringify(SHOP_DATA)); alert("ذخیره شد! (صفحه را رفرش کنید)"); updateProfileUI(); } 
+  catch (e) { alert("حافظه پر شده است! عکس‌های سبک‌تری انتخاب کنید."); }
 }
 
 let currentShopTab = 'boards';
@@ -574,9 +523,7 @@ function renderShop() {
   for (const [key, item] of Object.entries(data)) {
     const owned = ownedArr.includes(key);
     const active = activeKey === key;
-    let previewHTML = '';
-    let styleStr = '';
-    
+    let previewHTML = ''; let styleStr = '';
     if (item.image) { styleStr = `background-image: url('${item.image}'); background-size: cover; background-position: center;`; }
     else if (currentShopTab === 'boards') { styleStr = `background: ${item.colors};`; }
 
@@ -611,15 +558,10 @@ function handleBuy(category, key) {
   
   if (profile[ownedArrKey].includes(key)) { profile[activeKey] = key; } 
   else {
-    if (profile.coins >= item.price) {
-      profile.coins -= item.price;
-      profile[ownedArrKey].push(key);
-      profile[activeKey] = key;
-    } else { alert("سکه کافی نیست!"); return; }
+    if (profile.coins >= item.price) { profile.coins -= item.price; profile[ownedArrKey].push(key); profile[activeKey] = key; } 
+    else { alert("سکه کافی نیست!"); return; }
   }
-  localStorage.setItem('nard_profile', JSON.stringify(profile));
-  updateProfileUI();
-  renderShop();
+  localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI(); renderShop();
 }
 
 function toggleChat() { document.getElementById('chatWindow').classList.toggle('open'); document.getElementById('chatInput').focus(); }
@@ -632,8 +574,7 @@ socket.on('chatMessage', (data) => {
   const div = document.createElement('div');
   div.className = 'chat-msg ' + (data.sender === myColor ? 'me' : 'them');
   div.textContent = data.text;
-  chatMsgs.appendChild(div);
-  chatMsgs.scrollTop = chatMsgs.scrollHeight;
+  chatMsgs.appendChild(div); chatMsgs.scrollTop = chatMsgs.scrollHeight;
   if (!document.getElementById('chatWindow').classList.contains('open') && data.sender !== myColor) {
     document.getElementById('chatToggle').style.backgroundColor = '#ff6b9d';
     setTimeout(() => document.getElementById('chatToggle').style.backgroundColor = '#3a5a8a', 2000);
@@ -668,16 +609,12 @@ function startBotGame(difficulty) {
 }
 
 function resetBoard() {
-  const initial = {
-    points: { 13: { white: 5, black: 0 }, 17: { white: 0, black: 3 }, 19: { white: 0, black: 5 }, 24: { white: 2, black: 0 }, 12: { white: 0, black: 5 }, 8: { white: 3, black: 0 }, 6: { white: 5, black: 0 }, 1: { white: 0, black: 2 } },
-    bar: { white: 0, black: 0 }
-  };
+  const initial = { points: { 13: { white: 5, black: 0 }, 17: { white: 0, black: 3 }, 19: { white: 0, black: 5 }, 24: { white: 2, black: 0 }, 12: { white: 0, black: 5 }, 8: { white: 3, black: 0 }, 6: { white: 5, black: 0 }, 1: { white: 0, black: 2 } }, bar: { white: 0, black: 0 } };
   applyBoardState(initial);
 }
 
 function findRandomMatch() {
-  isBotMode = false;
-  showScreen('screen-wait');
+  isBotMode = false; showScreen('screen-wait');
   document.getElementById('waitText').textContent = 'در حال جستجوی حریف...';
   document.getElementById('roomCodeDisplay').style.display = 'none';
   socket.emit('findMatch', { playerId: profile.id, playerName: profile.name });
@@ -712,8 +649,7 @@ function joinRoom() {
 socket.on('waitingForMatch', () => { document.getElementById('waitText').textContent = 'در حال جستجوی حریف... لطفا صبر کنید.'; });
 socket.on('matchFound', (data) => { roomCode = data.code; sessionStorage.setItem('nard_roomCode', roomCode); });
 socket.on('assignedColor', (color) => {
-  myColor = color;
-  sessionStorage.setItem('nard_myColor', color);
+  myColor = color; sessionStorage.setItem('nard_myColor', color);
   document.getElementById('myColorDisplay').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
   setupLocalView();
 });
@@ -723,11 +659,25 @@ function updateMatchInfo() {
   document.getElementById('blackScore').textContent = toPersian(matchScore.black);
   document.getElementById('matchLabel').textContent = 'بازی ' + toPersian(matchTarget) + ' امتیازی';
 }
-function triggerWinEffect(isMe) {
-  if (!isMe) return;
-  profile.coins += 50; profile.wins += 1;
+
+// ==== سیستم اقتصاد و رتبه‌بندی ====
+function applyWinRules(isMe) {
+  if (isMe) {
+    profile.coins += 100; // جایزه برد
+    profile.wins += 1;
+    profile.rating += 15; // امتیاز رتبه برد
+    playSound('win');
+    triggerConfetti();
+  } else {
+    profile.coins += 20; // جایزه تسلی باخت
+    profile.losses += 1;
+    profile.rating = Math.max(0, profile.rating - 5); // امتیاز رتبه باخت
+  }
   localStorage.setItem('nard_profile', JSON.stringify(profile));
   updateProfileUI();
+}
+
+function triggerConfetti() {
   const container = document.getElementById('confetti-container');
   const colors = ['#ff6b9d', '#ffd93d', '#6b9dff', '#4caf50', '#ff4757'];
   for (let i = 0; i < 60; i++) {
@@ -742,6 +692,7 @@ function triggerWinEffect(isMe) {
     setTimeout(() => confetti.remove(), 3500);
   }
 }
+
 function setupLocalView() {
     document.querySelectorAll('.point').forEach(el => {
         if (!el.dataset.orig) el.dataset.orig = el.dataset.point;
@@ -749,12 +700,10 @@ function setupLocalView() {
     });
     if (myColor === 'black') {
         const mapping = { 13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7, 19: 6, 20: 5, 21: 4, 22: 3, 23: 2, 24: 1, 12: 13, 11: 14, 10: 15, 9: 16, 8: 17, 7: 18, 6: 19, 5: 20, 4: 21, 3: 22, 2: 23, 1: 24 };
-        document.querySelectorAll('.point').forEach(el => {
-            const orig = parseInt(el.dataset.orig);
-            el.dataset.point = mapping[orig];
-        });
+        document.querySelectorAll('.point').forEach(el => { const orig = parseInt(el.dataset.orig); el.dataset.point = mapping[orig]; });
     }
 }
+
 function hasCheckerOnBar() {
   if (currentTurn === "white") return document.getElementById("topBar").querySelectorAll(".white").length > 0;
   return document.getElementById("bottomBar").querySelectorAll(".black").length > 0;
@@ -795,9 +744,7 @@ function getBearOffDie(checker) {
   const dist = currentTurn === "white" ? from : (25 - from);
   if (diceValues.includes(dist)) return dist;
   const sorted = [...diceValues].sort((a, b) => b - a);
-  for (const die of sorted) {
-    if (die > dist && !hasCheckerFurtherBack(dist)) return die;
-  }
+  for (const die of sorted) { if (die > dist && !hasCheckerFurtherBack(dist)) return die; }
   return null;
 }
 function canBearOff(checker) {
@@ -809,10 +756,7 @@ function canBearOff(checker) {
 function hasAnyLegalMove() {
   if (diceValues.length === 0) return false;
   if (hasCheckerOnBar()) {
-    for (const die of diceValues) {
-      const to = currentTurn === "white" ? (25 - die) : die;
-      if (canMoveTo(to)) return true;
-    }
+    for (const die of diceValues) { const to = currentTurn === "white" ? (25 - die) : die; if (canMoveTo(to)) return true; }
     return false;
   }
   const own = document.querySelectorAll(".checker." + currentTurn);
@@ -827,10 +771,7 @@ function hasAnyLegalMove() {
     }
   }
   if (allCheckersInHome()) {
-    for (const c of own) {
-      if (!c.parentElement.classList.contains("point")) continue;
-      if (getBearOffDie(c) !== null) return true;
-    }
+    for (const c of own) { if (!c.parentElement.classList.contains("point")) continue; if (getBearOffDie(c) !== null) return true; }
   }
   return false;
 }
@@ -858,16 +799,12 @@ function setDiceFace(el, value) {
   cells.forEach(c => c.classList.add('hidden'));
   if (value && DICE_POSITIONS[value]) { for (const pos of DICE_POSITIONS[value]) cells[pos].classList.remove('hidden'); }
 }
-function updateDiceDisplay() {
-  setDiceFace(document.getElementById('dice1'), diceValues[0] || null);
-  setDiceFace(document.getElementById('dice2'), diceValues[1] || null);
-}
+function updateDiceDisplay() { setDiceFace(document.getElementById('dice1'), diceValues[0] || null); setDiceFace(document.getElementById('dice2'), diceValues[1] || null); }
 function getBoardState() {
   const state = { points: {}, bar: { white: 0, black: 0 } };
   document.querySelectorAll('.point').forEach(p => {
     const pt = p.dataset.point;
-    const w = p.querySelectorAll('.white').length;
-    const b = p.querySelectorAll('.black').length;
+    const w = p.querySelectorAll('.white').length; const b = p.querySelectorAll('.black').length;
     if (w > 0 || b > 0) state.points[pt] = { white: w, black: b };
   });
   state.bar.white = document.getElementById('topBar').querySelectorAll('.white').length;
@@ -901,15 +838,9 @@ function setupCheckerClicks() {
         if (p.id !== "topBar" && p.id !== "bottomBar") { showMessage("اول باید مهره‌های روی بار رو وارد کنی!"); return; }
       }
       if (selectedChecker) selectedChecker.classList.remove("selected", "can-bear-off");
-      selectedChecker = checker;
-      checker.classList.add("selected");
-      highlightLegalMoves();
-      if (canBearOff(checker) && getBearOffDie(checker) !== null) {
-        checker.classList.add("can-bear-off");
-        showMessage("برای بیرون انداختن، دوباره روی همین مهره بزن.");
-      } else {
-        showMessage("مهره انتخاب شد. خانه مقصد رو انتخاب کن.");
-      }
+      selectedChecker = checker; checker.classList.add("selected"); highlightLegalMoves();
+      if (canBearOff(checker) && getBearOffDie(checker) !== null) { checker.classList.add("can-bear-off"); showMessage("برای بیرون انداختن، دوباره روی همین مهره بزن."); } 
+      else { showMessage("مهره انتخاب شد. خانه مقصد رو انتخاب کن."); }
     };
   });
 }
@@ -937,64 +868,43 @@ document.querySelectorAll(".point").forEach(point => {
     if (oppC.length === 1) {
       const bar = document.getElementById(opp === "white" ? "topBar" : "bottomBar");
       bar.appendChild(oppC[0]);
-      playSound('hit');
-      showMessage("مهره حریف زده شد!");
+      playSound('hit'); showMessage("مهره حریف زده شد!");
     } else playSound('move');
     
     const moved = selectedChecker;
-    point.appendChild(moved);
-    moved.classList.remove("selected", "can-bear-off");
-    selectedChecker = null;
-    clearHighlights();
-    const idx = diceValues.indexOf(dist);
-    if (idx > -1) diceValues.splice(idx, 1);
-    updateDiceDisplay();
-    setupCheckerClicks();
-    syncState();
-    if (diceValues.length === 0) { endTurn(); }
-    else if (!hasAnyLegalMove()) {
-      document.getElementById("passBtn").style.display = "block";
-      showMessage("هیچ حرکتی نداری! پاس بده.");
-    } else showMessage("حرکت انجام شد. " + diceValues.length + " حرکت باقی مونده.");
+    point.appendChild(moved); moved.classList.remove("selected", "can-bear-off"); selectedChecker = null; clearHighlights();
+    const idx = diceValues.indexOf(dist); if (idx > -1) diceValues.splice(idx, 1);
+    updateDiceDisplay(); setupCheckerClicks(); syncState();
+    if (diceValues.length === 0) { endTurn(); } 
+    else if (!hasAnyLegalMove()) { document.getElementById("passBtn").style.display = "block"; showMessage("هیچ حرکتی نداری! پاس بده."); } 
+    else showMessage("حرکت انجام شد. " + diceValues.length + " حرکت باقی مونده.");
   };
 });
 function tryBearOff(checker) {
   if (!canBearOff(checker)) { showMessage("هنوز نمی‌تونی مهره‌ها رو بیرون بندازی."); return; }
   const die = getBearOffDie(checker);
   if (die === null) { showMessage("با تاس‌های فعلی نمی‌تونی این مهره رو بیرون بندازی."); return; }
-  checker.remove();
-  playSound('bearoff');
-  const idx = diceValues.indexOf(die);
-  if (idx > -1) diceValues.splice(idx, 1);
-  selectedChecker = null;
-  clearHighlights();
-  updateDiceDisplay();
-  setupCheckerClicks();
-  syncState();
+  checker.remove(); playSound('bearoff');
+  const idx = diceValues.indexOf(die); if (idx > -1) diceValues.splice(idx, 1);
+  selectedChecker = null; clearHighlights(); updateDiceDisplay(); setupCheckerClicks(); syncState();
   if (document.querySelectorAll(".checker." + currentTurn).length === 0) { endGame(currentTurn); return; }
-  if (diceValues.length === 0) { endTurn(); }
-  else if (!hasAnyLegalMove()) {
-    document.getElementById("passBtn").style.display = "block";
-    showMessage("هیچ حرکتی نداری! پاس بده.");
-  } else showMessage("مهره بیرون انداخته شد. " + diceValues.length + " حرکت باقی مونده.");
+  if (diceValues.length === 0) { endTurn(); } 
+  else if (!hasAnyLegalMove()) { document.getElementById("passBtn").style.display = "block"; showMessage("هیچ حرکتی نداری! پاس بده."); } 
+  else showMessage("مهره بیرون انداخته شد. " + diceValues.length + " حرکت باقی مونده.");
 }
 function syncState() { if (isBotMode) return; socket.emit('stateUpdate', { state: getBoardState(), dice: diceValues, turn: currentTurn }); }
 function endTurn() {
   document.getElementById("passBtn").style.display = "none";
-  diceValues = []; diceRolled = false;
-  updateDiceDisplay(); clearHighlights();
+  diceValues = []; diceRolled = false; updateDiceDisplay(); clearHighlights();
   if (selectedChecker) { selectedChecker.classList.remove("selected", "can-bear-off"); selectedChecker = null; }
   currentTurn = currentTurn === "white" ? "black" : "white";
   document.getElementById('turnInfo').textContent = 'نوبت: ' + (currentTurn === 'white' ? 'سفید' : 'مشکی');
   if (gameOver) return;
   if (isBotMode && currentTurn === 'black') {
-    document.getElementById("rollBtn").disabled = true;
-    showMessage("کامپیوتر در حال فکر کردن...");
+    document.getElementById("rollBtn").disabled = true; showMessage("کامپیوتر در حال فکر کردن...");
     setTimeout(() => aiTurn(), 800);
-  } else if (currentTurn === myColor) {
-    document.getElementById("rollBtn").disabled = false;
-    showMessage("نوبت شماست. تاس بنداز.");
-  } else { showMessage("نوبت حریف..."); }
+  } else if (currentTurn === myColor) { document.getElementById("rollBtn").disabled = false; showMessage("نوبت شماست. تاس بنداز."); } 
+  else { showMessage("نوبت حریف..."); }
   syncState();
 }
 function calculateGamePoints(winner) {
@@ -1009,12 +919,12 @@ function endGame(winner) {
   document.getElementById("passBtn").style.display = "none";
   document.getElementById("rollBtn").disabled = true;
   const points = calculateGamePoints(winner);
+  
   if (isBotMode) {
     matchScore[winner] += points; updateMatchInfo();
     if (matchScore[winner] >= matchTarget) {
       matchOver = true;
-      if (winner === 'white') { triggerWinEffect(true); playSound('win'); } 
-      else { profile.losses += 1; localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI(); }
+      applyWinRules(winner === 'white');
       showOverlay(true, winner, 0);
     } else {
       showOverlay(false, winner, points);
@@ -1024,9 +934,6 @@ function endGame(winner) {
 }
 function showOverlay(isMatchOver, winner, points) {
   const isMe = winner === myColor;
-  if (isMe && !isMatchOver) triggerWinEffect(true);
-  else if (!isMe) { profile.losses += 1; localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI(); }
-  
   document.getElementById('overlayIcon').textContent = isMatchOver ? (isMe ? '🏆' : '😔') : '🏁';
   document.getElementById('overlayTitle').textContent = isMatchOver ? (isMe ? 'شما برنده مسابقه شدید!' : 'شما باختید!') : (winner === 'white' ? 'سفید این دست را برد' : 'مشکی این دست را برد');
   let msg = '';
@@ -1036,7 +943,8 @@ function showOverlay(isMatchOver, winner, points) {
     msg += '<br>در حال آماده‌سازی دست بعدی...';
   } else {
     msg = 'امتیاز نهایی: سفید <strong>' + toPersian(matchScore.white) + '</strong> — <strong>' + toPersian(matchScore.black) + '</strong> مشکی';
-    if (isMe) msg += '<br><br>🪙 ۵۰ سکه دریافت کردید!';
+    if (isMe) msg += '<br><br>🪙 ۱۰۰ سکه و +۱۵ امتیاز رتبه دریافت کردید!';
+    else msg += '<br><br>🪙 ۲۰ سکه دریافت کردید. دفعه بعد می‌برید!';
   }
   document.getElementById('overlayMessage').innerHTML = msg;
   const btn = document.querySelector('#overlay button');
@@ -1050,10 +958,7 @@ function showOverlay(isMatchOver, winner, points) {
 function aiGetMoves() {
   const moves = [];
   if (hasCheckerOnBar()) {
-    for (const die of [...new Set(diceValues)]) {
-      const to = currentTurn === "white" ? (25 - die) : die;
-      if (canMoveTo(to)) moves.push({ type: 'bar', to, die });
-    }
+    for (const die of [...new Set(diceValues)]) { const to = currentTurn === "white" ? (25 - die) : die; if (canMoveTo(to)) moves.push({ type: 'bar', to, die }); }
     return moves;
   }
   const seen = new Set();
@@ -1061,8 +966,7 @@ function aiGetMoves() {
     const p = c.parentElement;
     if (!p.classList.contains("point")) return;
     const from = parseInt(p.getAttribute("data-point"));
-    if (seen.has(from)) return;
-    seen.add(from);
+    if (seen.has(from)) return; seen.add(from);
     for (const die of [...new Set(diceValues)]) {
       const to = currentTurn === "white" ? (from - die) : (from + die);
       if (to < 1 || to > 24) continue;
@@ -1126,10 +1030,7 @@ function aiTurn() {
   const n1 = Math.floor(Math.random() * 6) + 1;
   const n2 = Math.floor(Math.random() * 6) + 1;
   diceValues = n1 === n2 ? [n1, n1, n1, n1] : [n1, n2];
-  animateDiceThenSet([n1, n2], () => {
-    diceRolled = true;
-    setTimeout(() => aiMakeMove(), 500);
-  });
+  animateDiceThenSet([n1, n2], () => { diceRolled = true; setTimeout(() => aiMakeMove(), 500); });
 }
 function aiMakeMove() {
   if (gameOver || currentTurn !== "black") return;
@@ -1157,14 +1058,11 @@ function aiExecuteMove(move) {
     }
     if (!checker) return;
     const whiteOnTarget = toEl.querySelectorAll(".white");
-    if (whiteOnTarget.length === 1) {
-      document.getElementById("topBar").appendChild(whiteOnTarget[0]);
-      playSound('hit');
-    } else playSound('move');
+    if (whiteOnTarget.length === 1) { document.getElementById("topBar").appendChild(whiteOnTarget[0]); playSound('hit'); } 
+    else playSound('move');
     toEl.appendChild(checker);
   }
-  const idx = diceValues.indexOf(move.die);
-  if (idx > -1) diceValues.splice(idx, 1);
+  const idx = diceValues.indexOf(move.die); if (idx > -1) diceValues.splice(idx, 1);
   updateDiceDisplay(); setupCheckerClicks();
   if (document.querySelectorAll(".checker.black").length === 0) { endGame('black'); return; }
   if (diceValues.length === 0) { setTimeout(() => endTurn(), 500); }
@@ -1183,8 +1081,7 @@ function animateDiceThenSet(vals, cb) {
     setDiceFace(d2, Math.floor(Math.random() * 6) + 1);
     i++;
     if (i >= 8) {
-      stopDiceAnim();
-      d1.classList.remove('rolling'); d2.classList.remove('rolling');
+      stopDiceAnim(); d1.classList.remove('rolling'); d2.classList.remove('rolling');
       setDiceFace(d1, vals[0]); setDiceFace(d2, vals[1]);
       if (cb) cb();
     }
@@ -1235,6 +1132,7 @@ socket.on('matchOver', (data) => {
   matchScore = data.scores; updateMatchInfo(); gameOver = true;
   document.getElementById('passBtn').style.display = "none";
   document.getElementById('rollBtn').disabled = true;
+  applyWinRules(data.winner === myColor);
   showOverlay(true, data.winner, 0);
 });
 socket.on('diceResult', (data) => {
@@ -1285,24 +1183,9 @@ if (roomCode && myColor) {
 } else { showScreen('screen-home'); }
 document.getElementById('profileBar').style.display = 'flex';
 
-// سیستم آپدیت خودکار PWA
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(reg => {
-      reg.onupdatefound = () => {
-        const installingWorker = reg.installing;
-        installingWorker.onstatechange = () => {
-          if (installingWorker.state === 'installed') {
-            if (navigator.serviceWorker.controller) {
-              // نسخه جدیدی وجود دارد!
-              if (confirm('نسخه جدید بازی منتشر شده است. برای آپدیت، صفحه را رفرش کنید.')) {
-                window.location.reload();
-              }
-            }
-          }
-        };
-      };
-    }).catch(err => console.log('SW registration failed:', err));
+    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
   });
 }
 </script>
