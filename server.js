@@ -7,10 +7,8 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// ==== تنظیمات جلوگیری از کش شدن فایل‌های اصلی ====
 app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders: (res, filePath) => {
-    // اگر فایل index.html یا sw.js بود، به مرورگر بگو کش نکن
     if (filePath.endsWith('index.html') || filePath.endsWith('sw.js')) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
@@ -45,6 +43,7 @@ io.on('connection', (socket) => {
         playerNames: { white: p1.playerName, black: p2.playerName },
         gameState: null,
         matchScore: { white: 0, black: 0 },
+        gamesWon: { white: 0, black: 0 }, // شمارش دست‌های برده
         disconnectedAt: null
       };
       rooms.set(code, room);
@@ -78,13 +77,11 @@ io.on('connection', (socket) => {
       playerNames: { white: playerName, black: null },
       gameState: null,
       matchScore: { white: 0, black: 0 },
+      gamesWon: { white: 0, black: 0 },
       disconnectedAt: null
     };
     rooms.set(code, room);
-    socket.join(code);
-    socket.roomCode = code;
-    socket.color = 'white';
-    
+    socket.join(code); socket.roomCode = code; socket.color = 'white';
     if (typeof cb === 'function') cb({ success: true, code, color: 'white', target: room.target });
   });
 
@@ -161,9 +158,10 @@ io.on('connection', (socket) => {
     if (!room) return;
     room.gameState = null;
     room.matchScore[winner] += points;
+    room.gamesWon[winner] += 1; // افزایش دست برده برای رتبه‌بندی
     
     if (room.matchScore[winner] >= room.target) {
-      io.to(room.code).emit('matchOver', { winner, scores: room.matchScore });
+      io.to(room.code).emit('matchOver', { winner, scores: room.matchScore, gamesWon: room.gamesWon });
     } else {
       io.to(room.code).emit('startNextGame', { scores: room.matchScore, nextTurn: winner });
     }
