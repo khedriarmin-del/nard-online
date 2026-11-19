@@ -181,6 +181,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="admin-btn" onclick="openAdminPanel()" title="پنل مدیریت">⚙️</button>
 </div>
 
+<!-- صفحه اصلی (منو) -->
 <div id="screen-home" class="screen active">
   <h1>🎲 نرد آنلاین</h1>
   <p>یک اتاق بسازید، به دوستتان بپیوندید یا با حریف تصادفی بازی کنید.</p>
@@ -196,6 +197,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   </div>
 </div>
 
+<!-- صفحه رتبه‌بندی -->
 <div id="screen-ranking" class="screen">
   <h1>🏆 رتبه‌بندی</h1>
   <div class="rank-card">
@@ -203,14 +205,14 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
     <div class="rank-score" id="myRankScore">۱۰۰۰</div>
     <div style="font-size: 14px; color: #4caf50;">برد در مسابقه: +۱۵ امتیاز</div>
     <div style="font-size: 14px; color: #4caf50;">هر دست برد: +۵ امتیاز</div>
-    <div style="font-size: 14px; color: #4caf50;">باخت در مسابقه: -۵ امتیاز</div>
+    <div style="font-size: 14px; color: #ff4757;">باخت در مسابقه: -۵ امتیاز</div>
     <div style="font-size: 14px; color: #4caf50;">هر دست برد (بازنده): +۳ امتیاز</div>
   </div>
-  
   <p style="font-size: 12px; color: #888;">(جدول برترین‌های جهان به زودی با اتصال به دیتابیس فعال می‌شود)</p>
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
 </div>
 
+<!-- صفحه انتخاب سختی AI -->
 <div id="screen-ai-setup" class="screen">
   <h1>🤖 بازی با کامپیوتر</h1>
   <p>سطح سختی حریف را انتخاب کنید (بازی رایگان است):</p>
@@ -220,6 +222,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
 </div>
 
+<!-- صفحه فروشگاه -->
 <div id="screen-shop" class="screen">
   <h1>🛒 فروشگاه</h1>
   <div class="shop-tabs">
@@ -231,6 +234,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px; flex-shrink: 0;">بازگشت</button>
 </div>
 
+<!-- پنل ادمین -->
 <div id="screen-admin" class="screen">
   <h1>⚙️ پنل مدیریت</h1>
   <p style="color:#ff6b9d; font-size:12px;">عکس‌ها را از سیستم خود انتخاب کنید. (زیر ۲۰۰ کیلوبایت)</p>
@@ -244,6 +248,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')">بازگشت به بازی</button>
 </div>
 
+<!-- ساخت اتاق -->
 <div id="screen-create" class="screen">
   <h1>ساخت اتاق</h1>
   <p>طول مسابقه را انتخاب کنید:</p>
@@ -252,6 +257,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
 </div>
 
+<!-- ورود به اتاق -->
 <div id="screen-join" class="screen">
   <h1>ورود به اتاق</h1>
   <p>کد ۶ رقمی دریافتی را وارد کنید:</p>
@@ -260,6 +266,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')">بازگشت</button>
 </div>
 
+<!-- انتظار برای حریف -->
 <div id="screen-wait" class="screen">
   <h1>در انتظار حریف...</h1>
   <p id="waitText">این کد را برای دوست خود بفرستید:</p>
@@ -268,6 +275,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="leaveRoom()" style="margin-top: 20px;">انصراف</button>
 </div>
 
+<!-- صفحه بازی -->
 <div id="screen-game" class="screen" style="max-width: 440px;">
   <div class="match-bar">
     <span class="match-label" id="matchLabel">بازی ۳ امتیازی</span>
@@ -326,6 +334,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   </div>
 </div>
 
+<!-- سیستم چت -->
 <button class="chat-toggle-btn" id="chatToggle" onclick="toggleChat()">💬</button>
 <div class="chat-window" id="chatWindow">
   <div class="chat-header">
@@ -347,6 +356,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   </div>
 </div>
 
+<!-- اوورلی (پایان بازی) -->
 <div class="overlay" id="overlay">
   <div class="overlay-content">
     <div id="overlayIcon" style="font-size:56px;"></div>
@@ -924,7 +934,6 @@ function showOverlay(isMatchOver, winner, points, gamesWon) {
   const isMe = winner === myColor;
   
   if (isMatchOver) {
-      // محاسبه سکه و رتبه
       if (!isBotMode) {
           if (isMe) {
               profile.coins += 150; // 100 سکه حریف + 50 سکه جایزه
