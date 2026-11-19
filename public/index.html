@@ -157,6 +157,8 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 .admin-input { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff; margin-top: 5px; font-family: inherit; font-size: 12px;}
 .admin-row { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1);}
 .admin-row-title { font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #ffd93d;}
+.file-input-wrapper { margin-top: 5px; font-size: 11px; color: #aaa; }
+input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 10px; font-family: inherit;}
 </style>
 </head>
 <body>
@@ -211,7 +213,7 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 <!-- Admin Panel Screen -->
 <div id="screen-admin" class="screen">
   <h1>⚙️ پنل مدیریت</h1>
-  <p style="color:#ff6b9d;">شما در حال ویرایش فروشگاه هستید. تغییرات فقط برای شما ذخیره می‌شود.</p>
+  <p style="color:#ff6b9d; font-size:12px;">عکس‌ها را از سیستم خود انتخاب کنید. (برای جلوگیری از پر شدن حافظه، از عکس‌های کوچک زیر ۲۰۰ کیلوبایت استفاده کنید)</p>
   <div class="shop-tabs">
     <button class="shop-tab active" onclick="switchAdminTab('boards')">تخته</button>
     <button class="shop-tab" onclick="switchAdminTab('dice')">تاس</button>
@@ -429,7 +431,6 @@ const DEFAULT_SHOP_DATA = {
   }
 };
 
-// بارگذاری تنظیمات ادمین از حافظه
 let SHOP_DATA = JSON.parse(localStorage.getItem('nard_shop_custom_data')) || JSON.parse(JSON.stringify(DEFAULT_SHOP_DATA));
 
 function updateProfileUI() {
@@ -437,29 +438,37 @@ function updateProfileUI() {
   document.getElementById('profileStats').textContent = toPersian(profile.wins) + ' برد - ' + toPersian(profile.losses) + ' باخت';
   document.getElementById('profileCoins').textContent = toPersian(profile.coins);
   
-  document.body.className = ''; // ریست کلاس‌ها
-  
+  document.body.className = ''; 
   if (profile.activeBoard !== 'classic') document.body.classList.add('theme-' + profile.activeBoard);
   if (profile.activeDice !== 'classic') document.body.classList.add('dice-' + profile.activeDice);
   if (profile.activeCheckers !== 'classic') document.body.classList.add('checker-' + profile.activeCheckers);
 
-  // اعمال عکس‌های سفارشی ادمین (اگر وجود داشته باشد)
+  // اعمال عکس تخته
   const boardItem = SHOP_DATA.boards[profile.activeBoard];
   const gameBoard = document.getElementById('gameBoard');
   if (boardItem && boardItem.image) {
-      gameBoard.style.backgroundImage = `url(${boardItem.image})`;
+      gameBoard.style.backgroundImage = `url('${boardItem.image}')`;
       gameBoard.style.backgroundSize = 'cover';
+      gameBoard.style.backgroundPosition = 'center';
   } else {
       gameBoard.style.backgroundImage = 'none';
       gameBoard.style.background = 'var(--board-bg)';
   }
 
-  const checkerItem = SHOP_DATA.checkers[profile.activeCheckers];
-  const checkers = document.querySelectorAll('.checker');
-  if (checkerItem && checkerItem.image) {
-      // اگر عکس مهره داشتیم، به همه مهره‌ها اعمال می‌کنیم (فقط برای تست)
-      // در واقعیت باید عکس‌های جدا برای سفید و سیاه باشد
-  }
+  // اعمال عکس تاس
+  const diceItem = SHOP_DATA.dice[profile.activeDice];
+  const diceEls = [document.getElementById('dice1'), document.getElementById('dice2')];
+  diceEls.forEach(d => {
+      if (diceItem && diceItem.image) {
+          d.style.backgroundImage = `url('${diceItem.image}')`;
+          d.style.backgroundSize = 'cover';
+          d.querySelectorAll('.pip').forEach(p => p.style.display = 'none'); // مخفی کردن خال‌ها وقتی عکس داریم
+      } else {
+          d.style.backgroundImage = 'none';
+          d.style.background = 'var(--dice-bg)';
+          d.querySelectorAll('.pip').forEach(p => p.style.display = 'block');
+      }
+  });
 }
 updateProfileUI();
 
@@ -485,7 +494,7 @@ let currentAdminTab = 'boards';
 
 function openAdminPanel() {
   const pass = prompt("رمز مدیریت را وارد کنید:");
-  if (pass === "1234") { // شما می‌توانید این رمز را در کد تغییر دهید
+  if (pass === "1234") { 
     showScreen('screen-admin');
   } else if (pass !== null) {
     alert("رمز اشتباه است!");
@@ -497,6 +506,25 @@ function switchAdminTab(tab) {
   document.querySelectorAll('#screen-admin .shop-tab').forEach(t => t.classList.remove('active'));
   event.target.classList.add('active');
   renderAdminPanel();
+}
+
+// تابع تبدیل عکس به Base64
+function handleImageUpload(event, category, key) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    // محدودیت حجم ۲۰۰ کیلوبایت
+    if (file.size > 200 * 1024) {
+        alert("عکس انتخاب شده بزرگ است! لطفاً عکسی زیر ۲۰۰ کیلوبایت انتخاب کنید.");
+        event.target.value = '';
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById(`image-${key}`).value = e.target.result; // ذخیره کد بیس۶۴ در فیلد مخفی
+    };
+    reader.readAsDataURL(file);
 }
 
 function renderAdminPanel() {
@@ -511,8 +539,13 @@ function renderAdminPanel() {
       <div class="admin-row-title">${item.name} (${key})</div>
       <label style="font-size:11px; color:#aaa;">قیمت (سکه):</label>
       <input type="number" class="admin-input" id="price-${key}" value="${item.price}">
-      <label style="font-size:11px; color:#aaa; display:block; margin-top:5px;">لینک عکس (اختیاری):</label>
-      <input type="text" class="admin-input" id="image-${key}" value="${item.image || ''}" placeholder="https://example.com/image.png">
+      
+      <div class="file-input-wrapper">
+        <label>انتخاب عکس از سیستم:</label>
+        <input type="file" accept="image/*" class="admin-input" onchange="handleImageUpload(event, '${currentAdminTab}', '${key}')">
+        <input type="hidden" id="image-${key}" value="${item.image || ''}">
+        ${item.image ? '<div style="color:#4caf50; font-size:10px; margin-top:3px;">✅ عکس تنظیم شده است</div>' : ''}
+      </div>
     `;
     list.appendChild(row);
   }
@@ -522,13 +555,17 @@ function saveAdminConfig() {
   const data = SHOP_DATA[currentAdminTab];
   for (const key in data) {
     const price = parseInt(document.getElementById(`price-${key}`).value) || 0;
-    const image = document.getElementById(`image-${key}`).value.trim();
+    const image = document.getElementById(`image-${key}`).value;
     data[key].price = price;
     data[key].image = image;
   }
-  localStorage.setItem('nard_shop_custom_data', JSON.stringify(SHOP_DATA));
-  alert("تغییرات با موفقیت ذخیره شد! (برای اعمال تصاویر، یک بار صفحه را رفرش کنید)");
-  updateProfileUI();
+  try {
+      localStorage.setItem('nard_shop_custom_data', JSON.stringify(SHOP_DATA));
+      alert("تغییرات با موفقیت ذخیره شد! (صفحه را رفرش کنید)");
+      updateProfileUI();
+  } catch (e) {
+      alert("خطا در ذخیره‌سازی! حافظه مرورگر شما پر شده است. لطفاً از عکس‌های با حجم کمتر استفاده کنید.");
+  }
 }
 
 // ==== سیستم فروشگاه ====
