@@ -73,6 +73,7 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 .btn-random { background: linear-gradient(145deg, #4caf50, #2e7d32); box-shadow: 0 4px 15px rgba(76,175,80,0.3); }
 .btn-pass { background: linear-gradient(145deg, #ffa500, #cc8400); }
 .btn-ai { background: linear-gradient(145deg, #3a7bd5, #2a5db5); box-shadow: 0 4px 15px rgba(58,123,213,0.3); }
+.btn-exit { background: linear-gradient(145deg, #555, #333); box-shadow: 0 4px 15px rgba(0,0,0,0.4); font-size: 14px; padding: 10px; margin-top: 10px;}
 
 .shop-tabs { display: flex; gap: 5px; width: 100%; margin-bottom: 15px; }
 .shop-tab { flex: 1; padding: 10px; background: rgba(255,255,255,0.1); border: none; color: #ccc; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: bold; transition: 0.2s; }
@@ -153,7 +154,6 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 .confetti { position: absolute; width: 10px; height: 10px; opacity: 0.9; animation: fall linear forwards; }
 @keyframes fall { 0% { transform: translateY(-100px) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
 
-/* Admin Panel Specific */
 .admin-input { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff; margin-top: 5px; font-family: inherit; font-size: 12px;}
 .admin-row { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1);}
 .admin-row-title { font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #ffd93d;}
@@ -188,7 +188,6 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-shop')" style="margin-top: 10px; background: #b8860b;">🛒 فروشگاه</button>
 </div>
 
-<!-- AI Difficulty Screen -->
 <div id="screen-ai-setup" class="screen">
   <h1>🤖 بازی با کامپیوتر</h1>
   <p>سطح سختی حریف را انتخاب کنید:</p>
@@ -198,7 +197,6 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
 </div>
 
-<!-- Shop Screen -->
 <div id="screen-shop" class="screen">
   <h1>🛒 فروشگاه</h1>
   <div class="shop-tabs">
@@ -210,7 +208,6 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px; flex-shrink: 0;">بازگشت</button>
 </div>
 
-<!-- Admin Panel Screen -->
 <div id="screen-admin" class="screen">
   <h1>⚙️ پنل مدیریت</h1>
   <p style="color:#ff6b9d; font-size:12px;">عکس‌ها را از سیستم خود انتخاب کنید. (برای جلوگیری از پر شدن حافظه، از عکس‌های کوچک زیر ۲۰۰ کیلوبایت استفاده کنید)</p>
@@ -302,6 +299,8 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
     </div>
     <button class="btn btn-pass" id="passBtn" style="display:none;" onclick="passTurn()">پاس بده (حرکتی نداری)</button>
     <button class="btn" id="rollBtn" onclick="requestRoll()" disabled>تاس بنداز</button>
+    <!-- دکمه خروج از بازی اینجا اضافه شد -->
+    <button class="btn btn-exit" onclick="confirmExitGame()">🚪 خروج از بازی</button>
   </div>
 </div>
 
@@ -337,6 +336,13 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
 
 <script>
 const socket = io();
+
+// ==== تابع خروج با تاییدیه ====
+function confirmExitGame() {
+  if (confirm('آیا مطمئن هستید که می‌خواهید از بازی خارج شوید؟ (مسابقه لغو می‌شود)')) {
+    leaveRoom();
+  }
+}
 
 // ==== سیستم صدا ====
 let audioCtx = null;
@@ -386,7 +392,7 @@ function playSound(name) {
   } catch (e) {}
 }
 
-// ==== مدیریت پروفایل، سکه‌ها و کالاها ====
+// ==== مدیریت پروفایل و سکه‌ها ====
 let profile = JSON.parse(localStorage.getItem('nard_profile')) || {
   id: Math.random().toString(36).substring(2, 10),
   name: 'بازیکن ' + Math.floor(Math.random() * 1000),
@@ -409,7 +415,6 @@ if (!profile.ownedBoards) {
 }
 localStorage.setItem('nard_profile', JSON.stringify(profile));
 
-// ==== دیتای پیش‌فرض فروشگاه ====
 const DEFAULT_SHOP_DATA = {
   boards: {
     classic: { name: 'کلاسیک', price: 0, image: '', colors: 'linear-gradient(135deg, #8b5a2b, #6b3e1f)' },
@@ -443,7 +448,6 @@ function updateProfileUI() {
   if (profile.activeDice !== 'classic') document.body.classList.add('dice-' + profile.activeDice);
   if (profile.activeCheckers !== 'classic') document.body.classList.add('checker-' + profile.activeCheckers);
 
-  // اعمال عکس تخته
   const boardItem = SHOP_DATA.boards[profile.activeBoard];
   const gameBoard = document.getElementById('gameBoard');
   if (boardItem && boardItem.image) {
@@ -455,14 +459,13 @@ function updateProfileUI() {
       gameBoard.style.background = 'var(--board-bg)';
   }
 
-  // اعمال عکس تاس
   const diceItem = SHOP_DATA.dice[profile.activeDice];
   const diceEls = [document.getElementById('dice1'), document.getElementById('dice2')];
   diceEls.forEach(d => {
       if (diceItem && diceItem.image) {
           d.style.backgroundImage = `url('${diceItem.image}')`;
           d.style.backgroundSize = 'cover';
-          d.querySelectorAll('.pip').forEach(p => p.style.display = 'none'); // مخفی کردن خال‌ها وقتی عکس داریم
+          d.querySelectorAll('.pip').forEach(p => p.style.display = 'none');
       } else {
           d.style.backgroundImage = 'none';
           d.style.background = 'var(--dice-bg)';
@@ -489,44 +492,32 @@ function leaveRoom() {
   location.reload();
 }
 
-// ==== پنل مدیریت ====
 let currentAdminTab = 'boards';
-
 function openAdminPanel() {
   const pass = prompt("رمز مدیریت را وارد کنید:");
-  if (pass === "1234") { 
-    showScreen('screen-admin');
-  } else if (pass !== null) {
-    alert("رمز اشتباه است!");
-  }
+  if (pass === "1234") { showScreen('screen-admin'); } 
+  else if (pass !== null) { alert("رمز اشتباه است!"); }
 }
-
 function switchAdminTab(tab) {
   currentAdminTab = tab;
   document.querySelectorAll('#screen-admin .shop-tab').forEach(t => t.classList.remove('active'));
   event.target.classList.add('active');
   renderAdminPanel();
 }
-
-// تابع تبدیل عکس به Base64
 function handleImageUpload(event, category, key) {
     const file = event.target.files[0];
     if (!file) return;
-    
-    // محدودیت حجم ۲۰۰ کیلوبایت
     if (file.size > 200 * 1024) {
         alert("عکس انتخاب شده بزرگ است! لطفاً عکسی زیر ۲۰۰ کیلوبایت انتخاب کنید.");
         event.target.value = '';
         return;
     }
-    
     const reader = new FileReader();
     reader.onload = function(e) {
-        document.getElementById(`image-${key}`).value = e.target.result; // ذخیره کد بیس۶۴ در فیلد مخفی
+        document.getElementById(`image-${key}`).value = e.target.result;
     };
     reader.readAsDataURL(file);
 }
-
 function renderAdminPanel() {
   const list = document.getElementById('admin-list');
   list.innerHTML = '';
@@ -539,7 +530,6 @@ function renderAdminPanel() {
       <div class="admin-row-title">${item.name} (${key})</div>
       <label style="font-size:11px; color:#aaa;">قیمت (سکه):</label>
       <input type="number" class="admin-input" id="price-${key}" value="${item.price}">
-      
       <div class="file-input-wrapper">
         <label>انتخاب عکس از سیستم:</label>
         <input type="file" accept="image/*" class="admin-input" onchange="handleImageUpload(event, '${currentAdminTab}', '${key}')">
@@ -550,7 +540,6 @@ function renderAdminPanel() {
     list.appendChild(row);
   }
 }
-
 function saveAdminConfig() {
   const data = SHOP_DATA[currentAdminTab];
   for (const key in data) {
@@ -568,20 +557,16 @@ function saveAdminConfig() {
   }
 }
 
-// ==== سیستم فروشگاه ====
 let currentShopTab = 'boards';
-
 function switchShopTab(tab) {
   currentShopTab = tab;
   document.querySelectorAll('#screen-shop .shop-tab').forEach(t => t.classList.remove('active'));
   event.target.classList.add('active');
   renderShop();
 }
-
 function renderShop() {
   const shopList = document.getElementById('shop-list');
   shopList.innerHTML = '';
-  
   const activeKey = currentShopTab === 'boards' ? profile.activeBoard : (currentShopTab === 'dice' ? profile.activeDice : profile.activeCheckers);
   const ownedArr = currentShopTab === 'boards' ? profile.ownedBoards : (currentShopTab === 'dice' ? profile.ownedDice : profile.ownedCheckers);
   const data = SHOP_DATA[currentShopTab];
@@ -589,30 +574,19 @@ function renderShop() {
   for (const [key, item] of Object.entries(data)) {
     const owned = ownedArr.includes(key);
     const active = activeKey === key;
-    
     let previewHTML = '';
     let styleStr = '';
     
-    if (item.image) {
-        styleStr = `background-image: url('${item.image}'); background-size: cover; background-position: center;`;
-    } else if (currentShopTab === 'boards') {
-        styleStr = `background: ${item.colors};`;
-    }
+    if (item.image) { styleStr = `background-image: url('${item.image}'); background-size: cover; background-position: center;`; }
+    else if (currentShopTab === 'boards') { styleStr = `background: ${item.colors};`; }
 
-    if (currentShopTab === 'boards') {
-        previewHTML = `<div class="shop-preview" style="${styleStr}"></div>`;
-    } else if (currentShopTab === 'dice') {
-        if (item.image) {
-            previewHTML = `<div class="shop-preview" style="${styleStr}"></div>`;
-        } else {
-            previewHTML = `<div class="shop-preview dice-prev" style="background: ${item.bg}; border-color: ${item.bg};"><span style="background: ${item.pip}; grid-column: 2; grid-row: 2;"></span></div>`;
-        }
+    if (currentShopTab === 'boards') { previewHTML = `<div class="shop-preview" style="${styleStr}"></div>`; }
+    else if (currentShopTab === 'dice') {
+        if (item.image) { previewHTML = `<div class="shop-preview" style="${styleStr}"></div>`; }
+        else { previewHTML = `<div class="shop-preview dice-prev" style="background: ${item.bg}; border-color: ${item.bg};"><span style="background: ${item.pip}; grid-column: 2; grid-row: 2;"></span></div>`; }
     } else {
-        if (item.image) {
-            previewHTML = `<div class="shop-preview" style="${styleStr}"></div>`;
-        } else {
-            previewHTML = `<div class="shop-preview" style="background: linear-gradient(135deg, ${item.w} 50%, ${item.b} 50%)"></div>`;
-        }
+        if (item.image) { previewHTML = `<div class="shop-preview" style="${styleStr}"></div>`; }
+        else { previewHTML = `<div class="shop-preview" style="background: linear-gradient(135deg, ${item.w} 50%, ${item.b} 50%)"></div>`; }
     }
 
     const el = document.createElement('div');
@@ -630,41 +604,26 @@ function renderShop() {
     shopList.appendChild(el);
   }
 }
-
 function handleBuy(category, key) {
   const item = SHOP_DATA[category][key];
   const ownedArrKey = category === 'boards' ? 'ownedBoards' : (category === 'dice' ? 'ownedDice' : 'ownedCheckers');
   const activeKey = category === 'boards' ? 'activeBoard' : (category === 'dice' ? 'activeDice' : 'activeCheckers');
   
-  if (profile[ownedArrKey].includes(key)) {
-    profile[activeKey] = key;
-  } else {
+  if (profile[ownedArrKey].includes(key)) { profile[activeKey] = key; } 
+  else {
     if (profile.coins >= item.price) {
       profile.coins -= item.price;
       profile[ownedArrKey].push(key);
       profile[activeKey] = key;
-    } else {
-      alert("سکه کافی نیست!");
-      return;
-    }
+    } else { alert("سکه کافی نیست!"); return; }
   }
   localStorage.setItem('nard_profile', JSON.stringify(profile));
   updateProfileUI();
   renderShop();
 }
 
-// ==== چت ====
-function toggleChat() {
-  document.getElementById('chatWindow').classList.toggle('open');
-  document.getElementById('chatInput').focus();
-}
-function sendChat() {
-  const input = document.getElementById('chatInput');
-  if (input.value.trim()) {
-    if (!isBotMode) socket.emit('chatMessage', input.value.trim());
-    input.value = '';
-  }
-}
+function toggleChat() { document.getElementById('chatWindow').classList.toggle('open'); document.getElementById('chatInput').focus(); }
+function sendChat() { const input = document.getElementById('chatInput'); if (input.value.trim()) { if (!isBotMode) socket.emit('chatMessage', input.value.trim()); input.value = ''; } }
 function sendEmoji(emoji) { if (!isBotMode) socket.emit('chatMessage', emoji); }
 function handleChatEnter(e) { if (e.key === 'Enter') sendChat(); }
 socket.on('chatMessage', (data) => {
@@ -681,7 +640,6 @@ socket.on('chatMessage', (data) => {
   }
 });
 
-// ==== بازی و اتصال ====
 let isBotMode = false;
 let botDifficulty = 'medium';
 let myColor = sessionStorage.getItem('nard_myColor');
@@ -695,25 +653,15 @@ let matchTarget = 3;
 let matchScore = { white: 0, black: 0 };
 
 function startBotGame(difficulty) {
-  isBotMode = true;
-  botDifficulty = difficulty;
-  myColor = 'white';
-  matchTarget = 3;
-  matchScore = { white: 0, black: 0 };
-  
+  isBotMode = true; botDifficulty = difficulty; myColor = 'white'; matchTarget = 3; matchScore = { white: 0, black: 0 };
   showScreen('screen-game');
   document.getElementById('chatToggle').classList.remove('active');
-  
   updateMatchInfo();
   document.getElementById('whiteNameDisplay').textContent = profile.name;
   document.getElementById('blackNameDisplay').textContent = '🤖 کامپیوتر (' + (difficulty === 'easy' ? 'آسان' : difficulty === 'medium' ? 'متوسط' : 'سخت') + ')';
   document.getElementById('myColorDisplay').textContent = 'شما: سفید';
-  
-  setupLocalView();
-  resetBoard();
-  
-  currentTurn = 'white';
-  gameOver = false;
+  setupLocalView(); resetBoard();
+  currentTurn = 'white'; gameOver = false;
   document.getElementById('turnInfo').textContent = 'نوبت: سفید';
   document.getElementById('rollBtn').disabled = false;
   showMessage("شما سفید هستید. تاس بنداز.");
@@ -740,8 +688,7 @@ function createRoom(target) {
   socket.emit('createRoom', { target, playerId: profile.id, playerName: profile.name }, (res) => {
     if (res.success) {
       myColor = res.color; roomCode = res.code;
-      sessionStorage.setItem('nard_roomCode', roomCode);
-      sessionStorage.setItem('nard_myColor', myColor);
+      sessionStorage.setItem('nard_roomCode', roomCode); sessionStorage.setItem('nard_myColor', myColor);
       document.getElementById('roomCodeDisplay').style.display = 'block';
       document.getElementById('waitText').textContent = 'این کد را برای دوست خود بفرستید:';
       document.getElementById('roomCodeDisplay').textContent = res.code;
@@ -757,21 +704,13 @@ function joinRoom() {
   socket.emit('joinRoom', { code, playerId: profile.id, playerName: profile.name }, (res) => {
     if (res.success) {
       myColor = res.color; roomCode = res.code;
-      sessionStorage.setItem('nard_roomCode', roomCode);
-      sessionStorage.setItem('nard_myColor', myColor);
+      sessionStorage.setItem('nard_roomCode', roomCode); sessionStorage.setItem('nard_myColor', myColor);
     } else { alert(res.error); }
   });
 }
 
-socket.on('waitingForMatch', () => {
-  document.getElementById('waitText').textContent = 'در حال جستجوی حریف... لطفا صبر کنید.';
-});
-
-socket.on('matchFound', (data) => {
-  roomCode = data.code;
-  sessionStorage.setItem('nard_roomCode', roomCode);
-});
-
+socket.on('waitingForMatch', () => { document.getElementById('waitText').textContent = 'در حال جستجوی حریف... لطفا صبر کنید.'; });
+socket.on('matchFound', (data) => { roomCode = data.code; sessionStorage.setItem('nard_roomCode', roomCode); });
 socket.on('assignedColor', (color) => {
   myColor = color;
   sessionStorage.setItem('nard_myColor', color);
@@ -784,14 +723,11 @@ function updateMatchInfo() {
   document.getElementById('blackScore').textContent = toPersian(matchScore.black);
   document.getElementById('matchLabel').textContent = 'بازی ' + toPersian(matchTarget) + ' امتیازی';
 }
-
 function triggerWinEffect(isMe) {
   if (!isMe) return;
-  profile.coins += 50;
-  profile.wins += 1;
+  profile.coins += 50; profile.wins += 1;
   localStorage.setItem('nard_profile', JSON.stringify(profile));
   updateProfileUI();
-
   const container = document.getElementById('confetti-container');
   const colors = ['#ff6b9d', '#ffd93d', '#6b9dff', '#4caf50', '#ff4757'];
   for (let i = 0; i < 60; i++) {
@@ -806,7 +742,6 @@ function triggerWinEffect(isMe) {
     setTimeout(() => confetti.remove(), 3500);
   }
 }
-
 function setupLocalView() {
     document.querySelectorAll('.point').forEach(el => {
         if (!el.dataset.orig) el.dataset.orig = el.dataset.point;
@@ -820,7 +755,6 @@ function setupLocalView() {
         });
     }
 }
-
 function hasCheckerOnBar() {
   if (currentTurn === "white") return document.getElementById("topBar").querySelectorAll(".white").length > 0;
   return document.getElementById("bottomBar").querySelectorAll(".black").length > 0;
@@ -1044,22 +978,15 @@ function tryBearOff(checker) {
     showMessage("هیچ حرکتی نداری! پاس بده.");
   } else showMessage("مهره بیرون انداخته شد. " + diceValues.length + " حرکت باقی مونده.");
 }
-function syncState() { 
-  if (isBotMode) return;
-  socket.emit('stateUpdate', { state: getBoardState(), dice: diceValues, turn: currentTurn }); 
-}
+function syncState() { if (isBotMode) return; socket.emit('stateUpdate', { state: getBoardState(), dice: diceValues, turn: currentTurn }); }
 function endTurn() {
   document.getElementById("passBtn").style.display = "none";
-  diceValues = [];
-  diceRolled = false;
-  updateDiceDisplay();
-  clearHighlights();
+  diceValues = []; diceRolled = false;
+  updateDiceDisplay(); clearHighlights();
   if (selectedChecker) { selectedChecker.classList.remove("selected", "can-bear-off"); selectedChecker = null; }
   currentTurn = currentTurn === "white" ? "black" : "white";
   document.getElementById('turnInfo').textContent = 'نوبت: ' + (currentTurn === 'white' ? 'سفید' : 'مشکی');
-  
   if (gameOver) return;
-
   if (isBotMode && currentTurn === 'black') {
     document.getElementById("rollBtn").disabled = true;
     showMessage("کامپیوتر در حال فکر کردن...");
@@ -1067,9 +994,7 @@ function endTurn() {
   } else if (currentTurn === myColor) {
     document.getElementById("rollBtn").disabled = false;
     showMessage("نوبت شماست. تاس بنداز.");
-  } else {
-    showMessage("نوبت حریف...");
-  }
+  } else { showMessage("نوبت حریف..."); }
   syncState();
 }
 function calculateGamePoints(winner) {
@@ -1084,10 +1009,8 @@ function endGame(winner) {
   document.getElementById("passBtn").style.display = "none";
   document.getElementById("rollBtn").disabled = true;
   const points = calculateGamePoints(winner);
-  
   if (isBotMode) {
-    matchScore[winner] += points;
-    updateMatchInfo();
+    matchScore[winner] += points; updateMatchInfo();
     if (matchScore[winner] >= matchTarget) {
       matchOver = true;
       if (winner === 'white') { triggerWinEffect(true); playSound('win'); } 
@@ -1095,26 +1018,17 @@ function endGame(winner) {
       showOverlay(true, winner, 0);
     } else {
       showOverlay(false, winner, points);
-      setTimeout(() => { 
-        document.getElementById('overlay').style.display = 'none'; 
-        startBotGame(botDifficulty); 
-      }, 2500);
+      setTimeout(() => { document.getElementById('overlay').style.display = 'none'; startBotGame(botDifficulty); }, 2500);
     }
-  } else {
-    socket.emit('gameOver', { winner, points });
-  }
+  } else { socket.emit('gameOver', { winner, points }); }
 }
 function showOverlay(isMatchOver, winner, points) {
   const isMe = winner === myColor;
   if (isMe && !isMatchOver) triggerWinEffect(true);
-  else if (isMe && isMatchOver) { /* جایزه در تابع endGame داده شده */ }
-  else { profile.losses += 1; localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI(); }
+  else if (!isMe) { profile.losses += 1; localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI(); }
   
   document.getElementById('overlayIcon').textContent = isMatchOver ? (isMe ? '🏆' : '😔') : '🏁';
-  document.getElementById('overlayTitle').textContent = isMatchOver 
-    ? (isMe ? 'شما برنده مسابقه شدید!' : 'شما باختید!') 
-    : (winner === 'white' ? 'سفید این دست را برد' : 'مشکی این دست را برد');
-    
+  document.getElementById('overlayTitle').textContent = isMatchOver ? (isMe ? 'شما برنده مسابقه شدید!' : 'شما باختید!') : (winner === 'white' ? 'سفید این دست را برد' : 'مشکی این دست را برد');
   let msg = '';
   if (!isMatchOver) {
     msg = 'امتیاز این دست: <strong>' + toPersian(points) + '</strong>';
@@ -1125,7 +1039,6 @@ function showOverlay(isMatchOver, winner, points) {
     if (isMe) msg += '<br><br>🪙 ۵۰ سکه دریافت کردید!';
   }
   document.getElementById('overlayMessage').innerHTML = msg;
-  
   const btn = document.querySelector('#overlay button');
   if (!isMatchOver) {
     btn.style.display = 'none';
@@ -1167,30 +1080,21 @@ function aiGetMoves() {
   }
   return moves;
 }
-function isInOpponentHome(pt) {
-  return currentTurn === 'white' ? (pt >= 19 && pt <= 24) : (pt >= 1 && pt <= 6);
-}
+function isInOpponentHome(pt) { return currentTurn === 'white' ? (pt >= 19 && pt <= 24) : (pt >= 1 && pt <= 6); }
 function aiScoreMove(m, difficulty) {
   if (m.type === 'bearoff') return 1000;
   const opp = currentTurn === "white" ? "black" : "white";
   let score = 0;
   const target = document.querySelector('.point[data-point="' + m.to + '"]');
   if (!target) return -1000;
-  
   const myOnTarget = target.querySelectorAll('.' + currentTurn).length;
   const oppOnTarget = target.querySelectorAll('.' + opp).length;
-  
-  if (difficulty === 'easy') {
-    if (oppOnTarget === 1) return 100 + Math.random() * 50;
-    return Math.random() * 100;
-  } 
-  
+  if (difficulty === 'easy') { if (oppOnTarget === 1) return 100 + Math.random() * 50; return Math.random() * 100; } 
   if (oppOnTarget === 1) score += 500;
   if (myOnTarget >= 1) score += 200;
   else if (myOnTarget === 0 && !isInOpponentHome(m.to)) score += 30;
   if (myOnTarget === 0 && isInOpponentHome(m.to)) score -= 150;
   if (myOnTarget === 0 && oppOnTarget === 0 && isInOpponentHome(m.to)) score -= 50;
-  
   if (m.type === 'move') {
     const fromEl = document.querySelector('.point[data-point="' + m.from + '"]');
     if (fromEl) {
@@ -1202,7 +1106,6 @@ function aiScoreMove(m, difficulty) {
     score += adv * 4;
   }
   if (m.type === 'bar') score += 180;
-
   if (difficulty === 'hard') {
     if (myOnTarget === 0 && isInOpponentHome(m.to)) score -= 100;
     if (m.type === 'move') {
@@ -1214,15 +1117,9 @@ function aiScoreMove(m, difficulty) {
 }
 function aiPickMove(moves, difficulty) {
   const scored = moves.map(m => ({ m, s: aiScoreMove(m, difficulty) })).sort((a, b) => b.s - a.s);
-  if (difficulty === 'easy') {
-    const top = scored.slice(0, Math.min(4, scored.length));
-    return top[Math.floor(Math.random() * top.length)].m;
-  } else if (difficulty === 'medium') {
-    const top = scored.slice(0, Math.min(2, scored.length));
-    return top[Math.floor(Math.random() * top.length)].m;
-  } else {
-    return scored[0].m;
-  }
+  if (difficulty === 'easy') { const top = scored.slice(0, Math.min(4, scored.length)); return top[Math.floor(Math.random() * top.length)].m; } 
+  else if (difficulty === 'medium') { const top = scored.slice(0, Math.min(2, scored.length)); return top[Math.floor(Math.random() * top.length)].m; } 
+  else { return scored[0].m; }
 }
 function aiTurn() {
   if (gameOver || currentTurn !== "black" || !isBotMode) return;
@@ -1237,10 +1134,7 @@ function aiTurn() {
 function aiMakeMove() {
   if (gameOver || currentTurn !== "black") return;
   const moves = aiGetMoves();
-  if (moves.length === 0) {
-    setTimeout(() => { endTurn(); }, 500);
-    return;
-  }
+  if (moves.length === 0) { setTimeout(() => { endTurn(); }, 500); return; }
   const move = aiPickMove(moves, botDifficulty);
   aiExecuteMove(move);
 }
@@ -1251,8 +1145,7 @@ function aiExecuteMove(move) {
     if (!fromEl) return;
     const checker = fromEl.querySelector(".black");
     if (!checker) return;
-    checker.remove();
-    playSound('bearoff');
+    checker.remove(); playSound('bearoff');
   } else {
     let checker, toEl = document.querySelector('.point[data-point="' + move.to + '"]');
     if (!toEl) return;
@@ -1272,21 +1165,18 @@ function aiExecuteMove(move) {
   }
   const idx = diceValues.indexOf(move.die);
   if (idx > -1) diceValues.splice(idx, 1);
-  updateDiceDisplay();
-  setupCheckerClicks();
+  updateDiceDisplay(); setupCheckerClicks();
   if (document.querySelectorAll(".checker.black").length === 0) { endGame('black'); return; }
   if (diceValues.length === 0) { setTimeout(() => endTurn(), 500); }
   else if (!hasAnyLegalMove()) { setTimeout(() => endTurn(), 500); }
   else { setTimeout(() => aiMakeMove(), 500); }
 }
-
 let diceAnimId = null;
 function stopDiceAnim() { if (diceAnimId) { clearInterval(diceAnimId); diceAnimId = null; } }
 function animateDiceThenSet(vals, cb) {
   stopDiceAnim();
   const d1 = document.getElementById('dice1'), d2 = document.getElementById('dice2');
-  d1.classList.add('rolling'); d2.classList.add('rolling');
-  playSound('dice');
+  d1.classList.add('rolling'); d2.classList.add('rolling'); playSound('dice');
   let i = 0;
   diceAnimId = setInterval(() => {
     setDiceFace(d1, Math.floor(Math.random() * 6) + 1);
@@ -1295,34 +1185,25 @@ function animateDiceThenSet(vals, cb) {
     if (i >= 8) {
       stopDiceAnim();
       d1.classList.remove('rolling'); d2.classList.remove('rolling');
-      setDiceFace(d1, vals[0]);
-      setDiceFace(d2, vals[1]);
+      setDiceFace(d1, vals[0]); setDiceFace(d2, vals[1]);
       if (cb) cb();
     }
   }, 60);
 }
-
 function requestRoll() {
   if (gameOver || (isBotMode && currentTurn === 'black')) return;
   document.getElementById("passBtn").style.display = "none";
   document.getElementById("rollBtn").disabled = true;
-  
   if (isBotMode) {
     const n1 = Math.floor(Math.random() * 6) + 1;
     const n2 = Math.floor(Math.random() * 6) + 1;
     diceValues = n1 === n2 ? [n1, n1, n1, n1] : [n1, n2];
     animateDiceThenSet([n1, n2], () => {
       diceRolled = true;
-      if (!hasAnyLegalMove()) {
-        document.getElementById("passBtn").style.display = "block";
-        showMessage("هیچ حرکتی نداری! پاس بده.");
-      } else {
-        showMessage("تاس انداختی. حرکت کن.");
-      }
+      if (!hasAnyLegalMove()) { document.getElementById("passBtn").style.display = "block"; showMessage("هیچ حرکتی نداری! پاس بده."); } 
+      else { showMessage("تاس انداختی. حرکت کن."); }
     });
-  } else {
-    socket.emit('rollDice');
-  }
+  } else { socket.emit('rollDice'); }
 }
 
 socket.on('gameStart', (data) => {
@@ -1331,49 +1212,27 @@ socket.on('gameStart', (data) => {
   matchTarget = data.target || 3;
   if (data.matchScore) matchScore = data.matchScore;
   updateMatchInfo();
-  
   if (data.whiteName) document.getElementById('whiteNameDisplay').textContent = data.whiteName;
   if (data.blackName) document.getElementById('blackNameDisplay').textContent = data.blackName;
   document.getElementById('myColorDisplay').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
   document.getElementById('myColorDisplay').style.color = myColor === 'white' ? '#fff' : '#aaa';
-
-  setupLocalView();
-  resetBoard();
-  currentTurn = 'white';
-  gameOver = false;
+  setupLocalView(); resetBoard();
+  currentTurn = 'white'; gameOver = false;
   document.getElementById('turnInfo').textContent = 'نوبت: سفید';
-  
-  if (myColor === 'white') {
-    document.getElementById('rollBtn').disabled = false;
-    showMessage("شما سفید هستید. تاس بنداز.");
-  } else {
-    document.getElementById('rollBtn').disabled = true;
-    showMessage("در انتظار حرکت سفید...");
-  }
+  if (myColor === 'white') { document.getElementById('rollBtn').disabled = false; showMessage("شما سفید هستید. تاس بنداز."); } 
+  else { document.getElementById('rollBtn').disabled = true; showMessage("در انتظار حرکت سفید..."); }
 });
 socket.on('startNextGame', (data) => {
-  matchScore = data.scores;
-  updateMatchInfo();
-  setupLocalView();
-  resetBoard();
-  currentTurn = data.nextTurn;
-  gameOver = false;
-  diceValues = [];
-  diceRolled = false;
-  updateDiceDisplay();
+  matchScore = data.scores; updateMatchInfo();
+  setupLocalView(); resetBoard();
+  currentTurn = data.nextTurn; gameOver = false;
+  diceValues = []; diceRolled = false; updateDiceDisplay();
   document.getElementById('turnInfo').textContent = 'نوبت: ' + (currentTurn === 'white' ? 'سفید' : 'مشکی');
-  if (currentTurn === myColor) {
-    document.getElementById('rollBtn').disabled = false;
-    showMessage("نوبت شماست. تاس بنداز.");
-  } else {
-    document.getElementById('rollBtn').disabled = true;
-    showMessage("در انتظار حرکت حریف...");
-  }
+  if (currentTurn === myColor) { document.getElementById('rollBtn').disabled = false; showMessage("نوبت شماست. تاس بنداز."); } 
+  else { document.getElementById('rollBtn').disabled = true; showMessage("در انتظار حرکت حریف..."); }
 });
 socket.on('matchOver', (data) => {
-  matchScore = data.scores;
-  updateMatchInfo();
-  gameOver = true;
+  matchScore = data.scores; updateMatchInfo(); gameOver = true;
   document.getElementById('passBtn').style.display = "none";
   document.getElementById('rollBtn').disabled = true;
   showOverlay(true, data.winner, 0);
@@ -1384,41 +1243,25 @@ socket.on('diceResult', (data) => {
   animateDiceThenSet([data.n1, data.n2], () => {
     diceRolled = true;
     if (data.roller === myColor) {
-      if (!hasAnyLegalMove()) {
-        document.getElementById("passBtn").style.display = "block";
-        showMessage("هیچ حرکتی نداری! پاس بده.");
-      } else {
-        showMessage("تاس انداختی. حرکت کن.");
-      }
-    } else {
-      showMessage("حریف تاس انداخت...");
-    }
+      if (!hasAnyLegalMove()) { document.getElementById("passBtn").style.display = "block"; showMessage("هیچ حرکتی نداری! پاس بده."); } 
+      else { showMessage("تاس انداختی. حرکت کن."); }
+    } else { showMessage("حریف تاس انداخت..."); }
   });
 });
 socket.on('stateSync', (data) => {
   if (isBotMode) return;
   applyBoardState(data.state);
-  diceValues = data.dice;
-  updateDiceDisplay();
+  diceValues = data.dice; updateDiceDisplay();
   currentTurn = data.turn;
   document.getElementById('turnInfo').textContent = 'نوبت: ' + (currentTurn === 'white' ? 'سفید' : 'مشکی');
   document.getElementById("passBtn").style.display = "none";
   if (currentTurn === myColor) {
     diceRolled = diceValues.length > 0;
     if (diceRolled) {
-      if (!hasAnyLegalMove()) {
-        document.getElementById("passBtn").style.display = "block";
-        showMessage("هیچ حرکتی نداری! پاس بده.");
-      } else {
-        showMessage("حریف حرکت کرد. نوبت شماست.");
-      }
-    } else {
-      document.getElementById("rollBtn").disabled = false;
-      showMessage("نوبت شماست. تاس بنداز.");
-    }
-  } else {
-    showMessage("حریف در حال بازی...");
-  }
+      if (!hasAnyLegalMove()) { document.getElementById("passBtn").style.display = "block"; showMessage("هیچ حرکتی نداری! پاس بده."); } 
+      else { showMessage("حریف حرکت کرد. نوبت شماست."); }
+    } else { document.getElementById("rollBtn").disabled = false; showMessage("نوبت شماست. تاس بنداز."); }
+  } else { showMessage("حریف در حال بازی..."); }
 });
 socket.on('gameOver', (data) => {
   if (isBotMode) return;
@@ -1439,9 +1282,7 @@ if (roomCode && myColor) {
             showScreen('screen-home');
         }
     });
-} else {
-    showScreen('screen-home');
-}
+} else { showScreen('screen-home'); }
 document.getElementById('profileBar').style.display = 'flex';
 
 if ('serviceWorker' in navigator) {
