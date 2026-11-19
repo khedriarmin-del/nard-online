@@ -197,7 +197,6 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   </div>
 </div>
 
-<!-- Matchmaking Setup -->
 <div id="screen-random-setup" class="screen">
   <h1>🎲 حریف تصادفی</h1>
   <p>سطح بازی را انتخاب کنید (ورودی کسر می‌شود):</p>
@@ -208,7 +207,6 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
 </div>
 
-<!-- Private Room Create -->
 <div id="screen-create" class="screen">
   <h1>➕ ساخت اتاق اختصاصی</h1>
   
@@ -231,7 +229,6 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')">بازگشت</button>
 </div>
 
-<!-- Ranking -->
 <div id="screen-ranking" class="screen">
   <h1>🏆 رتبه‌بندی</h1>
   <div class="rank-card">
@@ -242,11 +239,10 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
     <div style="font-size: 14px; color: #ff4757;">باخت در مسابقه: -۵ امتیاز</div>
     <div style="font-size: 14px; color: #4caf50;">هر دست برد (بازنده): +۳ امتیاز</div>
   </div>
-  <p style="font-size: 12px; color: #888;">(رتبه فقط در بازی‌های تصادفی و اتاق‌های اختصاصی اعمال می‌شود)</p>
+  <p style="font-size: 12px; color: #888;">(رتبه فقط در بازی‌های تصادفی اعمال می‌شود)</p>
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
 </div>
 
-<!-- AI Setup -->
 <div id="screen-ai-setup" class="screen">
   <h1>🤖 بازی با کامپیوتر</h1>
   <p>سطح سختی حریف را انتخاب کنید (رایگان):</p>
@@ -256,7 +252,6 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
 </div>
 
-<!-- Shop -->
 <div id="screen-shop" class="screen">
   <h1>🛒 فروشگاه</h1>
   <div class="shop-tabs">
@@ -268,7 +263,6 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px; flex-shrink: 0;">بازگشت</button>
 </div>
 
-<!-- Admin -->
 <div id="screen-admin" class="screen">
   <h1>⚙️ پنل مدیریت</h1>
   <p style="color:#ff6b9d; font-size:12px;">عکس‌ها را از سیستم خود انتخاب کنید. (زیر ۲۰۰ کیلوبایت)</p>
@@ -282,7 +276,6 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')">بازگشت به بازی</button>
 </div>
 
-<!-- Join Room -->
 <div id="screen-join" class="screen">
   <h1>ورود به اتاق</h1>
   <p>کد ۶ رقمی دریافتی را وارد کنید:</p>
@@ -291,7 +284,6 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')">بازگشت</button>
 </div>
 
-<!-- Wait -->
 <div id="screen-wait" class="screen">
   <h1>در انتظار حریف...</h1>
   <p id="waitText">این کد را برای دوست خود بفرستید:</p>
@@ -300,7 +292,6 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="leaveRoom()" style="margin-top: 20px;">انصراف</button>
 </div>
 
-<!-- Game -->
 <div id="screen-game" class="screen" style="max-width: 440px;">
   <div class="match-bar">
     <span class="match-label" id="matchLabel">بازی ۳ امتیازی</span>
@@ -359,7 +350,6 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   </div>
 </div>
 
-<!-- Chat -->
 <button class="chat-toggle-btn" id="chatToggle" onclick="toggleChat()">💬</button>
 <div class="chat-window" id="chatWindow">
   <div class="chat-header">
@@ -381,7 +371,6 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   </div>
 </div>
 
-<!-- Overlay -->
 <div class="overlay" id="overlay">
   <div class="overlay-content">
     <div id="overlayIcon" style="font-size:56px;"></div>
@@ -393,6 +382,75 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
 
 <script>
 const socket = io();
+
+// ==== تابع محافظت شده برای جلوگیری از کرش ====
+let profile;
+try {
+    profile = JSON.parse(localStorage.getItem('nard_profile'));
+} catch (e) { console.error("Profile parse error", e); }
+
+if (!profile || !profile.id) {
+    profile = {
+        id: Math.random().toString(36).substring(2, 10),
+        name: 'بازیکن ' + Math.floor(Math.random() * 1000),
+        coins: 1000,
+        wins: 0,
+        losses: 0,
+        rating: 1000,
+        ownedBoards: ['classic'], activeBoard: 'classic',
+        ownedDice: ['classic'], activeDice: 'classic',
+        ownedCheckers: ['classic'], activeCheckers: 'classic'
+    };
+}
+if (profile.rating === undefined) profile.rating = 1000;
+if (profile.coins === undefined) profile.coins = 1000;
+if (!profile.ownedBoards) {
+    profile.ownedBoards = profile.themes || ['classic'];
+    profile.activeBoard = profile.activeTheme || 'classic';
+    profile.ownedDice = ['classic']; profile.activeDice = 'classic';
+    profile.ownedCheckers = ['classic']; profile.activeCheckers = 'classic';
+}
+localStorage.setItem('nard_profile', JSON.stringify(profile));
+
+const DEFAULT_SHOP_DATA = {
+  boards: { classic: { name: 'کلاسیک', price: 0, image: '', colors: 'linear-gradient(135deg, #8b5a2b, #6b3e1f)' }, dark: { name: 'شب تاریک', price: 100, image: '', colors: 'linear-gradient(135deg, #1e1e2e, #0e0e1e)' }, blue: { name: 'اقیانوس', price: 150, image: '', colors: 'linear-gradient(135deg, #1a3a6e, #0a2a5e)' }, green: { name: 'جنگل', price: 150, image: '', colors: 'linear-gradient(135deg, #2a5e2a, #1a4e1a)' }, neon: { name: 'نئون', price: 300, image: '', colors: 'linear-gradient(135deg, #ff00ff, #00ffff)' } },
+  dice: { classic: { name: 'سفید کلاسیک', price: 0, image: '', bg: '#fff', pip: '#111' }, gold: { name: 'طلایی', price: 100, image: '', bg: '#ffd700', pip: '#fff' }, red: { name: 'یاقوتی', price: 100, image: '', bg: '#ff4757', pip: '#fff' }, neon: { name: 'نئون آبی', price: 200, image: '', bg: '#00ffff', pip: '#000' } },
+  checkers: { classic: { name: 'کلاسیک', price: 0, image: '', w: '#fff', b: '#111' }, gold: { name: 'طلا و نقره', price: 150, image: '', w: '#ffd700', b: '#c0c0c0' }, glass: { name: 'شیشه‌ای', price: 250, image: '', w: 'rgba(255,255,255,0.5)', b: 'rgba(50,50,50,0.5)' } }
+};
+
+let SHOP_DATA;
+try {
+    SHOP_DATA = JSON.parse(localStorage.getItem('nard_shop_custom_data'));
+} catch (e) { console.error("Shop parse error", e); }
+
+if (!SHOP_DATA || !SHOP_DATA.boards) {
+    SHOP_DATA = JSON.parse(JSON.stringify(DEFAULT_SHOP_DATA));
+}
+
+function updateProfileUI() {
+  document.getElementById('profileName').textContent = profile.name;
+  document.getElementById('profileStats').textContent = 'رتبه: ' + toPersian(profile.rating) + ' | ' + toPersian(profile.wins) + ' برد - ' + toPersian(profile.losses) + ' باخت';
+  document.getElementById('profileCoins').textContent = toPersian(profile.coins);
+  document.getElementById('myRankScore').textContent = toPersian(profile.rating);
+  
+  document.body.className = ''; 
+  if (profile.activeBoard !== 'classic') document.body.classList.add('theme-' + profile.activeBoard);
+  if (profile.activeDice !== 'classic') document.body.classList.add('dice-' + profile.activeDice);
+  if (profile.activeCheckers !== 'classic') document.body.classList.add('checker-' + profile.activeCheckers);
+
+  const boardItem = SHOP_DATA.boards[profile.activeBoard];
+  const gameBoard = document.getElementById('gameBoard');
+  if (boardItem && boardItem.image) { gameBoard.style.backgroundImage = `url('${boardItem.image}')`; gameBoard.style.backgroundSize = 'cover'; gameBoard.style.backgroundPosition = 'center'; } 
+  else { gameBoard.style.backgroundImage = 'none'; gameBoard.style.background = 'var(--board-bg)'; }
+
+  const diceItem = SHOP_DATA.dice[profile.activeDice];
+  const diceEls = [document.getElementById('dice1'), document.getElementById('dice2')];
+  diceEls.forEach(d => {
+      if (diceItem && diceItem.image) { d.style.backgroundImage = `url('${diceItem.image}')`; d.style.backgroundSize = 'cover'; d.querySelectorAll('.pip').forEach(p => p.style.display = 'none'); } 
+      else { d.style.backgroundImage = 'none'; d.style.background = 'var(--dice-bg)'; d.querySelectorAll('.pip').forEach(p => p.style.display = 'block'); }
+  });
+}
+updateProfileUI();
 
 function confirmExitGame() {
   if (confirm('آیا مطمئن هستید که می‌خواهید از بازی خارج شوید؟ (اگر در بازی آنلاین باشید، سکه شرط شما از بین می‌رود)')) {
@@ -425,54 +483,6 @@ function playSound(name) {
   } catch (e) {}
 }
 
-let profile = JSON.parse(localStorage.getItem('nard_profile')) || {
-  id: Math.random().toString(36).substring(2, 10),
-  name: 'بازیکن ' + Math.floor(Math.random() * 1000),
-  coins: 1000,
-  wins: 0,
-  losses: 0,
-  rating: 1000,
-  ownedBoards: ['classic'], activeBoard: 'classic',
-  ownedDice: ['classic'], activeDice: 'classic',
-  ownedCheckers: ['classic'], activeCheckers: 'classic'
-};
-if (profile.rating === undefined) profile.rating = 1000;
-if (profile.coins === undefined) profile.coins = 1000;
-localStorage.setItem('nard_profile', JSON.stringify(profile));
-
-const DEFAULT_SHOP_DATA = {
-  boards: { classic: { name: 'کلاسیک', price: 0, image: '', colors: 'linear-gradient(135deg, #8b5a2b, #6b3e1f)' }, dark: { name: 'شب تاریک', price: 100, image: '', colors: 'linear-gradient(135deg, #1e1e2e, #0e0e1e)' }, blue: { name: 'اقیانوس', price: 150, image: '', colors: 'linear-gradient(135deg, #1a3a6e, #0a2a5e)' }, green: { name: 'جنگل', price: 150, image: '', colors: 'linear-gradient(135deg, #2a5e2a, #1a4e1a)' }, neon: { name: 'نئون', price: 300, image: '', colors: 'linear-gradient(135deg, #ff00ff, #00ffff)' } },
-  dice: { classic: { name: 'سفید کلاسیک', price: 0, image: '', bg: '#fff', pip: '#111' }, gold: { name: 'طلایی', price: 100, image: '', bg: '#ffd700', pip: '#fff' }, red: { name: 'یاقوتی', price: 100, image: '', bg: '#ff4757', pip: '#fff' }, neon: { name: 'نئون آبی', price: 200, image: '', bg: '#00ffff', pip: '#000' } },
-  checkers: { classic: { name: 'کلاسیک', price: 0, image: '', w: '#fff', b: '#111' }, gold: { name: 'طلا و نقره', price: 150, image: '', w: '#ffd700', b: '#c0c0c0' }, glass: { name: 'شیشه‌ای', price: 250, image: '', w: 'rgba(255,255,255,0.5)', b: 'rgba(50,50,50,0.5)' } }
-};
-
-let SHOP_DATA = JSON.parse(localStorage.getItem('nard_shop_custom_data')) || JSON.parse(JSON.stringify(DEFAULT_SHOP_DATA));
-
-function updateProfileUI() {
-  document.getElementById('profileName').textContent = profile.name;
-  document.getElementById('profileStats').textContent = 'رتبه: ' + toPersian(profile.rating) + ' | ' + toPersian(profile.wins) + ' برد - ' + toPersian(profile.losses) + ' باخت';
-  document.getElementById('profileCoins').textContent = toPersian(profile.coins);
-  document.getElementById('myRankScore').textContent = toPersian(profile.rating);
-  
-  document.body.className = ''; 
-  if (profile.activeBoard !== 'classic') document.body.classList.add('theme-' + profile.activeBoard);
-  if (profile.activeDice !== 'classic') document.body.classList.add('dice-' + profile.activeDice);
-  if (profile.activeCheckers !== 'classic') document.body.classList.add('checker-' + profile.activeCheckers);
-
-  const boardItem = SHOP_DATA.boards[profile.activeBoard];
-  const gameBoard = document.getElementById('gameBoard');
-  if (boardItem && boardItem.image) { gameBoard.style.backgroundImage = `url('${boardItem.image}')`; gameBoard.style.backgroundSize = 'cover'; gameBoard.style.backgroundPosition = 'center'; } 
-  else { gameBoard.style.backgroundImage = 'none'; gameBoard.style.background = 'var(--board-bg)'; }
-
-  const diceItem = SHOP_DATA.dice[profile.activeDice];
-  const diceEls = [document.getElementById('dice1'), document.getElementById('dice2')];
-  diceEls.forEach(d => {
-      if (diceItem && diceItem.image) { d.style.backgroundImage = `url('${diceItem.image}')`; d.style.backgroundSize = 'cover'; d.querySelectorAll('.pip').forEach(p => p.style.display = 'none'); } 
-      else { d.style.backgroundImage = 'none'; d.style.background = 'var(--dice-bg)'; d.querySelectorAll('.pip').forEach(p => p.style.display = 'block'); }
-  });
-}
-updateProfileUI();
-
 function toPersian(n) { return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -486,6 +496,7 @@ function showScreen(id) {
 }
 function showMessage(t) { document.getElementById('message').textContent = t; }
 function leaveRoom() {
+  socket.emit('cancelMatch');
   sessionStorage.removeItem('nard_roomCode'); sessionStorage.removeItem('nard_myColor');
   location.reload();
 }
@@ -630,7 +641,6 @@ let currentRoomType = 'random';
 let currentEntryFee = 0;
 let currentBonus = 0;
 
-// Private Room State
 let selectedTarget = 3;
 let selectedFee = 100;
 function selectTarget(t) {
@@ -670,7 +680,6 @@ function resetBoard() {
 function findRandomMatch(fee, bonus) {
   if (profile.coins < fee) { alert("سکه کافی نیست! نیاز به " + fee + " سکه دارید."); return; }
   isBotMode = false;
-  profile.coins -= fee; localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI();
   showScreen('screen-wait');
   document.getElementById('waitText').textContent = 'در حال جستجوی حریف در سطح ' + fee + ' سکه...';
   document.getElementById('roomCodeDisplay').style.display = 'none';
@@ -680,7 +689,6 @@ function findRandomMatch(fee, bonus) {
 function createRoom() {
   if (profile.coins < selectedFee) { alert("سکه کافی نیست! نیاز به " + selectedFee + " سکه دارید."); return; }
   isBotMode = false;
-  profile.coins -= selectedFee; localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI();
   socket.emit('createRoom', { target: selectedTarget, entryFee: selectedFee, playerId: profile.id, playerName: profile.name }, (res) => {
     if (res.success) {
       myColor = res.color; roomCode = res.code;
@@ -696,19 +704,11 @@ function createRoom() {
 function joinRoom() {
   const code = document.getElementById('joinCode').value.trim();
   if (code.length !== 6) return alert("کد باید ۶ رقم باشد");
-  
-  // ما نمیدانیم این اتاق چقدر شرط است. سرور به ما میگوید. اما برای سادگی، فرض میکنیم کاربر باید حداقل 10000 سکه داشته باشد تا بتواند وارد هر اتاقی شود.
-  // اما در سرور چک نمیکنیم که کاربر در لحظه ورود پول دارد یا نه. 
-  // برای رفع این مشکل، ما سکه را هنگام ورود از کاربر کم میکنیم. اما کلاینت نمیداند چقدر است.
-  // راه حل: کلاینت از سرور میپرسد شرط اتاق چقدر است؟ 
-  // یا ساده تر: کاربر بعد از زدن دکمه "ورود"، منتظر میماند تا سرور پاسخ دهد.
-  
   isBotMode = false;
   socket.emit('joinRoom', { code, playerId: profile.id, playerName: profile.name }, (res) => {
     if (res.success) {
       myColor = res.color; roomCode = res.code;
       sessionStorage.setItem('nard_roomCode', roomCode); sessionStorage.setItem('nard_myColor', myColor);
-      // کسر سکه در تابع gameStart انجام میشود تا مطمئن شویم اتاق درست است
     } else { alert(res.error); }
   });
 }
@@ -987,7 +987,6 @@ function showOverlay(isMatchOver, winner, points, gamesWon) {
   if (isMatchOver) {
       if (!isBotMode) {
           if (isMe) {
-              // اگر برنده شد
               let winCoins = 0;
               if (currentRoomType === 'random') {
                   winCoins = currentEntryFee + currentBonus; 
@@ -997,7 +996,6 @@ function showOverlay(isMatchOver, winner, points, gamesWon) {
               profile.coins += winCoins;
               profile.wins += 1;
               
-              // Rating فقط برای بازی تصادفی اعمال میشه (طبق درخواست شما اتاق اختصاصی رتبه نداره)
               if (currentRoomType === 'random') {
                   const ratingGain = (gamesWon[myColor] * 5) + 15;
                   profile.rating += ratingGain;
@@ -1005,7 +1003,6 @@ function showOverlay(isMatchOver, winner, points, gamesWon) {
               playSound('win');
               triggerConfetti();
           } else {
-              // اگر باخت
               profile.losses += 1;
               if (currentRoomType === 'random') {
                   const ratingChange = (gamesWon[myColor] * 3) - 5;
@@ -1098,209 +1095,4 @@ function aiScoreMove(m, difficulty) {
   if (myOnTarget >= 1) score += 200;
   else if (myOnTarget === 0 && !isInOpponentHome(m.to)) score += 30;
   if (myOnTarget === 0 && isInOpponentHome(m.to)) score -= 150;
-  if (myOnTarget === 0 && oppOnTarget === 0 && isInOpponentHome(m.to)) score -= 50;
-  if (m.type === 'move') {
-    const fromEl = document.querySelector('.point[data-point="' + m.from + '"]');
-    if (fromEl) {
-      const fromCount = fromEl.querySelectorAll('.' + currentTurn).length;
-      if (fromCount === 2) score -= 200;
-      else if (fromCount >= 3) score += 60;
-    }
-    const adv = currentTurn === "white" ? (m.from - m.to) : (m.to - m.from);
-    score += adv * 4;
-  }
-  if (m.type === 'bar') score += 180;
-  if (difficulty === 'hard') {
-    if (myOnTarget === 0 && isInOpponentHome(m.to)) score -= 100;
-    if (m.type === 'move') {
-      const fromEl = document.querySelector('.point[data-point="' + m.from + '"]');
-      if (fromEl && fromEl.querySelectorAll('.' + currentTurn).length === 1) score -= 100;
-    }
-  }
-  return score;
-}
-function aiPickMove(moves, difficulty) {
-  const scored = moves.map(m => ({ m, s: aiScoreMove(m, difficulty) })).sort((a, b) => b.s - a.s);
-  if (difficulty === 'easy') { const top = scored.slice(0, Math.min(4, scored.length)); return top[Math.floor(Math.random() * top.length)].m; } 
-  else if (difficulty === 'medium') { const top = scored.slice(0, Math.min(2, scored.length)); return top[Math.floor(Math.random() * top.length)].m; } 
-  else { return scored[0].m; }
-}
-function aiTurn() {
-  if (gameOver || currentTurn !== "black" || !isBotMode) return;
-  const n1 = Math.floor(Math.random() * 6) + 1;
-  const n2 = Math.floor(Math.random() * 6) + 1;
-  diceValues = n1 === n2 ? [n1, n1, n1, n1] : [n1, n2];
-  animateDiceThenSet([n1, n2], () => { diceRolled = true; setTimeout(() => aiMakeMove(), 500); });
-}
-function aiMakeMove() {
-  if (gameOver || currentTurn !== "black") return;
-  const moves = aiGetMoves();
-  if (moves.length === 0) { setTimeout(() => { endTurn(); }, 500); return; }
-  const move = aiPickMove(moves, botDifficulty);
-  aiExecuteMove(move);
-}
-function aiExecuteMove(move) {
-  if (gameOver) return;
-  if (move.type === "bearoff") {
-    const fromEl = document.querySelector('.point[data-point="' + move.from + '"]');
-    if (!fromEl) return;
-    const checker = fromEl.querySelector(".black");
-    if (!checker) return;
-    checker.remove(); playSound('bearoff');
-  } else {
-    let checker, toEl = document.querySelector('.point[data-point="' + move.to + '"]');
-    if (!toEl) return;
-    if (move.type === "bar") checker = document.getElementById("bottomBar").querySelector(".black");
-    else {
-      const fromEl = document.querySelector('.point[data-point="' + move.from + '"]');
-      if (!fromEl) return;
-      checker = fromEl.querySelector(".black");
-    }
-    if (!checker) return;
-    const whiteOnTarget = toEl.querySelectorAll(".white");
-    if (whiteOnTarget.length === 1) { document.getElementById("topBar").appendChild(whiteOnTarget[0]); playSound('hit'); } 
-    else playSound('move');
-    toEl.appendChild(checker);
-  }
-  const idx = diceValues.indexOf(move.die); if (idx > -1) diceValues.splice(idx, 1);
-  updateDiceDisplay(); setupCheckerClicks();
-  if (document.querySelectorAll(".checker.black").length === 0) { endGame('black'); return; }
-  if (diceValues.length === 0) { setTimeout(() => endTurn(), 500); }
-  else if (!hasAnyLegalMove()) { setTimeout(() => endTurn(), 500); }
-  else { setTimeout(() => aiMakeMove(), 500); }
-}
-let diceAnimId = null;
-function stopDiceAnim() { if (diceAnimId) { clearInterval(diceAnimId); diceAnimId = null; } }
-function animateDiceThenSet(vals, cb) {
-  stopDiceAnim();
-  const d1 = document.getElementById('dice1'), d2 = document.getElementById('dice2');
-  d1.classList.add('rolling'); d2.classList.add('rolling'); playSound('dice');
-  let i = 0;
-  diceAnimId = setInterval(() => {
-    setDiceFace(d1, Math.floor(Math.random() * 6) + 1);
-    setDiceFace(d2, Math.floor(Math.random() * 6) + 1);
-    i++;
-    if (i >= 8) {
-      stopDiceAnim(); d1.classList.remove('rolling'); d2.classList.remove('rolling');
-      setDiceFace(d1, vals[0]); setDiceFace(d2, vals[1]);
-      if (cb) cb();
-    }
-  }, 60);
-}
-function requestRoll() {
-  if (gameOver || (isBotMode && currentTurn === 'black')) return;
-  document.getElementById("passBtn").style.display = "none";
-  document.getElementById("rollBtn").disabled = true;
-  if (isBotMode) {
-    const n1 = Math.floor(Math.random() * 6) + 1;
-    const n2 = Math.floor(Math.random() * 6) + 1;
-    diceValues = n1 === n2 ? [n1, n1, n1, n1] : [n1, n2];
-    animateDiceThenSet([n1, n2], () => {
-      diceRolled = true;
-      if (!hasAnyLegalMove()) { document.getElementById("passBtn").style.display = "block"; showMessage("هیچ حرکتی نداری! پاس بده."); } 
-      else { showMessage("تاس انداختی. حرکت کن."); }
-    });
-  } else { socket.emit('rollDice'); }
-}
-
-socket.on('gameStart', (data) => {
-  showScreen('screen-game');
-  document.getElementById('chatToggle').classList.add('active');
-  matchTarget = data.target || 3;
-  if (data.matchScore) matchScore = data.matchScore;
-  currentRoomType = data.roomType;
-  currentEntryFee = data.entryFee;
-  currentBonus = data.bonus;
-  
-  updateMatchInfo();
-  if (data.whiteName) document.getElementById('whiteNameDisplay').textContent = data.whiteName;
-  if (data.blackName) document.getElementById('blackNameDisplay').textContent = data.blackName;
-  document.getElementById('myColorDisplay').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
-  document.getElementById('myColorDisplay').style.color = myColor === 'white' ? '#fff' : '#aaa';
-  
-  if (myColor === 'black' && currentRoomType === 'private') {
-      // کسر سکه بازیکن مشکی برای ورود به اتاق خصوصی در این لحظه انجام میشود
-      if (profile.coins >= currentEntryFee) {
-          profile.coins -= currentEntryFee;
-          localStorage.setItem('nard_profile', JSON.stringify(profile));
-          updateProfileUI();
-      }
-  }
-
-  setupLocalView(); resetBoard();
-  currentTurn = 'white'; gameOver = false;
-  document.getElementById('turnInfo').textContent = 'نوبت: سفید';
-  if (myColor === 'white') { document.getElementById('rollBtn').disabled = false; showMessage("شما سفید هستید. تاس بنداز."); } 
-  else { document.getElementById('rollBtn').disabled = true; showMessage("در انتظار حرکت سفید..."); }
-});
-socket.on('startNextGame', (data) => {
-  matchScore = data.scores; updateMatchInfo();
-  setupLocalView(); resetBoard();
-  currentTurn = data.nextTurn; gameOver = false;
-  diceValues = []; diceRolled = false; updateDiceDisplay();
-  document.getElementById('turnInfo').textContent = 'نوبت: ' + (currentTurn === 'white' ? 'سفید' : 'مشکی');
-  if (currentTurn === myColor) { document.getElementById('rollBtn').disabled = false; showMessage("نوبت شماست. تاس بنداز."); } 
-  else { document.getElementById('rollBtn').disabled = true; showMessage("در انتظار حرکت حریف..."); }
-});
-socket.on('matchOver', (data) => {
-  matchScore = data.scores; updateMatchInfo(); gameOver = true;
-  document.getElementById('passBtn').style.display = "none";
-  document.getElementById('rollBtn').disabled = true;
-  showOverlay(true, data.winner, 0, data.gamesWon);
-});
-socket.on('diceResult', (data) => {
-  if (isBotMode) return;
-  diceValues = data.n1 === data.n2 ? [data.n1, data.n1, data.n1, data.n1] : [data.n1, data.n2];
-  animateDiceThenSet([data.n1, data.n2], () => {
-    diceRolled = true;
-    if (data.roller === myColor) {
-      if (!hasAnyLegalMove()) { document.getElementById("passBtn").style.display = "block"; showMessage("هیچ حرکتی نداری! پاس بده."); } 
-      else { showMessage("تاس انداختی. حرکت کن."); }
-    } else { showMessage("حریف تاس انداخت..."); }
-  });
-});
-socket.on('stateSync', (data) => {
-  if (isBotMode) return;
-  applyBoardState(data.state);
-  diceValues = data.dice; updateDiceDisplay();
-  currentTurn = data.turn;
-  document.getElementById('turnInfo').textContent = 'نوبت: ' + (currentTurn === 'white' ? 'سفید' : 'مشکی');
-  document.getElementById("passBtn").style.display = "none";
-  if (currentTurn === myColor) {
-    diceRolled = diceValues.length > 0;
-    if (diceRolled) {
-      if (!hasAnyLegalMove()) { document.getElementById("passBtn").style.display = "block"; showMessage("هیچ حرکتی نداری! پاس بده."); } 
-      else { showMessage("حریف حرکت کرد. نوبت شماست."); }
-    } else { document.getElementById("rollBtn").disabled = false; showMessage("نوبت شماست. تاس بنداز."); }
-  } else { showMessage("حریف در حال بازی..."); }
-});
-socket.on('gameOver', (data) => {
-  if (isBotMode) return;
-  if (gameOver) return; 
-  gameOver = true;
-  document.getElementById('passBtn').style.display = "none";
-  document.getElementById('rollBtn').disabled = true;
-  showOverlay(false, data.winner, data.points);
-});
-socket.on('opponentDisconnected', () => { if (!isBotMode) showMessage("⚠️ حریف قطع شد! ۶۰ ثانیه فرصت دارد برگردد..."); });
-socket.on('opponentReconnected', () => { if (!isBotMode) showMessage("✅ حریف برگشت! بازی ادامه دارد."); });
-socket.on('opponentTimeout', () => { if (!isBotMode) { alert("حریف برنگشت. شما برنده شدید!"); leaveRoom(); } });
-
-if (roomCode && myColor) {
-    socket.emit('joinRoom', { code: roomCode, playerId: profile.id, playerName: profile.name }, (res) => {
-        if (!res.success) {
-            sessionStorage.removeItem('nard_roomCode'); sessionStorage.removeItem('nard_myColor');
-            showScreen('screen-home');
-        }
-    });
-} else { showScreen('screen-home'); }
-document.getElementById('profileBar').style.display = 'flex';
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
-  });
-}
-</script>
-</body>
-</html>
+  if (myOnTarget ===
