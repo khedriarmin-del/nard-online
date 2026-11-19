@@ -7,7 +7,17 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static(path.join(__dirname, 'public')));
+// ==== تنظیمات جلوگیری از کش شدن فایل‌های اصلی ====
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, filePath) => {
+    // اگر فایل index.html یا sw.js بود، به مرورگر بگو کش نکن
+    if (filePath.endsWith('index.html') || filePath.endsWith('sw.js')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+  }
+}));
 
 const rooms = new Map();
 let matchmakingQueue = [];
@@ -19,7 +29,6 @@ function generateCode() {
 }
 
 io.on('connection', (socket) => {
-  // === بازی با حریف تصادفی ===
   socket.on('findMatch', ({ playerId, playerName }) => {
     matchmakingQueue.push({ socketId: socket.id, playerId, playerName });
     
@@ -30,7 +39,7 @@ io.on('connection', (socket) => {
       const code = generateCode();
       const room = {
         code,
-        target: 3, // بازی تصادفی پیش‌فرض ۳ امتیازی است
+        target: 3,
         players: { white: p1.socketId, black: p2.socketId },
         playerIds: { white: p1.playerId, black: p2.playerId },
         playerNames: { white: p1.playerName, black: p2.playerName },
@@ -46,30 +55,19 @@ io.on('connection', (socket) => {
       if (s1) { s1.join(code); s1.roomCode = code; s1.color = 'white'; }
       if (s2) { s2.join(code); s2.roomCode = code; s2.color = 'black'; }
       
-      io.to(code).emit('matchFound', { 
-        code, 
-        target: 3,
-        whiteName: p1.playerName,
-        blackName: p2.playerName
-      });
-      io.to(code).emit('gameStart', { target: 3, matchScore: room.matchScore });
+      io.to(code).emit('matchFound', { code, target: 3, whiteName: p1.playerName, blackName: p2.playerName });
+      io.to(code).emit('gameStart', { target: 3, matchScore: room.matchScore, whiteName: p1.playerName, blackName: p2.playerName });
     } else {
       socket.emit('waitingForMatch');
     }
   });
 
-  // === چت ===
   socket.on('chatMessage', (msg) => {
     const room = rooms.get(socket.roomCode);
     if (!room) return;
-    // ارسال پیام به هر دو بازیکن
-    io.to(room.code).emit('chatMessage', {
-      sender: socket.color,
-      text: msg
-    });
+    io.to(room.code).emit('chatMessage', { sender: socket.color, text: msg });
   });
 
-  // === ساخت اتاق اختصاصی ===
   socket.on('createRoom', ({ target, playerId, playerName }, cb) => {
     const code = generateCode();
     const room = {
@@ -90,12 +88,10 @@ io.on('connection', (socket) => {
     if (typeof cb === 'function') cb({ success: true, code, color: 'white', target: room.target });
   });
 
-  // === ورود به اتاق اختصاصی ===
   socket.on('joinRoom', ({ code, playerId, playerName }, cb) => {
     const room = rooms.get(String(code));
     if (!room) return cb({ success: false, error: 'اتاق پیدا نشد' });
 
-    // اگر بازیکن قبلی بود (Reconnect)
     if (room.playerIds.white === playerId) {
       room.players.white = socket.id;
       socket.join(room.code); socket.roomCode = room.code; socket.color = 'white';
@@ -131,7 +127,6 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // ورود بازیکن جدید (مشکی)
     if (!room.playerIds.black) {
       room.players.black = socket.id;
       room.playerIds.black = playerId;
@@ -146,7 +141,6 @@ io.on('connection', (socket) => {
     return cb({ success: false, error: 'اتاق پر است!' });
   });
 
-  // === مکانیزم‌های بازی ===
   socket.on('rollDice', () => {
     const room = rooms.get(socket.roomCode);
     if (!room) return;
@@ -175,9 +169,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // === قطع اتصال ===
   socket.on('disconnect', () => {
-    // حذف از صف بازی تصادفی (اگر آنجا بود)
     matchmakingQueue = matchmakingQueue.filter(p => p.socketId !== socket.id);
 
     const code = socket.roomCode;
