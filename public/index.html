@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#1a0033">
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2662/2662503.png">
+<link rel="apple-touch-icon" href="/icon.png">
 <title>تخته نرد آنلاین</title>
 <script src="/socket.io/socket.io.js"></script>
 <style>
@@ -19,11 +19,31 @@
   --point-even-up: linear-gradient(180deg, #8b5a2b, #6b3e1f);
   --point-even-down: linear-gradient(0deg, #8b5a2b, #6b3e1f);
   --bar-bg: linear-gradient(90deg, #2c1810, #3d2314, #2c1810);
+  
+  /* Cosmetics Variables */
+  --dice-bg: linear-gradient(145deg, #fff, #e0e0e0);
+  --dice-pip: radial-gradient(circle at 35% 35%, #666, #111);
+  --dice-border: #ccc;
+  --w-checker: radial-gradient(circle at 35% 35%, #ffffff, #cccccc);
+  --w-border: #888;
+  --b-checker: radial-gradient(circle at 35% 35%, #666666, #111111);
+  --b-border: #000;
 }
 
+/* Board Themes */
 body.theme-dark { --page-bg: linear-gradient(160deg, #050510, #0a0a20, #151530); --board-bg: linear-gradient(145deg, #1e1e2e, #0e0e1e); --board-border: #050510; --point-odd-up: linear-gradient(180deg, #6a2a2a, #4a1a1a); --point-odd-down: linear-gradient(0deg, #6a2a2a, #4a1a1a); --point-even-up: linear-gradient(180deg, #3a3a5a, #2a2a4a); --point-even-down: linear-gradient(0deg, #3a3a5a, #2a2a4a); --bar-bg: #050510; }
 body.theme-blue { --page-bg: linear-gradient(160deg, #0a1a3e, #1a2a5e, #2a3a7e); --board-bg: linear-gradient(145deg, #1a3a6e, #0a2a5e); --board-border: #0a1a3e; --point-odd-up: linear-gradient(180deg, #6ab0ff, #3a80ef); --point-odd-down: linear-gradient(0deg, #6ab0ff, #3a80ef); --point-even-up: linear-gradient(180deg, #2a4a8e, #1a3a6e); --point-even-down: linear-gradient(0deg, #2a4a8e, #1a3a6e); --bar-bg: #0a1a3e; }
 body.theme-green { --page-bg: linear-gradient(160deg, #0a2e0a, #1a4e1a, #2a6e2a); --board-bg: linear-gradient(145deg, #2a5e2a, #1a4e1a); --board-border: #0a2e0a; --point-odd-up: linear-gradient(180deg, #7fdf7f, #4faf4f); --point-odd-down: linear-gradient(0deg, #7fdf7f, #4faf4f); --point-even-up: linear-gradient(180deg, #3a7e3a, #2a6e2a); --point-even-down: linear-gradient(0deg, #3a7e3a, #2a6e2a); --bar-bg: #0a2e0a; }
+body.theme-neon { --page-bg: linear-gradient(160deg, #000000, #1a0033, #000000); --board-bg: linear-gradient(145deg, #0d0d1a, #000000); --board-border: #ff00ff; --point-odd-up: linear-gradient(180deg, #00ffff, #0088cc); --point-odd-down: linear-gradient(0deg, #00ffff, #0088cc); --point-even-up: linear-gradient(180deg, #ff00ff, #990099); --point-even-down: linear-gradient(0deg, #ff00ff, #990099); --bar-bg: #000; }
+
+/* Dice Themes */
+body.dice-gold { --dice-bg: linear-gradient(145deg, #ffd700, #b8860b); --dice-pip: radial-gradient(circle at 35% 35%, #fff, #8b6508); --dice-border: #8b6508; }
+body.dice-red { --dice-bg: linear-gradient(145deg, #ff4757, #c0392b); --dice-pip: radial-gradient(circle at 35% 35%, #fff, #ddd); --dice-border: #a93226; }
+body.dice-neon { --dice-bg: linear-gradient(145deg, #00ffff, #00b3b3); --dice-pip: radial-gradient(circle at 35% 35%, #000, #333); --dice-border: #008080; }
+
+/* Checker Themes */
+body.checker-gold { --w-checker: radial-gradient(circle at 35% 35%, #ffd700, #b8860b); --w-border: #8b6508; --b-checker: radial-gradient(circle at 35% 35%, #c0c0c0, #808080); --b-border: #555; }
+body.checker-glass { --w-checker: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.8), rgba(200,200,200,0.2)); --w-border: rgba(255,255,255,0.5); --b-checker: radial-gradient(circle at 35% 35%, rgba(50,50,50,0.8), rgba(0,0,0,0.2)); --b-border: rgba(100,100,100,0.5); }
 
 body {
   font-family: Tahoma, Arial, sans-serif; background: var(--page-bg);
@@ -57,12 +77,19 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 .btn-pass { background: linear-gradient(145deg, #ffa500, #cc8400); }
 .btn-ai { background: linear-gradient(145deg, #3a7bd5, #2a5db5); box-shadow: 0 4px 15px rgba(58,123,213,0.3); }
 
-.shop-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 10px; width: 100%; }
-.shop-theme-preview { width: 40px; height: 40px; border-radius: 8px; border: 2px solid #fff; }
-.shop-item-info { flex: 1; margin-right: 15px; text-align: right; }
-.shop-item-title { font-weight: bold; font-size: 15px; }
+/* Shop Tabs */
+.shop-tabs { display: flex; gap: 5px; width: 100%; margin-bottom: 15px; }
+.shop-tab { flex: 1; padding: 10px; background: rgba(255,255,255,0.1); border: none; color: #ccc; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: bold; transition: 0.2s; }
+.shop-tab.active { background: #ffd93d; color: #1a1a2e; }
+.shop-content { width: 100%; display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; padding-right: 5px; }
+.shop-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+.shop-preview { width: 40px; height: 40px; border-radius: 8px; border: 2px solid #fff; display: flex; justify-content: center; align-items: center; }
+.shop-preview.dice-prev { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 4px; gap: 2px; }
+.shop-preview.dice-prev span { background: #111; border-radius: 50%; width: 100%; height: 100%; }
+.shop-item-info { flex: 1; margin-right: 12px; text-align: right; }
+.shop-item-title { font-weight: bold; font-size: 14px; }
 .shop-item-price { font-size: 12px; color: #ffd93d; margin-top: 4px; }
-.btn-buy { width: auto; padding: 8px 16px; font-size: 13px; margin: 0; }
+.btn-buy { width: auto; padding: 6px 12px; font-size: 12px; margin: 0; border-radius: 8px; }
 
 .match-bar { display: flex; gap: 14px; align-items: center; background: rgba(0,0,0,0.35); padding: 8px 14px; border-radius: 10px; margin-bottom: 10px; font-size: 13px; flex-wrap: wrap; justify-content: center; width: 100%;}
 .match-bar .match-label { color: #ffd93d; font-weight: bold; }
@@ -73,7 +100,7 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 .board {
   width: 100%; background: var(--board-bg); border: 6px solid var(--board-border);
   border-radius: 12px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  display: flex; flex-direction: column; gap: 8px; transition: background 0.3s;
+  display: flex; flex-direction: column; gap: 8px; transition: background 0.3s, border-color 0.3s;
 }
 .row { display: flex; height: 150px; gap: 2px; }
 .point { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; z-index: 1; }
@@ -88,9 +115,10 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 
 .center-bar { width: 18px; background: var(--bar-bg); border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px 0; }
 
+/* Checkers with CSS variables */
 .checker { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; cursor: pointer; transition: 0.15s; z-index: 3; }
-.white { background: radial-gradient(circle at 35% 35%, #ffffff, #cccccc); border: 2px solid #888; box-shadow: 0 3px 5px rgba(0,0,0,0.5), inset 0 0 4px rgba(255,255,255,0.8); }
-.black { background: radial-gradient(circle at 35% 35%, #666666, #111111); border: 2px solid #000; box-shadow: 0 3px 5px rgba(0,0,0,0.7), inset 0 0 4px rgba(255,255,255,0.3); }
+.white { background: var(--w-checker); border: 2px solid var(--w-border); box-shadow: 0 3px 5px rgba(0,0,0,0.5), inset 0 0 4px rgba(255,255,255,0.8); }
+.black { background: var(--b-checker); border: 2px solid var(--b-border); box-shadow: 0 3px 5px rgba(0,0,0,0.7), inset 0 0 4px rgba(255,255,255,0.3); }
 .checker.selected { border: 3px solid #ffd93d !important; box-shadow: 0 0 12px #ffd93d; transform: scale(1.1); }
 .checker.can-bear-off { outline: 3px solid #4caf50; outline-offset: 2px; animation: pulse 1s infinite; }
 @keyframes pulse { 0%, 100% { outline-color: #4caf50; } 50% { outline-color: #a5ffa8; } }
@@ -99,10 +127,10 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 
 .controls { width: 100%; margin-top: 16px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
 .dice-area { display: flex; gap: 22px; }
-.dice { width: 54px; height: 54px; background: linear-gradient(145deg, #fff, #e0e0e0); border-radius: 12px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 8px; gap: 3px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid #ccc; transition: transform 0.1s; }
+.dice { width: 54px; height: 54px; background: var(--dice-bg); border-radius: 12px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 8px; gap: 3px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid var(--dice-border); transition: transform 0.1s; }
 .dice.rolling { animation: diceShake 0.1s infinite alternate; }
 @keyframes diceShake { from { transform: rotate(-5deg) scale(1.05); } to { transform: rotate(5deg) scale(1.05); } }
-.dice .pip { width: 8px; height: 8px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #666, #111); place-self: center; }
+.dice .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--dice-pip); place-self: center; }
 .dice .pip.hidden { visibility: hidden; }
 
 .chat-toggle-btn { position: fixed; bottom: 20px; left: 20px; width: 50px; height: 50px; border-radius: 50%; background: #3a5a8a; border: none; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 150; display: none; align-items: center; justify-content: center; }
@@ -150,18 +178,33 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
   <h1>🎲 نرد آنلاین</h1>
   <p>یک اتاق بسازید، به دوستتان بپیوندید یا با حریف تصادفی بازی کنید.</p>
   
-  <button class="btn btn-ai" onclick="startBotGame()">🤖 بازی با کامپیوتر</button>
+  <button class="btn btn-ai" onclick="showScreen('screen-ai-setup')">🤖 بازی با کامپیوتر</button>
   <button class="btn btn-random" onclick="findRandomMatch()">🎲 بازی با حریف تصادفی</button>
   <button class="btn btn-online" onclick="showScreen('screen-create')">➕ ساخت اتاق اختصاصی</button>
   <button class="btn btn-secondary" onclick="showScreen('screen-join')">🔑 ورود با کد اتاق</button>
-  <button class="btn btn-secondary" onclick="showScreen('screen-shop')" style="margin-top: 10px; background: #b8860b;">🛒 فروشگاه تم‌ها</button>
+  <button class="btn btn-secondary" onclick="showScreen('screen-shop')" style="margin-top: 10px; background: #b8860b;">🛒 فروشگاه</button>
 </div>
 
-<div id="screen-shop" class="screen">
-  <h1>🛒 فروشگاه تم</h1>
-  <p>با سکه‌های خود ظاهر تخته را تغییر دهید.</p>
-  <div id="shop-list"></div>
+<!-- AI Difficulty Screen -->
+<div id="screen-ai-setup" class="screen">
+  <h1>🤖 بازی با کامپیوتر</h1>
+  <p>سطح سختی حریف را انتخاب کنید:</p>
+  <button class="btn btn-random" onclick="startBotGame('easy')">🟢 آسان (مبتدی)</button>
+  <button class="btn btn-ai" onclick="startBotGame('medium')">🟡 متوسط (معمولی)</button>
+  <button class="btn" onclick="startBotGame('hard')" style="background: linear-gradient(145deg, #ff4757, #c0392b);">🔴 سخت (حرفه‌ای)</button>
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
+</div>
+
+<!-- Shop Screen -->
+<div id="screen-shop" class="screen">
+  <h1>🛒 فروشگاه</h1>
+  <div class="shop-tabs">
+    <button class="shop-tab active" onclick="switchShopTab('boards')">تخته</button>
+    <button class="shop-tab" onclick="switchShopTab('dice')">تاس</button>
+    <button class="shop-tab" onclick="switchShopTab('checkers')">مهره</button>
+  </div>
+  <div class="shop-content" id="shop-list"></div>
+  <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px; flex-shrink: 0;">بازگشت</button>
 </div>
 
 <div id="screen-create" class="screen">
@@ -281,9 +324,7 @@ const socket = io();
 // ==== سیستم صدا ====
 let audioCtx = null;
 function ensureAudio() {
-  if (!audioCtx) {
-    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
-  }
+  if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
   return audioCtx;
 }
 function playSound(name) {
@@ -328,23 +369,48 @@ function playSound(name) {
   } catch (e) {}
 }
 
-// ==== مدیریت پروفایل و سکه‌ها ====
+// ==== مدیریت پروفایل، سکه‌ها و کالاها ====
 let profile = JSON.parse(localStorage.getItem('nard_profile')) || {
   id: Math.random().toString(36).substring(2, 10),
   name: 'بازیکن ' + Math.floor(Math.random() * 1000),
-  coins: 200,
+  coins: 500,
   wins: 0,
   losses: 0,
-  themes: ['classic'],
-  activeTheme: 'classic'
+  ownedBoards: ['classic'],
+  activeBoard: 'classic',
+  ownedDice: ['classic'],
+  activeDice: 'classic',
+  ownedCheckers: ['classic'],
+  activeCheckers: 'classic'
 };
+
+// مایگریشن (اگر پروفایل قدیمی داشت)
+if (!profile.ownedBoards) {
+  profile.ownedBoards = profile.themes || ['classic'];
+  profile.activeBoard = profile.activeTheme || 'classic';
+  profile.ownedDice = ['classic'];
+  profile.activeDice = 'classic';
+  profile.ownedCheckers = ['classic'];
+  profile.activeCheckers = 'classic';
+}
 localStorage.setItem('nard_profile', JSON.stringify(profile));
 
 function updateProfileUI() {
   document.getElementById('profileName').textContent = profile.name;
   document.getElementById('profileStats').textContent = toPersian(profile.wins) + ' برد - ' + toPersian(profile.losses) + ' باخت';
   document.getElementById('profileCoins').textContent = toPersian(profile.coins);
-  document.body.className = profile.activeTheme === 'classic' ? '' : 'theme-' + profile.activeTheme;
+  
+  // اعمال تم تخته
+  if (profile.activeBoard === 'classic') document.body.classList.remove('theme-dark', 'theme-blue', 'theme-green', 'theme-neon');
+  else document.body.classList.add('theme-' + profile.activeBoard);
+
+  // اعمال تم تاس
+  document.body.classList.remove('dice-gold', 'dice-red', 'dice-neon');
+  if (profile.activeDice !== 'classic') document.body.classList.add('dice-' + profile.activeDice);
+
+  // اعمال تم مهره
+  document.body.classList.remove('checker-gold', 'checker-glass');
+  if (profile.activeCheckers !== 'classic') document.body.classList.add('checker-' + profile.activeCheckers);
 }
 updateProfileUI();
 
@@ -355,6 +421,7 @@ function showScreen(id) {
   document.getElementById('chatToggle').classList.remove('active');
   document.getElementById('chatWindow').classList.remove('open');
   document.getElementById('profileBar').style.display = (id === 'screen-game') ? 'none' : 'flex';
+  if (id === 'screen-shop') renderShop();
 }
 function showMessage(t) { document.getElementById('message').textContent = t; }
 function leaveRoom() {
@@ -363,55 +430,94 @@ function leaveRoom() {
   location.reload();
 }
 
-// ==== سیستم فروشگاه ====
-const THEMES = {
-  classic: { name: 'کلاسیک', price: 0, colors: 'linear-gradient(135deg, #8b5a2b, #6b3e1f)' },
-  dark: { name: 'شب تاریک', price: 100, colors: 'linear-gradient(135deg, #1e1e2e, #0e0e1e)' },
-  blue: { name: 'اقیانوس', price: 150, colors: 'linear-gradient(135deg, #1a3a6e, #0a2a5e)' },
-  green: { name: 'جنگل', price: 150, colors: 'linear-gradient(135deg, #2a5e2a, #1a4e1a)' }
+// ==== سیستم فروشگاه ارتقا یافته ====
+const SHOP_DATA = {
+  boards: {
+    classic: { name: 'کلاسیک', price: 0, colors: 'linear-gradient(135deg, #8b5a2b, #6b3e1f)' },
+    dark: { name: 'شب تاریک', price: 100, colors: 'linear-gradient(135deg, #1e1e2e, #0e0e1e)' },
+    blue: { name: 'اقیانوس', price: 150, colors: 'linear-gradient(135deg, #1a3a6e, #0a2a5e)' },
+    green: { name: 'جنگل', price: 150, colors: 'linear-gradient(135deg, #2a5e2a, #1a4e1a)' },
+    neon: { name: 'نئون', price: 300, colors: 'linear-gradient(135deg, #ff00ff, #00ffff)' }
+  },
+  dice: {
+    classic: { name: 'سفید کلاسیک', price: 0, bg: '#fff', pip: '#111' },
+    gold: { name: 'طلایی', price: 100, bg: '#ffd700', pip: '#fff' },
+    red: { name: 'یاقوتی', price: 100, bg: '#ff4757', pip: '#fff' },
+    neon: { name: 'نئون آبی', price: 200, bg: '#00ffff', pip: '#000' }
+  },
+  checkers: {
+    classic: { name: 'کلاسیک', price: 0, w: '#fff', b: '#111' },
+    gold: { name: 'طلا و نقره', price: 150, w: '#ffd700', b: '#c0c0c0' },
+    glass: { name: 'شیشه‌ای', price: 250, w: 'rgba(255,255,255,0.5)', b: 'rgba(50,50,50,0.5)' }
+  }
 };
+
+let currentShopTab = 'boards';
+
+function switchShopTab(tab) {
+  currentShopTab = tab;
+  document.querySelectorAll('.shop-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  renderShop();
+}
 
 function renderShop() {
   const shopList = document.getElementById('shop-list');
   shopList.innerHTML = '';
-  for (const [key, data] of Object.entries(THEMES)) {
-    const owned = profile.themes.includes(key);
-    const active = profile.activeTheme === key;
-    const item = document.createElement('div');
-    item.className = 'shop-item';
-    item.innerHTML = `
-      <div class="shop-theme-preview" style="background: ${data.colors}"></div>
+  
+  const activeKey = currentShopTab === 'boards' ? profile.activeBoard : (currentShopTab === 'dice' ? profile.activeDice : profile.activeCheckers);
+  const ownedArr = currentShopTab === 'boards' ? profile.ownedBoards : (currentShopTab === 'dice' ? profile.ownedDice : profile.ownedCheckers);
+  const data = SHOP_DATA[currentShopTab];
+
+  for (const [key, item] of Object.entries(data)) {
+    const owned = ownedArr.includes(key);
+    const active = activeKey === key;
+    
+    let previewHTML = '';
+    if (currentShopTab === 'boards') {
+        previewHTML = `<div class="shop-preview" style="background: ${item.colors}"></div>`;
+    } else if (currentShopTab === 'dice') {
+        previewHTML = `<div class="shop-preview dice-prev" style="background: ${item.bg}; border-color: ${item.bg};"><span style="background: ${item.pip}; grid-column: 2; grid-row: 2;"></span></div>`;
+    } else {
+        previewHTML = `<div class="shop-preview" style="background: linear-gradient(135deg, ${item.w} 50%, ${item.b} 50%)"></div>`;
+    }
+
+    const el = document.createElement('div');
+    el.className = 'shop-item';
+    el.innerHTML = `
+      ${previewHTML}
       <div class="shop-item-info">
-        <div class="shop-item-title">${data.name}</div>
-        <div class="shop-item-price">${owned ? (active ? 'فعال' : 'خریداری شده') : '🪙 ' + data.price}</div>
+        <div class="shop-item-title">${item.name}</div>
+        <div class="shop-item-price">${owned ? (active ? 'فعال' : 'خریداری شده') : '🪙 ' + toPersian(item.price)}</div>
       </div>
-      <button class="btn ${active ? 'btn-secondary' : 'btn-buy'}" ${active ? 'disabled' : ''} onclick="handleBuyTheme('${key}')">
+      <button class="btn ${active ? 'btn-secondary' : 'btn-buy'}" ${active ? 'disabled' : ''} onclick="handleBuy('${currentShopTab}', '${key}')">
         ${active ? 'انتخاب شده' : (owned ? 'انتخاب' : 'خرید')}
       </button>
     `;
-    shopList.appendChild(item);
+    shopList.appendChild(el);
   }
 }
 
-function handleBuyTheme(key) {
-  const theme = THEMES[key];
-  if (profile.themes.includes(key)) {
-    profile.activeTheme = key;
-    localStorage.setItem('nard_profile', JSON.stringify(profile));
-    updateProfileUI();
-    renderShop();
+function handleBuy(category, key) {
+  const item = SHOP_DATA[category][key];
+  const ownedArrKey = category === 'boards' ? 'ownedBoards' : (category === 'dice' ? 'ownedDice' : 'ownedCheckers');
+  const activeKey = category === 'boards' ? 'activeBoard' : (category === 'dice' ? 'activeDice' : 'activeCheckers');
+  
+  if (profile[ownedArrKey].includes(key)) {
+    profile[activeKey] = key;
   } else {
-    if (profile.coins >= theme.price) {
-      profile.coins -= theme.price;
-      profile.themes.push(key);
-      profile.activeTheme = key;
-      localStorage.setItem('nard_profile', JSON.stringify(profile));
-      updateProfileUI();
-      renderShop();
+    if (profile.coins >= item.price) {
+      profile.coins -= item.price;
+      profile[ownedArrKey].push(key);
+      profile[activeKey] = key;
     } else {
       alert("سکه کافی نیست!");
+      return;
     }
   }
+  localStorage.setItem('nard_profile', JSON.stringify(profile));
+  updateProfileUI();
+  renderShop();
 }
 
 // ==== چت ====
@@ -422,11 +528,7 @@ function toggleChat() {
 function sendChat() {
   const input = document.getElementById('chatInput');
   if (input.value.trim()) {
-    if (isBotMode) {
-      // در حالت کامپیوتر، چت کار نمی‌کند
-    } else {
-      socket.emit('chatMessage', input.value.trim());
-    }
+    if (!isBotMode) socket.emit('chatMessage', input.value.trim());
     input.value = '';
   }
 }
@@ -448,6 +550,7 @@ socket.on('chatMessage', (data) => {
 
 // ==== بازی و اتصال ====
 let isBotMode = false;
+let botDifficulty = 'medium';
 let myColor = sessionStorage.getItem('nard_myColor');
 let roomCode = sessionStorage.getItem('nard_roomCode');
 let currentTurn = "white";
@@ -459,18 +562,19 @@ let matchTarget = 3;
 let matchScore = { white: 0, black: 0 };
 
 // ==== شروع بازی با کامپیوتر ====
-function startBotGame() {
+function startBotGame(difficulty) {
   isBotMode = true;
+  botDifficulty = difficulty;
   myColor = 'white';
   matchTarget = 3;
   matchScore = { white: 0, black: 0 };
   
   showScreen('screen-game');
-  document.getElementById('chatToggle').classList.remove('active'); // چت غیرفعال
+  document.getElementById('chatToggle').classList.remove('active');
   
   updateMatchInfo();
   document.getElementById('whiteNameDisplay').textContent = profile.name;
-  document.getElementById('blackNameDisplay').textContent = '🤖 کامپیوتر';
+  document.getElementById('blackNameDisplay').textContent = '🤖 کامپیوتر (' + (difficulty === 'easy' ? 'آسان' : difficulty === 'medium' ? 'متوسط' : 'سخت') + ')';
   document.getElementById('myColorDisplay').textContent = 'شما: سفید';
   
   setupLocalView();
@@ -578,12 +682,7 @@ function setupLocalView() {
         el.dataset.point = el.dataset.orig;
     });
     if (myColor === 'black') {
-        const mapping = {
-            13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7,
-            19: 6, 20: 5, 21: 4, 22: 3, 23: 2, 24: 1,
-            12: 13, 11: 14, 10: 15, 9: 16, 8: 17, 7: 18,
-            6: 19, 5: 20, 4: 21, 3: 22, 2: 23, 1: 24
-        };
+        const mapping = { 13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7, 19: 6, 20: 5, 21: 4, 22: 3, 23: 2, 24: 1, 12: 13, 11: 14, 10: 15, 9: 16, 8: 17, 7: 18, 6: 19, 5: 20, 4: 21, 3: 22, 2: 23, 1: 24 };
         document.querySelectorAll('.point').forEach(el => {
             const orig = parseInt(el.dataset.orig);
             el.dataset.point = mapping[orig];
@@ -867,7 +966,7 @@ function endGame(winner) {
       showOverlay(false, winner, points);
       setTimeout(() => { 
         document.getElementById('overlay').style.display = 'none'; 
-        startBotGame(); 
+        startBotGame(botDifficulty); 
       }, 2500);
     }
   } else {
@@ -904,7 +1003,7 @@ function showOverlay(isMatchOver, winner, points) {
   document.getElementById('overlay').style.display = 'flex';
 }
 
-// ==== هوش مصنوعی ====
+// ==== هوش مصنوعی (سه سطح) ====
 function aiGetMoves() {
   const moves = [];
   if (hasCheckerOnBar()) {
@@ -941,8 +1040,9 @@ function aiGetMoves() {
 function isInOpponentHome(pt) {
   return currentTurn === 'white' ? (pt >= 19 && pt <= 24) : (pt >= 1 && pt <= 6);
 }
-function aiScoreMove(m) {
+function aiScoreMove(m, difficulty) {
   if (m.type === 'bearoff') return 1000;
+  
   const opp = currentTurn === "white" ? "black" : "white";
   let score = 0;
   const target = document.querySelector('.point[data-point="' + m.to + '"]');
@@ -951,6 +1051,13 @@ function aiScoreMove(m) {
   const myOnTarget = target.querySelectorAll('.' + currentTurn).length;
   const oppOnTarget = target.querySelectorAll('.' + opp).length;
   
+  if (difficulty === 'easy') {
+    // سطح آسان: حرکات تصادفی با کمی تمایل به زدن مهره
+    if (oppOnTarget === 1) return 100 + Math.random() * 50;
+    return Math.random() * 100;
+  } 
+  
+  // منطق مشترک برای متوسط و سخت
   if (oppOnTarget === 1) score += 500;
   if (myOnTarget >= 1) score += 200;
   else if (myOnTarget === 0 && !isInOpponentHome(m.to)) score += 30;
@@ -964,18 +1071,40 @@ function aiScoreMove(m) {
       if (fromCount === 2) score -= 200;
       else if (fromCount >= 3) score += 60;
     }
-  }
-  if (m.type === 'bar') score += 180;
-  if (m.type === 'move') {
     const adv = currentTurn === "white" ? (m.from - m.to) : (m.to - m.from);
     score += adv * 4;
   }
+  if (m.type === 'bar') score += 180;
+
+  if (difficulty === 'hard') {
+    // سطح سخت: بررسی دقیق‌تر تهدیدهای حریف
+    // اگر مهره‌ای را در خانه حریف رها می‌کنیم، جریمه بیشتری دارد
+    if (myOnTarget === 0 && isInOpponentHome(m.to)) score -= 100; // جریمه دوبرابر برای رها کردن در خانه حریف
+    
+    // اگر مهره‌ای که حرکت می‌دهیم تنها بود (بلات)، جریمه می‌شود
+    if (m.type === 'move') {
+      const fromEl = document.querySelector('.point[data-point="' + m.from + '"]');
+      if (fromEl && fromEl.querySelectorAll('.' + currentTurn).length === 1) score -= 100;
+    }
+  }
+  
   return score;
 }
-function aiPickMove(moves) {
-  const scored = moves.map(m => ({ m, s: aiScoreMove(m) })).sort((a, b) => b.s - a.s);
-  const top = scored.slice(0, Math.min(2, scored.length));
-  return top[Math.floor(Math.random() * top.length)].m;
+function aiPickMove(moves, difficulty) {
+  const scored = moves.map(m => ({ m, s: aiScoreMove(m, difficulty) })).sort((a, b) => b.s - a.s);
+  
+  if (difficulty === 'easy') {
+    // انتخاب از بین ۴ حرکت برتر (تصادفی‌تر)
+    const top = scored.slice(0, Math.min(4, scored.length));
+    return top[Math.floor(Math.random() * top.length)].m;
+  } else if (difficulty === 'medium') {
+    // انتخاب از بین ۲ حرکت برتر
+    const top = scored.slice(0, Math.min(2, scored.length));
+    return top[Math.floor(Math.random() * top.length)].m;
+  } else {
+    // سطح سخت: همیشه بهترین حرکت را انجام می‌دهد
+    return scored[0].m;
+  }
 }
 function aiTurn() {
   if (gameOver || currentTurn !== "black" || !isBotMode) return;
@@ -994,7 +1123,7 @@ function aiMakeMove() {
     setTimeout(() => { endTurn(); }, 500);
     return;
   }
-  const move = aiPickMove(moves);
+  const move = aiPickMove(moves, botDifficulty);
   aiExecuteMove(move);
 }
 function aiExecuteMove(move) {
