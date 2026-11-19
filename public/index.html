@@ -46,17 +46,123 @@ body {
   color: #fff; min-height: 100vh; display: flex; flex-direction: column;
   align-items: center; padding: 16px 12px; overflow-x: hidden; transition: background 0.3s;
 }
+
+/* ================== HOME SCREEN (NEW DESIGN) ================== */
+.start-home {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--page-bg);
+  overflow-y: auto;
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 16px 16px 30px;
+}
+.start-home::before {
+  content: "";
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(255,107,157,0.22), transparent 45%),
+    radial-gradient(circle at 85% 20%, rgba(107,157,255,0.18), transparent 45%),
+    radial-gradient(circle at 50% 90%, rgba(255,217,61,0.10), transparent 55%);
+}
+.start-home > * { position: relative; z-index: 1; }
+
+.top-bar { width: 100%; max-width: 460px; display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.top-icon-btn {
+  width: 42px; height: 42px; flex-shrink: 0;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px; color: #fff; font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: 0.15s; backdrop-filter: blur(10px);
+}
+.top-icon-btn:hover { background: rgba(255,107,157,0.15); border-color: rgba(255,107,157,0.4); }
+
+.user-chip {
+  flex: 1; display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px 8px 8px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px; backdrop-filter: blur(10px); min-width: 0;
+}
+.user-avatar {
+  width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%;
+  background: linear-gradient(145deg, #ff6b9d, #d6336c);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; box-shadow: 0 2px 10px rgba(255,107,157,0.4);
+}
+.user-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.user-name { font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-level { font-size: 10px; color: #b0b0d0; }
+
+.home-hero { text-align: center; margin-bottom: 18px; }
+.hero-dice {
+  font-size: 56px; display: inline-block;
+  filter: drop-shadow(0 8px 24px rgba(255,107,157,0.5));
+  animation: floatDice 3s ease-in-out infinite;
+}
+@keyframes floatDice { 0%, 100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-8px) rotate(5deg); } }
+.hero-title {
+  font-size: 30px; font-weight: bold;
+  background: linear-gradient(90deg, #ff6b9d, #ffd93d, #6b9dff);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; margin: 4px 0; letter-spacing: 1px;
+}
+.hero-sub { font-size: 12px; color: #a0a0c0; }
+
+/* Main Layout: Buttons + Side Icons */
+.home-main { display: flex; gap: 10px; width: 100%; max-width: 460px; margin-bottom: 16px; align-items: stretch; }
+.play-buttons { flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.play-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 12px; border: none; border-radius: 16px;
+  cursor: pointer; font-family: inherit; text-align: right;
+  color: #fff; transition: 0.2s; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  position: relative; overflow: hidden;
+}
+.play-btn::before { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent 50%); pointer-events: none; }
+.play-btn:active { transform: translateY(0) scale(0.99); }
+.play-btn-online { background: linear-gradient(135deg, #9d4edd 0%, #6a0572 100%); border: 1px solid rgba(157,78,221,0.4); }
+.play-btn-private { background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); border: 1px solid rgba(76,175,80,0.4); }
+.play-btn-ai { background: linear-gradient(135deg, #3a7bd5 0%, #2a5db5 100%); border: 1px solid rgba(107,157,255,0.4); }
+.play-icon { font-size: 22px; background: rgba(255,255,255,0.18); border-radius: 10px; min-width: 40px; height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.play-body { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+.play-title { font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.play-sub { font-size: 10px; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.play-arrow { font-size: 14px; opacity: 0.7; transform: scaleX(-1); flex-shrink: 0; }
+
+.side-icons { width: 72px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; }
+.side-icon-btn {
+  flex: 1; min-height: 0; padding: 6px 3px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; color: #fff; font-family: inherit; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; transition: 0.15s; backdrop-filter: blur(10px);
+}
+.side-icon-btn:active { transform: scale(0.97); }
+.side-icon-emoji { font-size: 20px; line-height: 1; }
+.side-icon-label { font-size: 9px; color: #b0b0d0; text-align: center; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+.bottom-icons { width: 100%; max-width: 460px; display: flex; gap: 8px; margin-bottom: 16px; }
+.bottom-icon-btn {
+  flex: 1; padding: 10px 4px 8px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; color: #fff; font-family: inherit; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  transition: 0.15s; backdrop-filter: blur(10px); min-width: 0;
+}
+.bottom-icon-btn:active { transform: translateY(0); }
+.bottom-icon-emoji { font-size: 20px; line-height: 1; }
+.bottom-icon-label { font-size: 10px; color: #ccc; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; line-height: 1.1; }
+.bottom-icon-soon { font-size: 8px; color: #ffd93d; line-height: 1; }
+
+.quick-stats { width: 100%; max-width: 460px; display: flex; align-items: center; justify-content: space-around; padding: 12px 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; margin-bottom: 16px; backdrop-filter: blur(10px); }
+.stat-item { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
+.stat-num { font-size: 18px; font-weight: bold; color: #fff; }
+.stat-lbl { font-size: 10px; color: #a0a0c0; }
+.stat-divider { width: 1px; height: 26px; background: rgba(255,255,255,0.1); }
+.home-footer { width: 100%; max-width: 460px; text-align: center; font-size: 11px; color: #505070; margin-top: auto; padding-top: 16px; }
+
+/* ================== OTHER SCREENS ================== */
 .screen { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 420px; }
 .screen.active { display: flex; }
-
-.top-bar { width: 100%; max-width: 420px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); gap: 10px; }
-.profile-info { display: flex; align-items: center; gap: 10px; flex: 1;}
-.avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #ff6b9d, #d6336c); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; }
-.user-details { display: flex; flex-direction: column; overflow: hidden;}
-.user-name { font-size: 14px; font-weight: bold; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;}
-.user-stats { font-size: 11px; color: #aaa; }
-.coins-badge { background: #ffd93d; color: #1a1a2e; padding: 6px 10px; border-radius: 20px; font-weight: bold; font-size: 13px; display: flex; gap: 5px; align-items: center; white-space: nowrap;}
-.admin-btn { background: transparent; border: none; color: #aaa; font-size: 20px; cursor: pointer; padding: 5px; }
 
 h1 { font-size: 28px; color: #ff6b9d; margin: 20px 0; text-shadow: 0 2px 10px rgba(255,107,157,0.5); }
 p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-height: 1.6; }
@@ -75,7 +181,6 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 .btn-pass { background: linear-gradient(145deg, #ffa500, #cc8400); }
 .btn-ai { background: linear-gradient(145deg, #3a7bd5, #2a5db5); box-shadow: 0 4px 15px rgba(58,123,213,0.3); }
 .btn-exit { background: linear-gradient(145deg, #555, #333); box-shadow: 0 4px 15px rgba(0,0,0,0.4); font-size: 14px; padding: 10px; margin-top: 10px;}
-.btn-rank { background: linear-gradient(145deg, #ffd700, #b8860b); color: #1a1a2e; box-shadow: 0 4px 15px rgba(255,215,0,0.3); font-size: 15px; margin-bottom: 10px;}
 
 .shop-tabs { display: flex; gap: 5px; width: 100%; margin-bottom: 15px; }
 .shop-tab { flex: 1; padding: 10px; background: rgba(255,255,255,0.1); border: none; color: #ccc; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: bold; transition: 0.2s; }
@@ -170,34 +275,87 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
 
 <div id="confetti-container"></div>
 
-<div class="top-bar" id="profileBar">
-  <div class="profile-info">
-    <div class="avatar">👤</div>
-    <div class="user-details">
-      <span class="user-name" id="profileName">مهمان</span>
-      <span class="user-stats" id="profileStats">رتبه: ۱۰۰۰ | ۰ برد - ۰ باخت</span>
+<!-- ================== HOME SCREEN (BEAUTIFUL DESIGN) ================== -->
+<div id="screen-home" class="start-home active">
+  <div class="top-bar">
+    <button class="top-icon-btn" onclick="openAdminPanel()" title="تنظیمات">⚙️</button>
+    <div class="user-chip">
+      <div class="user-avatar">👤</div>
+      <div class="user-info">
+        <span class="user-name" id="profileName">مهمان</span>
+        <span class="user-level" id="profileStats">رتبه: ۱۰۰۰ | ۰ برد - ۰ باخت</span>
+      </div>
+    </div>
+    <div class="coins-badge" style="width: auto; padding: 6px 12px; font-size: 14px;">🪙 <span id="profileCoins">۱۰۰۰</span></div>
+  </div>
+
+  <div class="home-hero">
+    <div class="hero-dice">🎲</div>
+    <h1 class="hero-title">نرد آنلاین</h1>
+    <p class="hero-sub">بهترین بازی استراتژی جهان</p>
+  </div>
+
+  <div class="home-main">
+    <div class="play-buttons">
+      <button class="play-btn play-btn-online" onclick="showScreen('screen-random-setup')">
+        <span class="play-icon">🎲</span>
+        <span class="play-body">
+          <span class="play-title">بازی با حریف تصادفی</span>
+          <span class="play-sub">رقابت در سطوح مختلف</span>
+        </span>
+        <span class="play-arrow">▶</span>
+      </button>
+      <button class="play-btn play-btn-private" onclick="showScreen('screen-create')">
+        <span class="play-icon">➕</span>
+        <span class="play-body">
+          <span class="play-title">اتاق اختصاصی</span>
+          <span class="play-sub">با دوستان خود بازی کنید</span>
+        </span>
+        <span class="play-arrow">▶</span>
+      </button>
+      <button class="play-btn play-btn-ai" onclick="showScreen('screen-ai-setup')">
+        <span class="play-icon">🤖</span>
+        <span class="play-body">
+          <span class="play-title">بازی با کامپیوتر</span>
+          <span class="play-sub">تمرین و چالش (رایگان)</span>
+        </span>
+        <span class="play-arrow">▶</span>
+      </button>
+    </div>
+
+    <div class="side-icons">
+      <button class="side-icon-btn" onclick="showScreen('screen-ranking')">
+        <span class="side-icon-emoji">🏆</span>
+        <span class="side-icon-label">رتبه‌بندی</span>
+      </button>
+      <button class="side-icon-btn" onclick="showScreen('screen-shop')">
+        <span class="side-icon-emoji">🛒</span>
+        <span class="side-icon-label">فروشگاه</span>
+      </button>
+      <button class="side-icon-btn" onclick="alert('به زودی...')">
+        <span class="side-icon-emoji">💬</span>
+        <span class="side-icon-label">چت</span>
+      </button>
+      <button class="side-icon-btn" onclick="alert('به زودی...')">
+        <span class="side-icon-emoji">👤</span>
+        <span class="side-icon-label">پروفایل</span>
+      </button>
     </div>
   </div>
-  <div class="coins-badge">🪙 <span id="profileCoins">۱۰۰۰</span></div>
-  <button class="admin-btn" onclick="openAdminPanel()" title="پنل مدیریت">⚙️</button>
-</div>
 
-<div id="screen-home" class="screen active">
-  <h1>🎲 نرد آنلاین</h1>
-  <p>یک اتاق بسازید، به دوستتان بپیوندید یا با حریف تصادفی بازی کنید.</p>
-  
-  <button class="btn btn-ai" onclick="showScreen('screen-ai-setup')">🤖 بازی با کامپیوتر (رایگان)</button>
-  <button class="btn btn-random" onclick="showScreen('screen-random-setup')">🎲 بازی با حریف تصادفی</button>
-  <button class="btn btn-online" onclick="showScreen('screen-create')">➕ ساخت اتاق اختصاصی</button>
-  <button class="btn btn-secondary" onclick="showScreen('screen-join')">🔑 ورود با کد اتاق</button>
-  
-  <div style="display: flex; gap: 10px; width: 100%; margin-top: 10px;">
-    <button class="btn btn-rank" onclick="showScreen('screen-ranking')" style="flex: 1;">🏆 رتبه‌بندی</button>
-    <button class="btn btn-secondary" onclick="showScreen('screen-shop')" style="flex: 1; background: #b8860b;">🛒 فروشگاه</button>
+  <div class="quick-stats">
+    <div class="stat-item"><span class="stat-num" id="statWins">۰</span><span class="stat-lbl">برد</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat-item"><span class="stat-num" id="statLosses">۰</span><span class="stat-lbl">باخت</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat-item"><span class="stat-num" id="statWinRate">۰٪</span><span class="stat-lbl">نرخ برد</span></div>
   </div>
+
+  <div class="home-footer">نسخه ۱.۰.۰ — ساخته‌شده با ❤️</div>
 </div>
 
-<div id="screen-random-setup" class="screen">
+<!-- ================== SCREEN RANDOM SETUP ================== -->
+<div id="screen-random-setup" class="screen" style="position:fixed; inset:0; background:var(--page-bg); z-index:100; padding:20px; justify-content:center; overflow-y:auto;">
   <h1>🎲 حریف تصادفی</h1>
   <p>سطح بازی را انتخاب کنید (ورودی کسر می‌شود):</p>
   <button class="btn btn-random" onclick="findRandomMatch(100, 50)">مبتدی (ورودی ۱۰۰ + جایزه ۵۰)</button>
@@ -207,15 +365,14 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
 </div>
 
-<div id="screen-create" class="screen">
+<!-- ================== SCREEN CREATE ROOM ================== -->
+<div id="screen-create" class="screen" style="position:fixed; inset:0; background:var(--page-bg); z-index:100; padding:20px; justify-content:center; overflow-y:auto;">
   <h1>➕ ساخت اتاق اختصاصی</h1>
-  
   <p>تعداد دست:</p>
   <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 20px;">
     <button class="btn btn-secondary active" id="btnTarget3" onclick="selectTarget(3)">۳ امتیازی</button>
     <button class="btn btn-secondary" id="btnTarget5" onclick="selectTarget(5)">۵ امتیازی</button>
   </div>
-  
   <p>مقدار شرط (سکه):</p>
   <div style="display: flex; flex-wrap: wrap; gap: 10px; width: 100%; margin-bottom: 20px;">
     <button class="btn btn-secondary active" id="btnFee100" onclick="selectFee(100)">۱۰۰</button>
@@ -224,12 +381,12 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
     <button class="btn btn-secondary" id="btnFee5000" onclick="selectFee(5000)">۵۰۰۰</button>
     <button class="btn btn-secondary" id="btnFee10000" onclick="selectFee(10000)">۱۰۰۰۰</button>
   </div>
-  
   <button class="btn btn-random" onclick="createRoom()">ساخت اتاق</button>
   <button class="btn btn-secondary" onclick="showScreen('screen-home')">بازگشت</button>
 </div>
 
-<div id="screen-ranking" class="screen">
+<!-- ================== SCREEN RANKING ================== -->
+<div id="screen-ranking" class="screen" style="position:fixed; inset:0; background:var(--page-bg); z-index:100; padding:20px; justify-content:center; overflow-y:auto;">
   <h1>🏆 رتبه‌بندی</h1>
   <div class="rank-card">
     <div style="font-size: 16px; color: #aaa;">رتبه شما در بازی</div>
@@ -243,7 +400,8 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
 </div>
 
-<div id="screen-ai-setup" class="screen">
+<!-- ================== SCREEN AI SETUP ================== -->
+<div id="screen-ai-setup" class="screen" style="position:fixed; inset:0; background:var(--page-bg); z-index:100; padding:20px; justify-content:center; overflow-y:auto;">
   <h1>🤖 بازی با کامپیوتر</h1>
   <p>سطح سختی حریف را انتخاب کنید (رایگان):</p>
   <button class="btn btn-random" onclick="startBotGame('easy')">🟢 آسان (مبتدی)</button>
@@ -252,7 +410,8 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
 </div>
 
-<div id="screen-shop" class="screen">
+<!-- ================== SCREEN SHOP ================== -->
+<div id="screen-shop" class="screen" style="position:fixed; inset:0; background:var(--page-bg); z-index:100; padding:20px; justify-content:center; overflow-y:auto;">
   <h1>🛒 فروشگاه</h1>
   <div class="shop-tabs">
     <button class="shop-tab active" onclick="switchShopTab('boards')">تخته</button>
@@ -263,7 +422,8 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px; flex-shrink: 0;">بازگشت</button>
 </div>
 
-<div id="screen-admin" class="screen">
+<!-- ================== SCREEN ADMIN ================== -->
+<div id="screen-admin" class="screen" style="position:fixed; inset:0; background:var(--page-bg); z-index:100; padding:20px; justify-content:center; overflow-y:auto;">
   <h1>⚙️ پنل مدیریت</h1>
   <p style="color:#ff6b9d; font-size:12px;">عکس‌ها را از سیستم خود انتخاب کنید. (زیر ۲۰۰ کیلوبایت)</p>
   <div class="shop-tabs">
@@ -276,7 +436,8 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')">بازگشت به بازی</button>
 </div>
 
-<div id="screen-join" class="screen">
+<!-- ================== SCREEN JOIN ROOM ================== -->
+<div id="screen-join" class="screen" style="position:fixed; inset:0; background:var(--page-bg); z-index:100; padding:20px; justify-content:center; overflow-y:auto;">
   <h1>ورود به اتاق</h1>
   <p>کد ۶ رقمی دریافتی را وارد کنید:</p>
   <input type="text" id="joinCode" placeholder="کد ۶ رقمی" maxlength="6" inputmode="numeric" style="width: 100%; padding: 14px; font-size: 18px; text-align: center; border-radius: 12px; border: 2px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff; margin-bottom: 12px; letter-spacing: 2px; font-weight: bold; outline: none;">
@@ -284,7 +445,8 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')">بازگشت</button>
 </div>
 
-<div id="screen-wait" class="screen">
+<!-- ================== SCREEN WAIT ================== -->
+<div id="screen-wait" class="screen" style="position:fixed; inset:0; background:var(--page-bg); z-index:100; padding:20px; justify-content:center; overflow-y:auto;">
   <h1>در انتظار حریف...</h1>
   <p id="waitText">این کد را برای دوست خود بفرستید:</p>
   <h1 id="roomCodeDisplay" style="font-size: 48px; letter-spacing: 5px; color: #fff; margin: 10px 0;">------</h1>
@@ -292,64 +454,68 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="leaveRoom()" style="margin-top: 20px;">انصراف</button>
 </div>
 
-<div id="screen-game" class="screen" style="max-width: 440px;">
-  <div class="match-bar">
-    <span class="match-label" id="matchLabel">بازی ۳ امتیازی</span>
-    <span>⚪ <span id="whiteScore">۰</span></span>
-    <span>⚫ <span id="blackScore">۰</span></span>
-    <span id="myColorDisplay">شما: -</span>
-  </div>
-  
-  <div style="display: flex; justify-content: space-between; width: 100%; font-size: 13px; margin-bottom: 5px; color: #aaa;">
-    <span id="whiteNameDisplay">سفید</span>
-    <span id="blackNameDisplay">مشکی</span>
-  </div>
+<!-- ================== SCREEN GAME ================== -->
+<div id="screen-game" class="screen" style="position:fixed; inset:0; background:var(--page-bg); z-index:100; padding:20px; justify-content:center; overflow-y:auto; max-width:100%;">
+  <div style="display:flex; flex-direction:column; width:100%; max-width:440px;">
+    <div class="match-bar">
+      <span class="match-label" id="matchLabel">بازی ۳ امتیازی</span>
+      <span>⚪ <span id="whiteScore">۰</span></span>
+      <span>⚫ <span id="blackScore">۰</span></span>
+      <span id="myColorDisplay">شما: -</span>
+    </div>
+    
+    <div style="display: flex; justify-content: space-between; width: 100%; font-size: 13px; margin-bottom: 5px; color: #aaa;">
+      <span id="whiteNameDisplay">سفید</span>
+      <span id="blackNameDisplay">مشکی</span>
+    </div>
 
-  <div class="turn-info" id="turnInfo">در انتظار شروع...</div>
-  <div class="message" id="message"></div>
+    <div class="turn-info" id="turnInfo">در انتظار شروع...</div>
+    <div class="message" id="message"></div>
 
-  <div class="board-wrapper">
-    <div class="board" id="gameBoard">
-      <div class="row">
-        <div class="point" data-point="13"></div><div class="point" data-point="14"></div>
-        <div class="point" data-point="15"></div><div class="point" data-point="16"></div>
-        <div class="point" data-point="17"></div><div class="point" data-point="18"></div>
-        <div class="center-bar" id="topBar"></div>
-        <div class="point" data-point="19"></div><div class="point" data-point="20"></div>
-        <div class="point" data-point="21"></div><div class="point" data-point="22"></div>
-        <div class="point" data-point="23"></div><div class="point" data-point="24"></div>
-      </div>
-      <div class="row">
-        <div class="point" data-point="12"></div><div class="point" data-point="11"></div>
-        <div class="point" data-point="10"></div><div class="point" data-point="9"></div>
-        <div class="point" data-point="8"></div><div class="point" data-point="7"></div>
-        <div class="center-bar" id="bottomBar"></div>
-        <div class="point" data-point="6"></div><div class="point" data-point="5"></div>
-        <div class="point" data-point="4"></div><div class="point" data-point="3"></div>
-        <div class="point" data-point="2"></div><div class="point" data-point="1"></div>
+    <div class="board-wrapper">
+      <div class="board" id="gameBoard">
+        <div class="row">
+          <div class="point" data-point="13"></div><div class="point" data-point="14"></div>
+          <div class="point" data-point="15"></div><div class="point" data-point="16"></div>
+          <div class="point" data-point="17"></div><div class="point" data-point="18"></div>
+          <div class="center-bar" id="topBar"></div>
+          <div class="point" data-point="19"></div><div class="point" data-point="20"></div>
+          <div class="point" data-point="21"></div><div class="point" data-point="22"></div>
+          <div class="point" data-point="23"></div><div class="point" data-point="24"></div>
+        </div>
+        <div class="row">
+          <div class="point" data-point="12"></div><div class="point" data-point="11"></div>
+          <div class="point" data-point="10"></div><div class="point" data-point="9"></div>
+          <div class="point" data-point="8"></div><div class="point" data-point="7"></div>
+          <div class="center-bar" id="bottomBar"></div>
+          <div class="point" data-point="6"></div><div class="point" data-point="5"></div>
+          <div class="point" data-point="4"></div><div class="point" data-point="3"></div>
+          <div class="point" data-point="2"></div><div class="point" data-point="1"></div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="controls">
-    <div class="dice-area">
-      <div class="dice" id="dice1">
-        <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
-        <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
-        <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
+    <div class="controls">
+      <div class="dice-area">
+        <div class="dice" id="dice1">
+          <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
+          <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
+          <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
+        </div>
+        <div class="dice" id="dice2">
+          <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
+          <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
+          <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
+        </div>
       </div>
-      <div class="dice" id="dice2">
-        <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
-        <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
-        <span class="pip hidden"></span><span class="pip hidden"></span><span class="pip hidden"></span>
-      </div>
+      <button class="btn btn-pass" id="passBtn" style="display:none;" onclick="passTurn()">پاس بده (حرکتی نداری)</button>
+      <button class="btn" id="rollBtn" onclick="requestRoll()" disabled>تاس بنداز</button>
+      <button class="btn btn-exit" onclick="confirmExitGame()">🚪 خروج از بازی</button>
     </div>
-    <button class="btn btn-pass" id="passBtn" style="display:none;" onclick="passTurn()">پاس بده (حرکتی نداری)</button>
-    <button class="btn" id="rollBtn" onclick="requestRoll()" disabled>تاس بنداز</button>
-    <button class="btn btn-exit" onclick="confirmExitGame()">🚪 خروج از بازی</button>
   </div>
 </div>
 
+<!-- ================== CHAT ================== -->
 <button class="chat-toggle-btn" id="chatToggle" onclick="toggleChat()">💬</button>
 <div class="chat-window" id="chatWindow">
   <div class="chat-header">
@@ -371,6 +537,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   </div>
 </div>
 
+<!-- ================== OVERLAY ================== -->
 <div class="overlay" id="overlay">
   <div class="overlay-content">
     <div id="overlayIcon" style="font-size:56px;"></div>
@@ -433,6 +600,12 @@ function updateProfileUI() {
   document.getElementById('profileCoins').textContent = toPersian(profile.coins);
   document.getElementById('myRankScore').textContent = toPersian(profile.rating);
   
+  const total = profile.wins + profile.losses;
+  const rate = total > 0 ? Math.round((profile.wins / total) * 100) : 0;
+  document.getElementById('statWins').textContent = toPersian(profile.wins);
+  document.getElementById('statLosses').textContent = toPersian(profile.losses);
+  document.getElementById('statWinRate').textContent = toPersian(rate) + '٪';
+  
   document.body.className = ''; 
   if (profile.activeBoard !== 'classic') document.body.classList.add('theme-' + profile.activeBoard);
   if (profile.activeDice !== 'classic') document.body.classList.add('dice-' + profile.activeDice);
@@ -485,11 +658,10 @@ function playSound(name) {
 
 function toPersian(n) { return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.screen, .start-home').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.getElementById('chatToggle').classList.remove('active');
   document.getElementById('chatWindow').classList.remove('open');
-  document.getElementById('profileBar').style.display = (id === 'screen-game') ? 'none' : 'flex';
   if (id === 'screen-shop') renderShop();
   if (id === 'screen-admin') renderAdminPanel();
   if (id === 'screen-ranking') updateProfileUI();
@@ -1209,7 +1381,6 @@ socket.on('gameStart', (data) => {
   currentEntryFee = data.entryFee;
   currentBonus = data.bonus;
   
-  // کسر سکه در اینجا انجام میشود تا مطمئن باشیم بازی واقعا شروع شده است
   if (profile.coins >= currentEntryFee) {
       profile.coins -= currentEntryFee;
       localStorage.setItem('nard_profile', JSON.stringify(profile));
@@ -1289,7 +1460,6 @@ if (roomCode && myColor) {
         }
     });
 } else { showScreen('screen-home'); }
-document.getElementById('profileBar').style.display = 'flex';
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
