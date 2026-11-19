@@ -18,7 +18,6 @@
   --bar-bg: linear-gradient(90deg, #2c1810, #3d2314, #2c1810);
 }
 
-/* تم‌های فروشگاه */
 body.theme-dark { --page-bg: linear-gradient(160deg, #050510, #0a0a20, #151530); --board-bg: linear-gradient(145deg, #1e1e2e, #0e0e1e); --board-border: #050510; --point-odd-up: linear-gradient(180deg, #6a2a2a, #4a1a1a); --point-odd-down: linear-gradient(0deg, #6a2a2a, #4a1a1a); --point-even-up: linear-gradient(180deg, #3a3a5a, #2a2a4a); --point-even-down: linear-gradient(0deg, #3a3a5a, #2a2a4a); --bar-bg: #050510; }
 body.theme-blue { --page-bg: linear-gradient(160deg, #0a1a3e, #1a2a5e, #2a3a7e); --board-bg: linear-gradient(145deg, #1a3a6e, #0a2a5e); --board-border: #0a1a3e; --point-odd-up: linear-gradient(180deg, #6ab0ff, #3a80ef); --point-odd-down: linear-gradient(0deg, #6ab0ff, #3a80ef); --point-even-up: linear-gradient(180deg, #2a4a8e, #1a3a6e); --point-even-down: linear-gradient(0deg, #2a4a8e, #1a3a6e); --bar-bg: #0a1a3e; }
 body.theme-green { --page-bg: linear-gradient(160deg, #0a2e0a, #1a4e1a, #2a6e2a); --board-bg: linear-gradient(145deg, #2a5e2a, #1a4e1a); --board-border: #0a2e0a; --point-odd-up: linear-gradient(180deg, #7fdf7f, #4faf4f); --point-odd-down: linear-gradient(0deg, #7fdf7f, #4faf4f); --point-even-up: linear-gradient(180deg, #3a7e3a, #2a6e2a); --point-even-down: linear-gradient(0deg, #3a7e3a, #2a6e2a); --bar-bg: #0a2e0a; }
@@ -31,7 +30,6 @@ body {
 .screen { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 420px; }
 .screen.active { display: flex; }
 
-/* Top Bar Profile */
 .top-bar { width: 100%; max-width: 420px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
 .profile-info { display: flex; align-items: center; gap: 10px; }
 .avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #ff6b9d, #d6336c); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; }
@@ -55,7 +53,6 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 .btn-random { background: linear-gradient(145deg, #4caf50, #2e7d32); box-shadow: 0 4px 15px rgba(76,175,80,0.3); }
 .btn-pass { background: linear-gradient(145deg, #ffa500, #cc8400); }
 
-/* Shop */
 .shop-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 10px; width: 100%; }
 .shop-theme-preview { width: 40px; height: 40px; border-radius: 8px; border: 2px solid #fff; }
 .shop-item-info { flex: 1; margin-right: 15px; text-align: right; }
@@ -98,11 +95,12 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 
 .controls { width: 100%; margin-top: 16px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
 .dice-area { display: flex; gap: 22px; }
-.dice { width: 54px; height: 54px; background: linear-gradient(145deg, #fff, #e0e0e0); border-radius: 12px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 8px; gap: 3px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid #ccc; }
+.dice { width: 54px; height: 54px; background: linear-gradient(145deg, #fff, #e0e0e0); border-radius: 12px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 8px; gap: 3px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid #ccc; transition: transform 0.1s; }
+.dice.rolling { animation: diceShake 0.1s infinite alternate; }
+@keyframes diceShake { from { transform: rotate(-5deg) scale(1.05); } to { transform: rotate(5deg) scale(1.05); } }
 .dice .pip { width: 8px; height: 8px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #666, #111); place-self: center; }
 .dice .pip.hidden { visibility: hidden; }
 
-/* Chat UI */
 .chat-toggle-btn { position: fixed; bottom: 20px; left: 20px; width: 50px; height: 50px; border-radius: 50%; background: #3a5a8a; border: none; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 150; display: none; align-items: center; justify-content: center; }
 .chat-toggle-btn.active { display: flex; }
 .chat-window { position: fixed; bottom: 80px; left: 20px; width: 300px; height: 400px; background: linear-gradient(145deg, #2a2a4e, #1a1a2e); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; display: none; flex-direction: column; z-index: 150; box-shadow: 0 10px 30px rgba(0,0,0,0.8); overflow: hidden; }
@@ -133,7 +131,6 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 
 <div id="confetti-container"></div>
 
-<!-- نوار بالا (پروفایل) -->
 <div class="top-bar" id="profileBar">
   <div class="profile-info">
     <div class="avatar">👤</div>
@@ -243,7 +240,6 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
   </div>
 </div>
 
-<!-- سیستم چت -->
 <button class="chat-toggle-btn" id="chatToggle" onclick="toggleChat()">💬</button>
 <div class="chat-window" id="chatWindow">
   <div class="chat-header">
@@ -277,6 +273,79 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 <script>
 const socket = io();
 
+// ==== سیستم صدا ====
+let audioCtx = null;
+function ensureAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+  }
+  return audioCtx;
+}
+function playSound(name) {
+  const ctx = ensureAudio(); if (!ctx) return;
+  if (ctx.state === 'suspended') ctx.resume();
+  const now = ctx.currentTime;
+  try {
+    if (name === 'win') {
+      [523, 659, 784, 1047].forEach((f, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type = 'sine'; o.frequency.setValueAtTime(f, now + i * 0.12);
+        g.gain.setValueAtTime(0.15, now + i * 0.12);
+        g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.12 + 0.3);
+        o.start(now + i * 0.12); o.stop(now + i * 0.12 + 0.3);
+      });
+      return;
+    }
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    if (name === 'dice') {
+      o.type = 'triangle'; o.frequency.setValueAtTime(300, now);
+      o.frequency.exponentialRampToValueAtTime(100, now + 0.08);
+      g.gain.setValueAtTime(0.2, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+      o.start(now); o.stop(now + 0.1);
+    } else if (name === 'move') {
+      o.type = 'sine'; o.frequency.setValueAtTime(500, now);
+      o.frequency.exponentialRampToValueAtTime(900, now + 0.05);
+      g.gain.setValueAtTime(0.1, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+      o.start(now); o.stop(now + 0.08);
+    } else if (name === 'hit') {
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(200, now);
+      o.frequency.exponentialRampToValueAtTime(60, now + 0.15);
+      g.gain.setValueAtTime(0.25, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+      o.start(now); o.stop(now + 0.18);
+    } else if (name === 'bearoff') {
+      o.type = 'sine'; o.frequency.setValueAtTime(700, now);
+      o.frequency.exponentialRampToValueAtTime(1400, now + 0.1);
+      g.gain.setValueAtTime(0.12, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+      o.start(now); o.stop(now + 0.12);
+    }
+  } catch (e) {}
+}
+
+// ==== انیمیشن تاس ====
+let diceAnimId = null;
+function stopDiceAnim() { if (diceAnimId) { clearInterval(diceAnimId); diceAnimId = null; } }
+function animateDiceThenSet(vals, cb) {
+  stopDiceAnim();
+  const d1 = document.getElementById('dice1'), d2 = document.getElementById('dice2');
+  d1.classList.add('rolling'); d2.classList.add('rolling');
+  playSound('dice');
+  let i = 0;
+  diceAnimId = setInterval(() => {
+    setDiceFace(d1, Math.floor(Math.random() * 6) + 1);
+    setDiceFace(d2, Math.floor(Math.random() * 6) + 1);
+    i++;
+    if (i >= 8) {
+      stopDiceAnim();
+      d1.classList.remove('rolling'); d2.classList.remove('rolling');
+      setDiceFace(d1, vals[0]);
+      setDiceFace(d2, vals[1]);
+      if (cb) cb();
+    }
+  }, 60);
+}
+
 // ==== مدیریت پروفایل و سکه‌ها ====
 let profile = JSON.parse(localStorage.getItem('nard_profile')) || {
   id: Math.random().toString(36).substring(2, 10),
@@ -293,8 +362,6 @@ function updateProfileUI() {
   document.getElementById('profileName').textContent = profile.name;
   document.getElementById('profileStats').textContent = toPersian(profile.wins) + ' برد - ' + toPersian(profile.losses) + ' باخت';
   document.getElementById('profileCoins').textContent = toPersian(profile.coins);
-  
-  // اعمال تم ذخیره شده
   document.body.className = profile.activeTheme === 'classic' ? '' : 'theme-' + profile.activeTheme;
 }
 updateProfileUI();
@@ -325,11 +392,9 @@ const THEMES = {
 function renderShop() {
   const shopList = document.getElementById('shop-list');
   shopList.innerHTML = '';
-  
   for (const [key, data] of Object.entries(THEMES)) {
     const owned = profile.themes.includes(key);
     const active = profile.activeTheme === key;
-    
     const item = document.createElement('div');
     item.className = 'shop-item';
     item.innerHTML = `
@@ -367,17 +432,6 @@ function handleBuyTheme(key) {
   }
 }
 
-// ==== سیستم بازی و اتصال ====
-let myColor = sessionStorage.getItem('nard_myColor');
-let roomCode = sessionStorage.getItem('nard_roomCode');
-let currentTurn = "white";
-let selectedChecker = null;
-let diceValues = [];
-let diceRolled = false;
-let gameOver = false;
-let matchTarget = 3;
-let matchScore = { white: 0, black: 0 };
-
 // ==== چت ====
 function toggleChat() {
   document.getElementById('chatWindow').classList.toggle('open');
@@ -390,12 +444,8 @@ function sendChat() {
     input.value = '';
   }
 }
-function sendEmoji(emoji) {
-  socket.emit('chatMessage', emoji);
-}
-function handleChatEnter(e) {
-  if (e.key === 'Enter') sendChat();
-}
+function sendEmoji(emoji) { socket.emit('chatMessage', emoji); }
+function handleChatEnter(e) { if (e.key === 'Enter') sendChat(); }
 socket.on('chatMessage', (data) => {
   const chatMsgs = document.getElementById('chatMessages');
   const div = document.createElement('div');
@@ -404,12 +454,22 @@ socket.on('chatMessage', (data) => {
   chatMsgs.appendChild(div);
   chatMsgs.scrollTop = chatMsgs.scrollHeight;
   if (!document.getElementById('chatWindow').classList.contains('open') && data.sender !== myColor) {
-    document.getElementById('chatToggle').style.backgroundColor = '#ff6b9d'; // نشانگر پیام جدید
+    document.getElementById('chatToggle').style.backgroundColor = '#ff6b9d';
     setTimeout(() => document.getElementById('chatToggle').style.backgroundColor = '#3a5a8a', 2000);
   }
 });
 
-// ==== شروع بازی (تصادفی یا اتاقی) ====
+// ==== بازی و اتصال ====
+let myColor = sessionStorage.getItem('nard_myColor');
+let roomCode = sessionStorage.getItem('nard_roomCode');
+let currentTurn = "white";
+let selectedChecker = null;
+let diceValues = [];
+let diceRolled = false;
+let gameOver = false;
+let matchTarget = 3;
+let matchScore = { white: 0, black: 0 };
+
 function findRandomMatch() {
   showScreen('screen-wait');
   document.getElementById('waitText').textContent = 'در حال جستجوی حریف...';
@@ -434,7 +494,6 @@ function createRoom(target) {
 function joinRoom() {
   const code = document.getElementById('joinCode').value.trim();
   if (code.length !== 6) return alert("کد باید ۶ رقم باشد");
-  
   socket.emit('joinRoom', { code, playerId: profile.id, playerName: profile.name }, (res) => {
     if (res.success) {
       myColor = res.color; roomCode = res.code;
@@ -449,11 +508,18 @@ socket.on('waitingForMatch', () => {
 });
 
 socket.on('matchFound', (data) => {
-  roomCode = data.code; // کد از سمت سرور می‌آید
-  // رنگ خودمان را از gameStart متوجه می‌شویم
+  roomCode = data.code;
+  sessionStorage.setItem('nard_roomCode', roomCode);
 });
 
-// ==== هسته بازی (آپدیت شده) ====
+socket.on('assignedColor', (color) => {
+  myColor = color;
+  sessionStorage.setItem('nard_myColor', color);
+  document.getElementById('myColorDisplay').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
+  setupLocalView();
+});
+
+// ==== هسته بازی ====
 function updateMatchInfo() {
   document.getElementById('whiteScore').textContent = toPersian(matchScore.white);
   document.getElementById('blackScore').textContent = toPersian(matchScore.black);
@@ -462,7 +528,6 @@ function updateMatchInfo() {
 
 function triggerWinEffect(isMe) {
   if (!isMe) return;
-  // دادن سکه به برنده (فقط در بازی با حریف تصادفی یا در کل)
   profile.coins += 50;
   profile.wins += 1;
   localStorage.setItem('nard_profile', JSON.stringify(profile));
@@ -488,7 +553,6 @@ function setupLocalView() {
         if (!el.dataset.orig) el.dataset.orig = el.dataset.point;
         el.dataset.point = el.dataset.orig;
     });
-
     if (myColor === 'black') {
         const mapping = {
             13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7,
@@ -503,7 +567,6 @@ function setupLocalView() {
     }
 }
 
-// کپی کردن بقیه توابع منطق بازی از نسخه قبلی (جهت جلوگیری از طولانی شدن بیش از حد متن)
 function hasCheckerOnBar() {
   if (currentTurn === "white") return document.getElementById("topBar").querySelectorAll(".white").length > 0;
   return document.getElementById("bottomBar").querySelectorAll(".black").length > 0;
@@ -583,9 +646,7 @@ function hasAnyLegalMove() {
   }
   return false;
 }
-function clearHighlights() {
-  document.querySelectorAll('.point.legal-target').forEach(p => p.classList.remove('legal-target'));
-}
+function clearHighlights() { document.querySelectorAll('.point.legal-target').forEach(p => p.classList.remove('legal-target')); }
 function highlightLegalMoves() {
   clearHighlights();
   if (!selectedChecker || !diceRolled || gameOver) return;
@@ -645,9 +706,7 @@ function setupCheckerClicks() {
       if (gameOver || currentTurn !== myColor) return;
       if (!diceRolled) { showMessage("اول باید تاس بندازی!"); return; }
       const isW = checker.classList.contains("white");
-      if ((currentTurn === "white" && !isW) || (currentTurn === "black" && isW)) {
-        showMessage("نوبت این مهره نیست!"); return;
-      }
+      if ((currentTurn === "white" && !isW) || (currentTurn === "black" && isW)) { showMessage("نوبت این مهره نیست!"); return; }
       if (selectedChecker === checker) { tryBearOff(checker); return; }
       if (hasCheckerOnBar()) {
         const p = checker.parentElement;
@@ -690,8 +749,10 @@ document.querySelectorAll(".point").forEach(point => {
     if (oppC.length === 1) {
       const bar = document.getElementById(opp === "white" ? "topBar" : "bottomBar");
       bar.appendChild(oppC[0]);
+      playSound('hit');
       showMessage("مهره حریف زده شد!");
-    }
+    } else playSound('move');
+    
     const moved = selectedChecker;
     point.appendChild(moved);
     moved.classList.remove("selected", "can-bear-off");
@@ -702,14 +763,11 @@ document.querySelectorAll(".point").forEach(point => {
     updateDiceDisplay();
     setupCheckerClicks();
     syncState();
-    if (diceValues.length === 0) {
-      endTurn();
-    } else if (!hasAnyLegalMove()) {
+    if (diceValues.length === 0) { endTurn(); }
+    else if (!hasAnyLegalMove()) {
       document.getElementById("passBtn").style.display = "block";
       showMessage("هیچ حرکتی نداری! پاس بده.");
-    } else {
-      showMessage("حرکت انجام شد. " + diceValues.length + " حرکت باقی مونده.");
-    }
+    } else showMessage("حرکت انجام شد. " + diceValues.length + " حرکت باقی مونده.");
   };
 });
 function tryBearOff(checker) {
@@ -717,6 +775,7 @@ function tryBearOff(checker) {
   const die = getBearOffDie(checker);
   if (die === null) { showMessage("با تاس‌های فعلی نمی‌تونی این مهره رو بیرون بندازی."); return; }
   checker.remove();
+  playSound('bearoff');
   const idx = diceValues.indexOf(die);
   if (idx > -1) diceValues.splice(idx, 1);
   selectedChecker = null;
@@ -724,21 +783,14 @@ function tryBearOff(checker) {
   updateDiceDisplay();
   setupCheckerClicks();
   syncState();
-  if (document.querySelectorAll(".checker." + currentTurn).length === 0) {
-    endGame(currentTurn);
-    return;
-  }
+  if (document.querySelectorAll(".checker." + currentTurn).length === 0) { endGame(currentTurn); return; }
   if (diceValues.length === 0) { endTurn(); }
   else if (!hasAnyLegalMove()) {
     document.getElementById("passBtn").style.display = "block";
     showMessage("هیچ حرکتی نداری! پاس بده.");
-  } else {
-    showMessage("مهره بیرون انداخته شد. " + diceValues.length + " حرکت باقی مونده.");
-  }
+  } else showMessage("مهره بیرون انداخته شد. " + diceValues.length + " حرکت باقی مونده.");
 }
-function syncState() {
-  socket.emit('stateUpdate', { state: getBoardState(), dice: diceValues, turn: currentTurn });
-}
+function syncState() { socket.emit('stateUpdate', { state: getBoardState(), dice: diceValues, turn: currentTurn }); }
 function endTurn() {
   document.getElementById("passBtn").style.display = "none";
   diceValues = [];
@@ -772,12 +824,8 @@ function endGame(winner) {
 }
 function showOverlay(isMatchOver, winner, points) {
   const isMe = winner === myColor;
-  if (isMe) triggerWinEffect(true);
-  else {
-    profile.losses += 1;
-    localStorage.setItem('nard_profile', JSON.stringify(profile));
-    updateProfileUI();
-  }
+  if (isMe) { triggerWinEffect(true); playSound('win'); }
+  else { profile.losses += 1; localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI(); }
   
   document.getElementById('overlayIcon').textContent = isMatchOver ? (isMe ? '🏆' : '😔') : '🏁';
   document.getElementById('overlayTitle').textContent = isMatchOver 
@@ -799,13 +847,11 @@ function showOverlay(isMatchOver, winner, points) {
   if (!isMatchOver) {
     btn.style.display = 'none';
     setTimeout(() => { document.getElementById('overlay').style.display = 'none'; btn.style.display = 'block'; }, 2500);
-  } else {
-    btn.style.display = 'block';
-  }
+  } else { btn.style.display = 'block'; }
   document.getElementById('overlay').style.display = 'flex';
 }
 
-// ==== دریافت رویدادها ===
+// ==== دریافت رویدادها ====
 socket.on('waitingForOpponent', (data) => {
     showScreen('screen-wait');
     document.getElementById('roomCodeDisplay').style.display = 'block';
@@ -813,13 +859,6 @@ socket.on('waitingForOpponent', (data) => {
     document.getElementById('roomCodeDisplay').textContent = data.code;
 });
 socket.on('gameStart', (data) => {
-  // تعیین رنگ در بازی تصادفی (اگر roomCode نداریم)
-  if (!sessionStorage.getItem('nard_myColor')) {
-      // اینجا نمی‌دانیم سفیدیم یا مشکی، سرور باید بگوید.
-      // در سرور matchFound ارسال شد، بیایید ساده کنیم:
-      // رنگ از طریق event بعدی ارسال می‌شود.
-  }
-  
   showScreen('screen-game');
   document.getElementById('chatToggle').classList.add('active');
   matchTarget = data.target || 3;
@@ -828,7 +867,6 @@ socket.on('gameStart', (data) => {
   
   if (data.whiteName) document.getElementById('whiteNameDisplay').textContent = data.whiteName;
   if (data.blackName) document.getElementById('blackNameDisplay').textContent = data.blackName;
-  
   document.getElementById('myColorDisplay').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
   document.getElementById('myColorDisplay').style.color = myColor === 'white' ? '#fff' : '#aaa';
 
@@ -850,33 +888,6 @@ socket.on('gameStart', (data) => {
     showMessage("در انتظار حرکت سفید...");
   }
 });
-
-// بازی تصادفی: سرور باید رنگ را مشخص کند
-socket.on('matchFound', (data) => {
-    // سرور هنوز رنگی تعیین نکرده، در gameStart رنگ مشخص میشود
-});
-// سرور در findMatch فیلد playerId را بررسی میکند و در joinRoom رنگ را به کلاینت میدهد
-// برای رفع مشکل، این را به سرور اضافه کردیم:
-socket.on('assignedColor', (color) => {
-    myColor = color;
-    sessionStorage.setItem('nard_myColor', color);
-});
-
-// آپدیت سرور برای ارسال رنگ در Matchmaking: در matchFound ارسال کنیم
-socket.on('matchFound', (data) => {
-    roomCode = data.code;
-    sessionStorage.setItem('nard_roomCode', roomCode);
-    // سرور باید مشخص کند کدام سفید است و کدام مشکی. 
-    // ما از gameStart استفاده می‌کنیم.
-});
-// (سرور را طوری تنظیم کردیم که در findMatch، event gameStart را برای هر دو بفرستد. رنگ در gameStart نیست. یک مکانیزم سریع:)
-socket.on('youAre', (color) => {
-    myColor = color;
-    sessionStorage.setItem('nard_myColor', color);
-    document.getElementById('myColorDisplay').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
-    setupLocalView();
-});
-
 socket.on('startNextGame', (data) => {
   matchScore = data.scores;
   updateMatchInfo();
@@ -907,18 +918,19 @@ socket.on('matchOver', (data) => {
 });
 socket.on('diceResult', (data) => {
   diceValues = data.n1 === data.n2 ? [data.n1, data.n1, data.n1, data.n1] : [data.n1, data.n2];
-  diceRolled = true;
-  updateDiceDisplay();
-  if (data.roller === myColor) {
-    if (!hasAnyLegalMove()) {
-      document.getElementById("passBtn").style.display = "block";
-      showMessage("هیچ حرکتی نداری! پاس بده.");
+  animateDiceThenSet([data.n1, data.n2], () => {
+    diceRolled = true;
+    if (data.roller === myColor) {
+      if (!hasAnyLegalMove()) {
+        document.getElementById("passBtn").style.display = "block";
+        showMessage("هیچ حرکتی نداری! پاس بده.");
+      } else {
+        showMessage("تاس انداختی. حرکت کن.");
+      }
     } else {
-      showMessage("تاس انداختی. حرکت کن.");
+      showMessage("حریف تاس انداخت...");
     }
-  } else {
-    showMessage("حریف تاس انداخت...");
-  }
+  });
 });
 socket.on('stateSync', (data) => {
   applyBoardState(data.state);
@@ -955,7 +967,6 @@ socket.on('opponentDisconnected', () => { showMessage("⚠️ حریف قطع ش
 socket.on('opponentReconnected', () => { showMessage("✅ حریف برگشت! بازی ادامه دارد."); });
 socket.on('opponentTimeout', () => { alert("حریف برنگشت. شما برنده شدید!"); leaveRoom(); });
 
-// شروع
 if (roomCode && myColor) {
     socket.emit('joinRoom', { code: roomCode, playerId: profile.id, playerName: profile.name }, (res) => {
         if (!res.success) {
