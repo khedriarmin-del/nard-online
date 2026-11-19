@@ -69,6 +69,7 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 .btn:active { transform: scale(0.97); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-secondary { background: linear-gradient(145deg, #3a5a8a, #2a4068); box-shadow: 0 4px 15px rgba(42,64,104,0.3); }
+.btn-secondary.active { background: linear-gradient(145deg, #4caf50, #2e7d32); box-shadow: 0 4px 15px rgba(76,175,80,0.5); border: 2px solid #fff; }
 .btn-online { background: linear-gradient(145deg, #9d4edd, #6a0572); box-shadow: 0 4px 15px rgba(157,78,221,0.3); }
 .btn-random { background: linear-gradient(145deg, #4caf50, #2e7d32); box-shadow: 0 4px 15px rgba(76,175,80,0.3); }
 .btn-pass { background: linear-gradient(145deg, #ffa500, #cc8400); }
@@ -181,14 +182,13 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="admin-btn" onclick="openAdminPanel()" title="پنل مدیریت">⚙️</button>
 </div>
 
-<!-- صفحه اصلی (منو) -->
 <div id="screen-home" class="screen active">
   <h1>🎲 نرد آنلاین</h1>
   <p>یک اتاق بسازید، به دوستتان بپیوندید یا با حریف تصادفی بازی کنید.</p>
   
   <button class="btn btn-ai" onclick="showScreen('screen-ai-setup')">🤖 بازی با کامپیوتر (رایگان)</button>
-  <button class="btn btn-random" onclick="findRandomMatch()">🎲 بازی با حریف تصادفی (۱۰۰ سکه)</button>
-  <button class="btn btn-online" onclick="showScreen('screen-create')">➕ ساخت اتاق اختصاصی (۱۰۰ سکه)</button>
+  <button class="btn btn-random" onclick="showScreen('screen-random-setup')">🎲 بازی با حریف تصادفی</button>
+  <button class="btn btn-online" onclick="showScreen('screen-create')">➕ ساخت اتاق اختصاصی</button>
   <button class="btn btn-secondary" onclick="showScreen('screen-join')">🔑 ورود با کد اتاق</button>
   
   <div style="display: flex; gap: 10px; width: 100%; margin-top: 10px;">
@@ -197,7 +197,41 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   </div>
 </div>
 
-<!-- صفحه رتبه‌بندی -->
+<!-- Matchmaking Setup -->
+<div id="screen-random-setup" class="screen">
+  <h1>🎲 حریف تصادفی</h1>
+  <p>سطح بازی را انتخاب کنید (ورودی کسر می‌شود):</p>
+  <button class="btn btn-random" onclick="findRandomMatch(100, 50)">مبتدی (ورودی ۱۰۰ + جایزه ۵۰)</button>
+  <button class="btn btn-ai" onclick="findRandomMatch(1000, 200)">متوسط (ورودی ۱۰۰۰ + جایزه ۲۰۰)</button>
+  <button class="btn" onclick="findRandomMatch(5000, 1000)" style="background: linear-gradient(145deg, #ff4757, #c0392b);">حرفه‌ای (ورودی ۵۰۰۰ + جایزه ۱۰۰۰)</button>
+  <button class="btn" onclick="findRandomMatch(10000, 3000)" style="background: linear-gradient(145deg, #8b5a2b, #6b3e1f);">پیشرفته (ورودی ۱۰۰۰۰ + جایزه ۳۰۰۰)</button>
+  <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
+</div>
+
+<!-- Private Room Create -->
+<div id="screen-create" class="screen">
+  <h1>➕ ساخت اتاق اختصاصی</h1>
+  
+  <p>تعداد دست:</p>
+  <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 20px;">
+    <button class="btn btn-secondary active" id="btnTarget3" onclick="selectTarget(3)">۳ امتیازی</button>
+    <button class="btn btn-secondary" id="btnTarget5" onclick="selectTarget(5)">۵ امتیازی</button>
+  </div>
+  
+  <p>مقدار شرط (سکه):</p>
+  <div style="display: flex; flex-wrap: wrap; gap: 10px; width: 100%; margin-bottom: 20px;">
+    <button class="btn btn-secondary active" id="btnFee100" onclick="selectFee(100)">۱۰۰</button>
+    <button class="btn btn-secondary" id="btnFee500" onclick="selectFee(500)">۵۰۰</button>
+    <button class="btn btn-secondary" id="btnFee1000" onclick="selectFee(1000)">۱۰۰۰</button>
+    <button class="btn btn-secondary" id="btnFee5000" onclick="selectFee(5000)">۵۰۰۰</button>
+    <button class="btn btn-secondary" id="btnFee10000" onclick="selectFee(10000)">۱۰۰۰۰</button>
+  </div>
+  
+  <button class="btn btn-random" onclick="createRoom()">ساخت اتاق</button>
+  <button class="btn btn-secondary" onclick="showScreen('screen-home')">بازگشت</button>
+</div>
+
+<!-- Ranking -->
 <div id="screen-ranking" class="screen">
   <h1>🏆 رتبه‌بندی</h1>
   <div class="rank-card">
@@ -208,21 +242,21 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
     <div style="font-size: 14px; color: #ff4757;">باخت در مسابقه: -۵ امتیاز</div>
     <div style="font-size: 14px; color: #4caf50;">هر دست برد (بازنده): +۳ امتیاز</div>
   </div>
-  <p style="font-size: 12px; color: #888;">(جدول برترین‌های جهان به زودی با اتصال به دیتابیس فعال می‌شود)</p>
+  <p style="font-size: 12px; color: #888;">(رتبه فقط در بازی‌های تصادفی و اتاق‌های اختصاصی اعمال می‌شود)</p>
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
 </div>
 
-<!-- صفحه انتخاب سختی AI -->
+<!-- AI Setup -->
 <div id="screen-ai-setup" class="screen">
   <h1>🤖 بازی با کامپیوتر</h1>
-  <p>سطح سختی حریف را انتخاب کنید (بازی رایگان است):</p>
+  <p>سطح سختی حریف را انتخاب کنید (رایگان):</p>
   <button class="btn btn-random" onclick="startBotGame('easy')">🟢 آسان (مبتدی)</button>
   <button class="btn btn-ai" onclick="startBotGame('medium')">🟡 متوسط (معمولی)</button>
   <button class="btn" onclick="startBotGame('hard')" style="background: linear-gradient(145deg, #ff4757, #c0392b);">🔴 سخت (حرفه‌ای)</button>
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
 </div>
 
-<!-- صفحه فروشگاه -->
+<!-- Shop -->
 <div id="screen-shop" class="screen">
   <h1>🛒 فروشگاه</h1>
   <div class="shop-tabs">
@@ -234,7 +268,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px; flex-shrink: 0;">بازگشت</button>
 </div>
 
-<!-- پنل ادمین -->
+<!-- Admin -->
 <div id="screen-admin" class="screen">
   <h1>⚙️ پنل مدیریت</h1>
   <p style="color:#ff6b9d; font-size:12px;">عکس‌ها را از سیستم خود انتخاب کنید. (زیر ۲۰۰ کیلوبایت)</p>
@@ -248,16 +282,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')">بازگشت به بازی</button>
 </div>
 
-<!-- ساخت اتاق -->
-<div id="screen-create" class="screen">
-  <h1>ساخت اتاق</h1>
-  <p>طول مسابقه را انتخاب کنید:</p>
-  <button class="btn btn-online" onclick="createRoom(3)">بازی ۳ امتیازی</button>
-  <button class="btn btn-online" onclick="createRoom(5)">بازی ۵ امتیازی</button>
-  <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px;">بازگشت</button>
-</div>
-
-<!-- ورود به اتاق -->
+<!-- Join Room -->
 <div id="screen-join" class="screen">
   <h1>ورود به اتاق</h1>
   <p>کد ۶ رقمی دریافتی را وارد کنید:</p>
@@ -266,7 +291,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="showScreen('screen-home')">بازگشت</button>
 </div>
 
-<!-- انتظار برای حریف -->
+<!-- Wait -->
 <div id="screen-wait" class="screen">
   <h1>در انتظار حریف...</h1>
   <p id="waitText">این کد را برای دوست خود بفرستید:</p>
@@ -275,7 +300,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <button class="btn btn-secondary" onclick="leaveRoom()" style="margin-top: 20px;">انصراف</button>
 </div>
 
-<!-- صفحه بازی -->
+<!-- Game -->
 <div id="screen-game" class="screen" style="max-width: 440px;">
   <div class="match-bar">
     <span class="match-label" id="matchLabel">بازی ۳ امتیازی</span>
@@ -334,7 +359,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   </div>
 </div>
 
-<!-- سیستم چت -->
+<!-- Chat -->
 <button class="chat-toggle-btn" id="chatToggle" onclick="toggleChat()">💬</button>
 <div class="chat-window" id="chatWindow">
   <div class="chat-header">
@@ -356,7 +381,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   </div>
 </div>
 
-<!-- اوورلی (پایان بازی) -->
+<!-- Overlay -->
 <div class="overlay" id="overlay">
   <div class="overlay-content">
     <div id="overlayIcon" style="font-size:56px;"></div>
@@ -370,7 +395,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
 const socket = io();
 
 function confirmExitGame() {
-  if (confirm('آیا مطمئن هستید که می‌خواهید از بازی خارج شوید؟ (اگر در بازی آنلاین باشید، ۱۰۰ سکه ورودی شما از بین می‌رود)')) {
+  if (confirm('آیا مطمئن هستید که می‌خواهید از بازی خارج شوید؟ (اگر در بازی آنلاین باشید، سکه شرط شما از بین می‌رود)')) {
     leaveRoom();
   }
 }
@@ -601,6 +626,26 @@ let diceRolled = false;
 let gameOver = false;
 let matchTarget = 3;
 let matchScore = { white: 0, black: 0 };
+let currentRoomType = 'random';
+let currentEntryFee = 0;
+let currentBonus = 0;
+
+// Private Room State
+let selectedTarget = 3;
+let selectedFee = 100;
+function selectTarget(t) {
+  selectedTarget = t;
+  document.getElementById('btnTarget3').classList.remove('active');
+  document.getElementById('btnTarget5').classList.remove('active');
+  document.getElementById('btnTarget' + t).classList.add('active');
+}
+function selectFee(f) {
+  selectedFee = f;
+  [100, 500, 1000, 5000, 10000].forEach(val => {
+    document.getElementById('btnFee' + val).classList.remove('active');
+  });
+  document.getElementById('btnFee' + f).classList.add('active');
+}
 
 function startBotGame(difficulty) {
   isBotMode = true; botDifficulty = difficulty; myColor = 'white'; matchTarget = 3; matchScore = { white: 0, black: 0 };
@@ -622,21 +667,21 @@ function resetBoard() {
   applyBoardState(initial);
 }
 
-function findRandomMatch() {
-  if (profile.coins < 100) { alert("برای بازی آنلاین نیاز به ۱۰۰ سکه دارید!"); return; }
+function findRandomMatch(fee, bonus) {
+  if (profile.coins < fee) { alert("سکه کافی نیست! نیاز به " + fee + " سکه دارید."); return; }
   isBotMode = false;
-  profile.coins -= 100; localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI();
+  profile.coins -= fee; localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI();
   showScreen('screen-wait');
-  document.getElementById('waitText').textContent = 'در حال جستجوی حریف...';
+  document.getElementById('waitText').textContent = 'در حال جستجوی حریف در سطح ' + fee + ' سکه...';
   document.getElementById('roomCodeDisplay').style.display = 'none';
-  socket.emit('findMatch', { playerId: profile.id, playerName: profile.name });
+  socket.emit('findMatch', { playerId: profile.id, playerName: profile.name, entryFee: fee, bonus: bonus });
 }
 
-function createRoom(target) {
-  if (profile.coins < 100) { alert("برای ساخت اتاق نیاز به ۱۰۰ سکه دارید!"); return; }
+function createRoom() {
+  if (profile.coins < selectedFee) { alert("سکه کافی نیست! نیاز به " + selectedFee + " سکه دارید."); return; }
   isBotMode = false;
-  profile.coins -= 100; localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI();
-  socket.emit('createRoom', { target, playerId: profile.id, playerName: profile.name }, (res) => {
+  profile.coins -= selectedFee; localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI();
+  socket.emit('createRoom', { target: selectedTarget, entryFee: selectedFee, playerId: profile.id, playerName: profile.name }, (res) => {
     if (res.success) {
       myColor = res.color; roomCode = res.code;
       sessionStorage.setItem('nard_roomCode', roomCode); sessionStorage.setItem('nard_myColor', myColor);
@@ -649,15 +694,21 @@ function createRoom(target) {
 }
 
 function joinRoom() {
-  if (profile.coins < 100) { alert("برای ورود به بازی نیاز به ۱۰۰ سکه دارید!"); return; }
-  isBotMode = false;
   const code = document.getElementById('joinCode').value.trim();
   if (code.length !== 6) return alert("کد باید ۶ رقم باشد");
-  profile.coins -= 100; localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI();
+  
+  // ما نمیدانیم این اتاق چقدر شرط است. سرور به ما میگوید. اما برای سادگی، فرض میکنیم کاربر باید حداقل 10000 سکه داشته باشد تا بتواند وارد هر اتاقی شود.
+  // اما در سرور چک نمیکنیم که کاربر در لحظه ورود پول دارد یا نه. 
+  // برای رفع این مشکل، ما سکه را هنگام ورود از کاربر کم میکنیم. اما کلاینت نمیداند چقدر است.
+  // راه حل: کلاینت از سرور میپرسد شرط اتاق چقدر است؟ 
+  // یا ساده تر: کاربر بعد از زدن دکمه "ورود"، منتظر میماند تا سرور پاسخ دهد.
+  
+  isBotMode = false;
   socket.emit('joinRoom', { code, playerId: profile.id, playerName: profile.name }, (res) => {
     if (res.success) {
       myColor = res.color; roomCode = res.code;
       sessionStorage.setItem('nard_roomCode', roomCode); sessionStorage.setItem('nard_myColor', myColor);
+      // کسر سکه در تابع gameStart انجام میشود تا مطمئن شویم اتاق درست است
     } else { alert(res.error); }
   });
 }
@@ -936,16 +987,30 @@ function showOverlay(isMatchOver, winner, points, gamesWon) {
   if (isMatchOver) {
       if (!isBotMode) {
           if (isMe) {
-              profile.coins += 150; // 100 سکه حریف + 50 سکه جایزه
+              // اگر برنده شد
+              let winCoins = 0;
+              if (currentRoomType === 'random') {
+                  winCoins = currentEntryFee + currentBonus; 
+              } else if (currentRoomType === 'private') {
+                  winCoins = currentEntryFee; 
+              }
+              profile.coins += winCoins;
               profile.wins += 1;
-              const ratingGain = (gamesWon[myColor] * 5) + 15;
-              profile.rating += ratingGain;
+              
+              // Rating فقط برای بازی تصادفی اعمال میشه (طبق درخواست شما اتاق اختصاصی رتبه نداره)
+              if (currentRoomType === 'random') {
+                  const ratingGain = (gamesWon[myColor] * 5) + 15;
+                  profile.rating += ratingGain;
+              }
               playSound('win');
               triggerConfetti();
           } else {
+              // اگر باخت
               profile.losses += 1;
-              const ratingChange = (gamesWon[myColor] * 3) - 5;
-              profile.rating = Math.max(0, profile.rating + ratingChange);
+              if (currentRoomType === 'random') {
+                  const ratingChange = (gamesWon[myColor] * 3) - 5;
+                  profile.rating = Math.max(0, profile.rating + ratingChange);
+              }
           }
           localStorage.setItem('nard_profile', JSON.stringify(profile));
           updateProfileUI();
@@ -963,13 +1028,21 @@ function showOverlay(isMatchOver, winner, points, gamesWon) {
     msg = 'امتیاز نهایی: سفید <strong>' + toPersian(matchScore.white) + '</strong> — <strong>' + toPersian(matchScore.black) + '</strong> مشکی';
     if (!isBotMode) {
         if (isMe) {
-            msg += '<br><br>🪙 ۱۵۰ سکه دریافت کردید!';
-            const ratingGain = (gamesWon[myColor] * 5) + 15;
-            msg += '<br>📈 +' + toPersian(ratingGain) + ' امتیاز رتبه';
+            if (currentRoomType === 'random') msg += '<br><br>🪙 ' + toPersian(currentEntryFee + currentBonus) + ' سکه دریافت کردید!';
+            else msg += '<br><br>🪙 ' + toPersian(currentEntryFee) + ' سکه از حریف گرفتید!';
+            
+            if (currentRoomType === 'random') {
+                const ratingGain = (gamesWon[myColor] * 5) + 15;
+                msg += '<br>📈 +' + toPersian(ratingGain) + ' امتیاز رتبه';
+            }
         } else {
-            msg += '<br><br>🪙 ۱۰۰ سکه شما کسر شد.';
-            const ratingChange = (gamesWon[myColor] * 3) - 5;
-            msg += '<br>📉 ' + toPersian(ratingChange) + ' امتیاز رتبه';
+            if (currentRoomType === 'random') msg += '<br><br>🪙 ' + toPersian(currentEntryFee) + ' سکه شما کسر شد.';
+            else msg += '<br><br>🪙 ' + toPersian(currentEntryFee) + ' سکه از شما کسر شد.';
+            
+            if (currentRoomType === 'random') {
+                const ratingChange = (gamesWon[myColor] * 3) - 5;
+                msg += '<br>📉 ' + toPersian(ratingChange) + ' امتیاز رتبه';
+            }
         }
     }
   }
@@ -1135,11 +1208,25 @@ socket.on('gameStart', (data) => {
   document.getElementById('chatToggle').classList.add('active');
   matchTarget = data.target || 3;
   if (data.matchScore) matchScore = data.matchScore;
+  currentRoomType = data.roomType;
+  currentEntryFee = data.entryFee;
+  currentBonus = data.bonus;
+  
   updateMatchInfo();
   if (data.whiteName) document.getElementById('whiteNameDisplay').textContent = data.whiteName;
   if (data.blackName) document.getElementById('blackNameDisplay').textContent = data.blackName;
   document.getElementById('myColorDisplay').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
   document.getElementById('myColorDisplay').style.color = myColor === 'white' ? '#fff' : '#aaa';
+  
+  if (myColor === 'black' && currentRoomType === 'private') {
+      // کسر سکه بازیکن مشکی برای ورود به اتاق خصوصی در این لحظه انجام میشود
+      if (profile.coins >= currentEntryFee) {
+          profile.coins -= currentEntryFee;
+          localStorage.setItem('nard_profile', JSON.stringify(profile));
+          updateProfileUI();
+      }
+  }
+
   setupLocalView(); resetBoard();
   currentTurn = 'white'; gameOver = false;
   document.getElementById('turnInfo').textContent = 'نوبت: سفید';
