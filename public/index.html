@@ -52,6 +52,7 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 .btn-online { background: linear-gradient(145deg, #9d4edd, #6a0572); box-shadow: 0 4px 15px rgba(157,78,221,0.3); }
 .btn-random { background: linear-gradient(145deg, #4caf50, #2e7d32); box-shadow: 0 4px 15px rgba(76,175,80,0.3); }
 .btn-pass { background: linear-gradient(145deg, #ffa500, #cc8400); }
+.btn-ai { background: linear-gradient(145deg, #3a7bd5, #2a5db5); box-shadow: 0 4px 15px rgba(58,123,213,0.3); }
 
 .shop-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 10px; width: 100%; }
 .shop-theme-preview { width: 40px; height: 40px; border-radius: 8px; border: 2px solid #fff; }
@@ -146,6 +147,7 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
   <h1>🎲 نرد آنلاین</h1>
   <p>یک اتاق بسازید، به دوستتان بپیوندید یا با حریف تصادفی بازی کنید.</p>
   
+  <button class="btn btn-ai" onclick="startBotGame()">🤖 بازی با کامپیوتر (تست)</button>
   <button class="btn btn-random" onclick="findRandomMatch()">🎲 بازی با حریف تصادفی</button>
   <button class="btn btn-online" onclick="showScreen('screen-create')">➕ ساخت اتاق اختصاصی</button>
   <button class="btn btn-secondary" onclick="showScreen('screen-join')">🔑 ورود با کد اتاق</button>
@@ -323,29 +325,6 @@ function playSound(name) {
   } catch (e) {}
 }
 
-// ==== انیمیشن تاس ====
-let diceAnimId = null;
-function stopDiceAnim() { if (diceAnimId) { clearInterval(diceAnimId); diceAnimId = null; } }
-function animateDiceThenSet(vals, cb) {
-  stopDiceAnim();
-  const d1 = document.getElementById('dice1'), d2 = document.getElementById('dice2');
-  d1.classList.add('rolling'); d2.classList.add('rolling');
-  playSound('dice');
-  let i = 0;
-  diceAnimId = setInterval(() => {
-    setDiceFace(d1, Math.floor(Math.random() * 6) + 1);
-    setDiceFace(d2, Math.floor(Math.random() * 6) + 1);
-    i++;
-    if (i >= 8) {
-      stopDiceAnim();
-      d1.classList.remove('rolling'); d2.classList.remove('rolling');
-      setDiceFace(d1, vals[0]);
-      setDiceFace(d2, vals[1]);
-      if (cb) cb();
-    }
-  }, 60);
-}
-
 // ==== مدیریت پروفایل و سکه‌ها ====
 let profile = JSON.parse(localStorage.getItem('nard_profile')) || {
   id: Math.random().toString(36).substring(2, 10),
@@ -440,13 +419,18 @@ function toggleChat() {
 function sendChat() {
   const input = document.getElementById('chatInput');
   if (input.value.trim()) {
-    socket.emit('chatMessage', input.value.trim());
+    if (isBotMode) {
+      // در حالت کامپیوتر، چت کار نمی‌کند
+    } else {
+      socket.emit('chatMessage', input.value.trim());
+    }
     input.value = '';
   }
 }
-function sendEmoji(emoji) { socket.emit('chatMessage', emoji); }
+function sendEmoji(emoji) { if (!isBotMode) socket.emit('chatMessage', emoji); }
 function handleChatEnter(e) { if (e.key === 'Enter') sendChat(); }
 socket.on('chatMessage', (data) => {
+  if (isBotMode) return;
   const chatMsgs = document.getElementById('chatMessages');
   const div = document.createElement('div');
   div.className = 'chat-msg ' + (data.sender === myColor ? 'me' : 'them');
@@ -460,6 +444,7 @@ socket.on('chatMessage', (data) => {
 });
 
 // ==== بازی و اتصال ====
+let isBotMode = false;
 let myColor = sessionStorage.getItem('nard_myColor');
 let roomCode = sessionStorage.getItem('nard_roomCode');
 let currentTurn = "white";
@@ -470,7 +455,41 @@ let gameOver = false;
 let matchTarget = 3;
 let matchScore = { white: 0, black: 0 };
 
+// ==== شروع بازی با کامپیوتر ====
+function startBotGame() {
+  isBotMode = true;
+  myColor = 'white';
+  matchTarget = 3;
+  matchScore = { white: 0, black: 0 };
+  
+  showScreen('screen-game');
+  document.getElementById('chatToggle').classList.remove('active'); // چت غیرفعال
+  
+  updateMatchInfo();
+  document.getElementById('whiteNameDisplay').textContent = profile.name;
+  document.getElementById('blackNameDisplay').textContent = '🤖 کامپیوتر';
+  document.getElementById('myColorDisplay').textContent = 'شما: سفید';
+  
+  setupLocalView();
+  resetBoard();
+  
+  currentTurn = 'white';
+  gameOver = false;
+  document.getElementById('turnInfo').textContent = 'نوبت: سفید';
+  document.getElementById('rollBtn').disabled = false;
+  showMessage("شما سفید هستید. تاس بنداز.");
+}
+
+function resetBoard() {
+  const initial = {
+    points: { 13: { white: 5, black: 0 }, 17: { white: 0, black: 3 }, 19: { white: 0, black: 5 }, 24: { white: 2, black: 0 }, 12: { white: 0, black: 5 }, 8: { white: 3, black: 0 }, 6: { white: 5, black: 0 }, 1: { white: 0, black: 2 } },
+    bar: { white: 0, black: 0 }
+  };
+  applyBoardState(initial);
+}
+
 function findRandomMatch() {
+  isBotMode = false;
   showScreen('screen-wait');
   document.getElementById('waitText').textContent = 'در حال جستجوی حریف...';
   document.getElementById('roomCodeDisplay').style.display = 'none';
@@ -478,6 +497,7 @@ function findRandomMatch() {
 }
 
 function createRoom(target) {
+  isBotMode = false;
   socket.emit('createRoom', { target, playerId: profile.id, playerName: profile.name }, (res) => {
     if (res.success) {
       myColor = res.color; roomCode = res.code;
@@ -492,6 +512,7 @@ function createRoom(target) {
 }
 
 function joinRoom() {
+  isBotMode = false;
   const code = document.getElementById('joinCode').value.trim();
   if (code.length !== 6) return alert("کد باید ۶ رقم باشد");
   socket.emit('joinRoom', { code, playerId: profile.id, playerName: profile.name }, (res) => {
@@ -790,7 +811,10 @@ function tryBearOff(checker) {
     showMessage("هیچ حرکتی نداری! پاس بده.");
   } else showMessage("مهره بیرون انداخته شد. " + diceValues.length + " حرکت باقی مونده.");
 }
-function syncState() { socket.emit('stateUpdate', { state: getBoardState(), dice: diceValues, turn: currentTurn }); }
+function syncState() { 
+  if (isBotMode) return;
+  socket.emit('stateUpdate', { state: getBoardState(), dice: diceValues, turn: currentTurn }); 
+}
 function endTurn() {
   document.getElementById("passBtn").style.display = "none";
   diceValues = [];
@@ -800,7 +824,14 @@ function endTurn() {
   if (selectedChecker) { selectedChecker.classList.remove("selected", "can-bear-off"); selectedChecker = null; }
   currentTurn = currentTurn === "white" ? "black" : "white";
   document.getElementById('turnInfo').textContent = 'نوبت: ' + (currentTurn === 'white' ? 'سفید' : 'مشکی');
-  if (currentTurn === myColor) {
+  
+  if (gameOver) return;
+
+  if (isBotMode && currentTurn === 'black') {
+    document.getElementById("rollBtn").disabled = true;
+    showMessage("کامپیوتر در حال فکر کردن...");
+    setTimeout(() => aiTurn(), 800);
+  } else if (currentTurn === myColor) {
     document.getElementById("rollBtn").disabled = false;
     showMessage("نوبت شماست. تاس بنداز.");
   } else {
@@ -820,11 +851,30 @@ function endGame(winner) {
   document.getElementById("passBtn").style.display = "none";
   document.getElementById("rollBtn").disabled = true;
   const points = calculateGamePoints(winner);
-  socket.emit('gameOver', { winner, points });
+  
+  if (isBotMode) {
+    matchScore[winner] += points;
+    updateMatchInfo();
+    if (matchScore[winner] >= matchTarget) {
+      matchOver = true;
+      if (winner === 'white') { triggerWinEffect(true); playSound('win'); } 
+      else { profile.losses += 1; localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI(); }
+      showOverlay(true, winner, 0);
+    } else {
+      showOverlay(false, winner, points);
+      setTimeout(() => { 
+        document.getElementById('overlay').style.display = 'none'; 
+        startBotGame(); 
+      }, 2500);
+    }
+  } else {
+    socket.emit('gameOver', { winner, points });
+  }
 }
 function showOverlay(isMatchOver, winner, points) {
   const isMe = winner === myColor;
-  if (isMe) { triggerWinEffect(true); playSound('win'); }
+  if (isMe && !isMatchOver) triggerWinEffect(true);
+  else if (isMe && isMatchOver) { /* جایزه در تابع endGame داده شده */ }
   else { profile.losses += 1; localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI(); }
   
   document.getElementById('overlayIcon').textContent = isMatchOver ? (isMe ? '🏆' : '😔') : '🏁';
@@ -851,13 +901,188 @@ function showOverlay(isMatchOver, winner, points) {
   document.getElementById('overlay').style.display = 'flex';
 }
 
+// ==== هوش مصنوعی (برای حالت تست) ====
+function aiGetMoves() {
+  const moves = [];
+  if (hasCheckerOnBar()) {
+    for (const die of [...new Set(diceValues)]) {
+      const to = currentTurn === "white" ? (25 - die) : die;
+      if (canMoveTo(to)) moves.push({ type: 'bar', to, die });
+    }
+    return moves;
+  }
+  const seen = new Set();
+  document.querySelectorAll(".checker." + currentTurn).forEach(c => {
+    const p = c.parentElement;
+    if (!p.classList.contains("point")) return;
+    const from = parseInt(p.getAttribute("data-point"));
+    if (seen.has(from)) return;
+    seen.add(from);
+    for (const die of [...new Set(diceValues)]) {
+      const to = currentTurn === "white" ? (from - die) : (from + die);
+      if (to < 1 || to > 24) continue;
+      if (!canMoveTo(to)) continue;
+      moves.push({ type: 'move', from, to, die });
+    }
+  });
+  if (allCheckersInHome()) {
+    document.querySelectorAll(".checker." + currentTurn).forEach(c => {
+      if (!c.parentElement.classList.contains("point")) return;
+      const from = parseInt(c.parentElement.getAttribute("data-point"));
+      const die = getBearOffDie(c);
+      if (die !== null) moves.push({ type: 'bearoff', from, die });
+    });
+  }
+  return moves;
+}
+function isInOpponentHome(pt) {
+  return currentTurn === 'white' ? (pt >= 19 && pt <= 24) : (pt >= 1 && pt <= 6);
+}
+function aiScoreMove(m) {
+  if (m.type === 'bearoff') return 1000;
+  const opp = currentTurn === "white" ? "black" : "white";
+  let score = 0;
+  const target = document.querySelector('.point[data-point="' + m.to + '"]');
+  if (!target) return -1000;
+  
+  const myOnTarget = target.querySelectorAll('.' + currentTurn).length;
+  const oppOnTarget = target.querySelectorAll('.' + opp).length;
+  
+  if (oppOnTarget === 1) score += 500;
+  if (myOnTarget >= 1) score += 200;
+  else if (myOnTarget === 0 && !isInOpponentHome(m.to)) score += 30;
+  if (myOnTarget === 0 && isInOpponentHome(m.to)) score -= 150;
+  if (myOnTarget === 0 && oppOnTarget === 0 && isInOpponentHome(m.to)) score -= 50;
+  
+  if (m.type === 'move') {
+    const fromEl = document.querySelector('.point[data-point="' + m.from + '"]');
+    if (fromEl) {
+      const fromCount = fromEl.querySelectorAll('.' + currentTurn).length;
+      if (fromCount === 2) score -= 200;
+      else if (fromCount >= 3) score += 60;
+    }
+  }
+  if (m.type === 'bar') score += 180;
+  if (m.type === 'move') {
+    const adv = currentTurn === "white" ? (m.from - m.to) : (m.to - m.from);
+    score += adv * 4;
+  }
+  return score;
+}
+function aiPickMove(moves) {
+  const scored = moves.map(m => ({ m, s: aiScoreMove(m) })).sort((a, b) => b.s - a.s);
+  const top = scored.slice(0, Math.min(2, scored.length));
+  return top[Math.floor(Math.random() * top.length)].m;
+}
+function aiTurn() {
+  if (gameOver || currentTurn !== "black" || !isBotMode) return;
+  const n1 = Math.floor(Math.random() * 6) + 1;
+  const n2 = Math.floor(Math.random() * 6) + 1;
+  diceValues = n1 === n2 ? [n1, n1, n1, n1] : [n1, n2];
+  animateDiceThenSet([n1, n2], () => {
+    diceRolled = true;
+    setTimeout(() => aiMakeMove(), 500);
+  });
+}
+function aiMakeMove() {
+  if (gameOver || currentTurn !== "black") return;
+  const moves = aiGetMoves();
+  if (moves.length === 0) {
+    setTimeout(() => { endTurn(); }, 500);
+    return;
+  }
+  const move = aiPickMove(moves);
+  aiExecuteMove(move);
+}
+function aiExecuteMove(move) {
+  if (gameOver) return;
+  
+  if (move.type === "bearoff") {
+    const fromEl = document.querySelector('.point[data-point="' + move.from + '"]');
+    if (!fromEl) return;
+    const checker = fromEl.querySelector(".black");
+    if (!checker) return;
+    checker.remove();
+    playSound('bearoff');
+  } else {
+    let checker, toEl = document.querySelector('.point[data-point="' + move.to + '"]');
+    if (!toEl) return;
+    if (move.type === "bar") checker = document.getElementById("bottomBar").querySelector(".black");
+    else {
+      const fromEl = document.querySelector('.point[data-point="' + move.from + '"]');
+      if (!fromEl) return;
+      checker = fromEl.querySelector(".black");
+    }
+    if (!checker) return;
+    const whiteOnTarget = toEl.querySelectorAll(".white");
+    if (whiteOnTarget.length === 1) {
+      document.getElementById("topBar").appendChild(whiteOnTarget[0]);
+      playSound('hit');
+    } else playSound('move');
+    toEl.appendChild(checker);
+  }
+  
+  const idx = diceValues.indexOf(move.die);
+  if (idx > -1) diceValues.splice(idx, 1);
+  updateDiceDisplay();
+  setupCheckerClicks();
+  
+  if (document.querySelectorAll(".checker.black").length === 0) {
+    endGame('black');
+    return;
+  }
+  if (diceValues.length === 0) { setTimeout(() => endTurn(), 500); }
+  else if (!hasAnyLegalMove()) { setTimeout(() => endTurn(), 500); }
+  else { setTimeout(() => aiMakeMove(), 500); }
+}
+
+// انیمیشن تاس محلی
+let diceAnimId = null;
+function stopDiceAnim() { if (diceAnimId) { clearInterval(diceAnimId); diceAnimId = null; } }
+function animateDiceThenSet(vals, cb) {
+  stopDiceAnim();
+  const d1 = document.getElementById('dice1'), d2 = document.getElementById('dice2');
+  d1.classList.add('rolling'); d2.classList.add('rolling');
+  playSound('dice');
+  let i = 0;
+  diceAnimId = setInterval(() => {
+    setDiceFace(d1, Math.floor(Math.random() * 6) + 1);
+    setDiceFace(d2, Math.floor(Math.random() * 6) + 1);
+    i++;
+    if (i >= 8) {
+      stopDiceAnim();
+      d1.classList.remove('rolling'); d2.classList.remove('rolling');
+      setDiceFace(d1, vals[0]);
+      setDiceFace(d2, vals[1]);
+      if (cb) cb();
+    }
+  }, 60);
+}
+
+function requestRoll() {
+  if (gameOver || (isBotMode && currentTurn === 'black')) return;
+  document.getElementById("passBtn").style.display = "none";
+  document.getElementById("rollBtn").disabled = true;
+  
+  if (isBotMode) {
+    const n1 = Math.floor(Math.random() * 6) + 1;
+    const n2 = Math.floor(Math.random() * 6) + 1;
+    diceValues = n1 === n2 ? [n1, n1, n1, n1] : [n1, n2];
+    animateDiceThenSet([n1, n2], () => {
+      diceRolled = true;
+      if (!hasAnyLegalMove()) {
+        document.getElementById("passBtn").style.display = "block";
+        showMessage("هیچ حرکتی نداری! پاس بده.");
+      } else {
+        showMessage("تاس انداختی. حرکت کن.");
+      }
+    });
+  } else {
+    socket.emit('rollDice');
+  }
+}
+
 // ==== دریافت رویدادها ====
-socket.on('waitingForOpponent', (data) => {
-    showScreen('screen-wait');
-    document.getElementById('roomCodeDisplay').style.display = 'block';
-    document.getElementById('waitText').textContent = 'این کد را برای دوست خود بفرستید:';
-    document.getElementById('roomCodeDisplay').textContent = data.code;
-});
 socket.on('gameStart', (data) => {
   showScreen('screen-game');
   document.getElementById('chatToggle').classList.add('active');
@@ -871,11 +1096,7 @@ socket.on('gameStart', (data) => {
   document.getElementById('myColorDisplay').style.color = myColor === 'white' ? '#fff' : '#aaa';
 
   setupLocalView();
-  const initial = {
-    points: { 13: { white: 5, black: 0 }, 17: { white: 0, black: 3 }, 19: { white: 0, black: 5 }, 24: { white: 2, black: 0 }, 12: { white: 0, black: 5 }, 8: { white: 3, black: 0 }, 6: { white: 5, black: 0 }, 1: { white: 0, black: 2 } },
-    bar: { white: 0, black: 0 }
-  };
-  applyBoardState(initial);
+  resetBoard();
   currentTurn = 'white';
   gameOver = false;
   document.getElementById('turnInfo').textContent = 'نوبت: سفید';
@@ -892,8 +1113,7 @@ socket.on('startNextGame', (data) => {
   matchScore = data.scores;
   updateMatchInfo();
   setupLocalView();
-  const initial = { points: { 13: { white: 5, black: 0 }, 17: { white: 0, black: 3 }, 19: { white: 0, black: 5 }, 24: { white: 2, black: 0 }, 12: { white: 0, black: 5 }, 8: { white: 3, black: 0 }, 6: { white: 5, black: 0 }, 1: { white: 0, black: 2 } }, bar: { white: 0, black: 0 } };
-  applyBoardState(initial);
+  resetBoard();
   currentTurn = data.nextTurn;
   gameOver = false;
   diceValues = [];
@@ -917,6 +1137,7 @@ socket.on('matchOver', (data) => {
   showOverlay(true, data.winner, 0);
 });
 socket.on('diceResult', (data) => {
+  if (isBotMode) return;
   diceValues = data.n1 === data.n2 ? [data.n1, data.n1, data.n1, data.n1] : [data.n1, data.n2];
   animateDiceThenSet([data.n1, data.n2], () => {
     diceRolled = true;
@@ -933,6 +1154,7 @@ socket.on('diceResult', (data) => {
   });
 });
 socket.on('stateSync', (data) => {
+  if (isBotMode) return;
   applyBoardState(data.state);
   diceValues = data.dice;
   updateDiceDisplay();
@@ -957,15 +1179,16 @@ socket.on('stateSync', (data) => {
   }
 });
 socket.on('gameOver', (data) => {
+  if (isBotMode) return;
   if (gameOver) return; 
   gameOver = true;
   document.getElementById('passBtn').style.display = "none";
   document.getElementById('rollBtn').disabled = true;
   showOverlay(false, data.winner, data.points);
 });
-socket.on('opponentDisconnected', () => { showMessage("⚠️ حریف قطع شد! ۶۰ ثانیه فرصت دارد برگردد..."); });
-socket.on('opponentReconnected', () => { showMessage("✅ حریف برگشت! بازی ادامه دارد."); });
-socket.on('opponentTimeout', () => { alert("حریف برنگشت. شما برنده شدید!"); leaveRoom(); });
+socket.on('opponentDisconnected', () => { if (!isBotMode) showMessage("⚠️ حریف قطع شد! ۶۰ ثانیه فرصت دارد برگردد..."); });
+socket.on('opponentReconnected', () => { if (!isBotMode) showMessage("✅ حریف برگشت! بازی ادامه دارد."); });
+socket.on('opponentTimeout', () => { if (!isBotMode) { alert("حریف برنگشت. شما برنده شدید!"); leaveRoom(); } });
 
 if (roomCode && myColor) {
     socket.emit('joinRoom', { code: roomCode, playerId: profile.id, playerName: profile.name }, (res) => {
