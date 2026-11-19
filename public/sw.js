@@ -1,11 +1,11 @@
-const CACHE_NAME = 'nard-cache-v4'; // هر بار که بازی رو آپدیت کردی، این عدد رو یکی زیاد کن
+const CACHE_NAME = 'nard-cache-v5';
 const urlsToCache = [
   '/',
   '/index.html'
 ];
 
 self.addEventListener('install', event => {
-  self.skipWaiting(); // به محض نصب، فعال شو
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(urlsToCache))
@@ -18,7 +18,7 @@ self.addEventListener('activate', event => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName); // فایل‌های قدیمی رو پاک کن
+            return caches.delete(cacheName);
           }
         })
       );
