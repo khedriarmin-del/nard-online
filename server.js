@@ -27,58 +27,43 @@ function generateCode() {
 }
 
 io.on('connection', (socket) => {
-  // ==== Matchmaking ====
   socket.on('findMatch', ({ playerId, playerName, entryFee, bonus }) => {
     matchmakingQueue.push({ socketId: socket.id, playerId, playerName, entryFee, bonus });
     
-    // جستجوی حریف با شرط یکسان
     const opponentIndex = matchmakingQueue.findIndex(p => p.socketId !== socket.id && p.entryFee === entryFee);
     
     if (opponentIndex !== -1) {
+      const p2 = matchmakingQueue[opponentIndex];
       const p1 = matchmakingQueue.find(p => p.socketId === socket.id);
-      matchmakingQueue = matchmakingQueue.filter(p => p.socketId !== socket.id && p.socketId !== matchmakingQueue[opponentIndex].socketId);
       
-      const p2 = matchmakingQueue.splice(opponentIndex, 1)[0];
-      // اصلاح خط بالا: چون filter زدیم، ایندکس عوض میشه. بهتره با find کار کنیم.
-      // برای سادگی، اینطوری مینویسیم:
-    }
-    
-    // روش صحیح Matchmaking:
-    matchmakingQueue = matchmakingQueue.filter(p => p.socketId !== socket.id);
-    
-    if (matchmakingQueue.length > 0) {
-       const p2 = matchmakingQueue.shift(); // اولین نفر در صف
-       const p1 = { socketId: socket.id, playerId, playerName, entryFee, bonus };
-       
-       const code = generateCode();
-       const room = {
-         code,
-         target: 3, // حالت تصادفی همیشه 3 امتیازی است
-         roomType: 'random',
-         entryFee: p1.entryFee,
-         bonus: p1.bonus,
-         players: { white: p1.socketId, black: p2.socketId },
-         playerIds: { white: p1.playerId, black: p2.playerId },
-         playerNames: { white: p1.playerName, black: p2.playerName },
-         gameState: null,
-         matchScore: { white: 0, black: 0 },
-         gamesWon: { white: 0, black: 0 },
-         disconnectedAt: null
-       };
-       rooms.set(code, room);
-       
-       const s1 = io.sockets.sockets.get(p1.socketId);
-       const s2 = io.sockets.sockets.get(p2.socketId);
-       if (s1) { s1.join(code); s1.roomCode = code; s1.color = 'white'; }
-       if (s2) { s2.join(code); s2.roomCode = code; s2.color = 'black'; }
-       
-       const gameData = { code, target: 3, matchScore: room.matchScore, whiteName: p1.playerName, blackName: p2.playerName, entryFee: room.entryFee, bonus: room.bonus, roomType: 'random' };
-       io.to(code).emit('gameStart', gameData);
+      matchmakingQueue = matchmakingQueue.filter(p => p.socketId !== socket.id && p.socketId !== p2.socketId);
+      
+      const code = generateCode();
+      const room = {
+        code,
+        target: 3,
+        roomType: 'random',
+        entryFee: p1.entryFee,
+        bonus: p1.bonus,
+        players: { white: p1.socketId, black: p2.socketId },
+        playerIds: { white: p1.playerId, black: p2.playerId },
+        playerNames: { white: p1.playerName, black: p2.playerName },
+        gameState: null,
+        matchScore: { white: 0, black: 0 },
+        gamesWon: { white: 0, black: 0 },
+        disconnectedAt: null
+      };
+      rooms.set(code, room);
+      
+      const s1 = io.sockets.sockets.get(p1.socketId);
+      const s2 = io.sockets.sockets.get(p2.socketId);
+      if (s1) { s1.join(code); s1.roomCode = code; s1.color = 'white'; }
+      if (s2) { s2.join(code); s2.roomCode = code; s2.color = 'black'; }
+      
+      const gameData = { code, target: 3, matchScore: room.matchScore, whiteName: p1.playerName, blackName: p2.playerName, entryFee: room.entryFee, bonus: room.bonus, roomType: 'random' };
+      io.to(code).emit('gameStart', gameData);
     } else {
-       // ذخیره در صف
-       const p1 = { socketId: socket.id, playerId, playerName, entryFee, bonus };
-       matchmakingQueue.push(p1);
-       socket.emit('waitingForMatch');
+      socket.emit('waitingForMatch');
     }
   });
 
@@ -92,14 +77,13 @@ io.on('connection', (socket) => {
     io.to(room.code).emit('chatMessage', { sender: socket.color, text: msg });
   });
 
-  // ==== Private Room ====
   socket.on('createRoom', ({ target, entryFee, playerId, playerName }, cb) => {
     const code = generateCode();
     const room = {
       code,
       target: target === 5 ? 5 : 3,
       roomType: 'private',
-      entryFee: entryFee, // شرط سکه
+      entryFee: entryFee,
       bonus: 0,
       players: { white: socket.id, black: null },
       playerIds: { white: playerId, black: null },
