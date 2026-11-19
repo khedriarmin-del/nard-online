@@ -161,7 +161,6 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 .file-input-wrapper { margin-top: 5px; font-size: 11px; color: #aaa; }
 input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 10px; font-family: inherit;}
 
-/* Ranking Screen */
 .rank-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 16px; width: 100%; text-align: center; margin-bottom: 20px; }
 .rank-score { font-size: 48px; font-weight: bold; color: #ffd93d; margin: 10px 0; text-shadow: 0 0 20px rgba(255,217,61,0.5); }
 </style>
@@ -186,9 +185,9 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <h1>🎲 نرد آنلاین</h1>
   <p>یک اتاق بسازید، به دوستتان بپیوندید یا با حریف تصادفی بازی کنید.</p>
   
-  <button class="btn btn-ai" onclick="showScreen('screen-ai-setup')">🤖 بازی با کامپیوتر</button>
-  <button class="btn btn-random" onclick="findRandomMatch()">🎲 بازی با حریف تصادفی</button>
-  <button class="btn btn-online" onclick="showScreen('screen-create')">➕ ساخت اتاق اختصاصی</button>
+  <button class="btn btn-ai" onclick="showScreen('screen-ai-setup')">🤖 بازی با کامپیوتر (رایگان)</button>
+  <button class="btn btn-random" onclick="findRandomMatch()">🎲 بازی با حریف تصادفی (۱۰۰ سکه)</button>
+  <button class="btn btn-online" onclick="showScreen('screen-create')">➕ ساخت اتاق اختصاصی (۱۰۰ سکه)</button>
   <button class="btn btn-secondary" onclick="showScreen('screen-join')">🔑 ورود با کد اتاق</button>
   
   <div style="display: flex; gap: 10px; width: 100%; margin-top: 10px;">
@@ -202,8 +201,10 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
   <div class="rank-card">
     <div style="font-size: 16px; color: #aaa;">رتبه شما در بازی</div>
     <div class="rank-score" id="myRankScore">۱۰۰۰</div>
-    <div style="font-size: 14px; color: #4caf50;">با هر برد +۱۵ امتیاز</div>
-    <div style="font-size: 14px; color: #ff4757;">با هر باخت -۵ امتیاز</div>
+    <div style="font-size: 14px; color: #4caf50;">برد در مسابقه: +۱۵ امتیاز</div>
+    <div style="font-size: 14px; color: #4caf50;">هر دست برد: +۵ امتیاز</div>
+    <div style="font-size: 14px; color: #4caf50;">باخت در مسابقه: -۵ امتیاز</div>
+    <div style="font-size: 14px; color: #4caf50;">هر دست برد (بازنده): +۳ امتیاز</div>
   </div>
   
   <p style="font-size: 12px; color: #888;">(جدول برترین‌های جهان به زودی با اتصال به دیتابیس فعال می‌شود)</p>
@@ -212,7 +213,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
 
 <div id="screen-ai-setup" class="screen">
   <h1>🤖 بازی با کامپیوتر</h1>
-  <p>سطح سختی حریف را انتخاب کنید:</p>
+  <p>سطح سختی حریف را انتخاب کنید (بازی رایگان است):</p>
   <button class="btn btn-random" onclick="startBotGame('easy')">🟢 آسان (مبتدی)</button>
   <button class="btn btn-ai" onclick="startBotGame('medium')">🟡 متوسط (معمولی)</button>
   <button class="btn" onclick="startBotGame('hard')" style="background: linear-gradient(145deg, #ff4757, #c0392b);">🔴 سخت (حرفه‌ای)</button>
@@ -359,7 +360,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
 const socket = io();
 
 function confirmExitGame() {
-  if (confirm('آیا مطمئن هستید که می‌خواهید از بازی خارج شوید؟ (مسابقه لغو می‌شود)')) {
+  if (confirm('آیا مطمئن هستید که می‌خواهید از بازی خارج شوید؟ (اگر در بازی آنلاین باشید، ۱۰۰ سکه ورودی شما از بین می‌رود)')) {
     leaveRoom();
   }
 }
@@ -389,19 +390,17 @@ function playSound(name) {
   } catch (e) {}
 }
 
-// ==== مدیریت پروفایل و سکه‌ها و رتبه ====
 let profile = JSON.parse(localStorage.getItem('nard_profile')) || {
   id: Math.random().toString(36).substring(2, 10),
   name: 'بازیکن ' + Math.floor(Math.random() * 1000),
-  coins: 1000, // سکه شروع
+  coins: 1000,
   wins: 0,
   losses: 0,
-  rating: 1000, // امتیاز شروع
+  rating: 1000,
   ownedBoards: ['classic'], activeBoard: 'classic',
   ownedDice: ['classic'], activeDice: 'classic',
   ownedCheckers: ['classic'], activeCheckers: 'classic'
 };
-
 if (profile.rating === undefined) profile.rating = 1000;
 if (profile.coins === undefined) profile.coins = 1000;
 localStorage.setItem('nard_profile', JSON.stringify(profile));
@@ -614,14 +613,19 @@ function resetBoard() {
 }
 
 function findRandomMatch() {
-  isBotMode = false; showScreen('screen-wait');
+  if (profile.coins < 100) { alert("برای بازی آنلاین نیاز به ۱۰۰ سکه دارید!"); return; }
+  isBotMode = false;
+  profile.coins -= 100; localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI();
+  showScreen('screen-wait');
   document.getElementById('waitText').textContent = 'در حال جستجوی حریف...';
   document.getElementById('roomCodeDisplay').style.display = 'none';
   socket.emit('findMatch', { playerId: profile.id, playerName: profile.name });
 }
 
 function createRoom(target) {
+  if (profile.coins < 100) { alert("برای ساخت اتاق نیاز به ۱۰۰ سکه دارید!"); return; }
   isBotMode = false;
+  profile.coins -= 100; localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI();
   socket.emit('createRoom', { target, playerId: profile.id, playerName: profile.name }, (res) => {
     if (res.success) {
       myColor = res.color; roomCode = res.code;
@@ -635,9 +639,11 @@ function createRoom(target) {
 }
 
 function joinRoom() {
+  if (profile.coins < 100) { alert("برای ورود به بازی نیاز به ۱۰۰ سکه دارید!"); return; }
   isBotMode = false;
   const code = document.getElementById('joinCode').value.trim();
   if (code.length !== 6) return alert("کد باید ۶ رقم باشد");
+  profile.coins -= 100; localStorage.setItem('nard_profile', JSON.stringify(profile)); updateProfileUI();
   socket.emit('joinRoom', { code, playerId: profile.id, playerName: profile.name }, (res) => {
     if (res.success) {
       myColor = res.color; roomCode = res.code;
@@ -658,23 +664,6 @@ function updateMatchInfo() {
   document.getElementById('whiteScore').textContent = toPersian(matchScore.white);
   document.getElementById('blackScore').textContent = toPersian(matchScore.black);
   document.getElementById('matchLabel').textContent = 'بازی ' + toPersian(matchTarget) + ' امتیازی';
-}
-
-// ==== سیستم اقتصاد و رتبه‌بندی ====
-function applyWinRules(isMe) {
-  if (isMe) {
-    profile.coins += 100; // جایزه برد
-    profile.wins += 1;
-    profile.rating += 15; // امتیاز رتبه برد
-    playSound('win');
-    triggerConfetti();
-  } else {
-    profile.coins += 20; // جایزه تسلی باخت
-    profile.losses += 1;
-    profile.rating = Math.max(0, profile.rating - 5); // امتیاز رتبه باخت
-  }
-  localStorage.setItem('nard_profile', JSON.stringify(profile));
-  updateProfileUI();
 }
 
 function triggerConfetti() {
@@ -924,16 +913,36 @@ function endGame(winner) {
     matchScore[winner] += points; updateMatchInfo();
     if (matchScore[winner] >= matchTarget) {
       matchOver = true;
-      applyWinRules(winner === 'white');
-      showOverlay(true, winner, 0);
+      showOverlay(true, winner, 0); // AI Mode: No rating/coins change
     } else {
       showOverlay(false, winner, points);
       setTimeout(() => { document.getElementById('overlay').style.display = 'none'; startBotGame(botDifficulty); }, 2500);
     }
   } else { socket.emit('gameOver', { winner, points }); }
 }
-function showOverlay(isMatchOver, winner, points) {
+function showOverlay(isMatchOver, winner, points, gamesWon) {
   const isMe = winner === myColor;
+  
+  if (isMatchOver) {
+      // محاسبه سکه و رتبه
+      if (!isBotMode) {
+          if (isMe) {
+              profile.coins += 150; // 100 سکه حریف + 50 سکه جایزه
+              profile.wins += 1;
+              const ratingGain = (gamesWon[myColor] * 5) + 15;
+              profile.rating += ratingGain;
+              playSound('win');
+              triggerConfetti();
+          } else {
+              profile.losses += 1;
+              const ratingChange = (gamesWon[myColor] * 3) - 5;
+              profile.rating = Math.max(0, profile.rating + ratingChange);
+          }
+          localStorage.setItem('nard_profile', JSON.stringify(profile));
+          updateProfileUI();
+      }
+  }
+  
   document.getElementById('overlayIcon').textContent = isMatchOver ? (isMe ? '🏆' : '😔') : '🏁';
   document.getElementById('overlayTitle').textContent = isMatchOver ? (isMe ? 'شما برنده مسابقه شدید!' : 'شما باختید!') : (winner === 'white' ? 'سفید این دست را برد' : 'مشکی این دست را برد');
   let msg = '';
@@ -943,8 +952,17 @@ function showOverlay(isMatchOver, winner, points) {
     msg += '<br>در حال آماده‌سازی دست بعدی...';
   } else {
     msg = 'امتیاز نهایی: سفید <strong>' + toPersian(matchScore.white) + '</strong> — <strong>' + toPersian(matchScore.black) + '</strong> مشکی';
-    if (isMe) msg += '<br><br>🪙 ۱۰۰ سکه و +۱۵ امتیاز رتبه دریافت کردید!';
-    else msg += '<br><br>🪙 ۲۰ سکه دریافت کردید. دفعه بعد می‌برید!';
+    if (!isBotMode) {
+        if (isMe) {
+            msg += '<br><br>🪙 ۱۵۰ سکه دریافت کردید!';
+            const ratingGain = (gamesWon[myColor] * 5) + 15;
+            msg += '<br>📈 +' + toPersian(ratingGain) + ' امتیاز رتبه';
+        } else {
+            msg += '<br><br>🪙 ۱۰۰ سکه شما کسر شد.';
+            const ratingChange = (gamesWon[myColor] * 3) - 5;
+            msg += '<br>📉 ' + toPersian(ratingChange) + ' امتیاز رتبه';
+        }
+    }
   }
   document.getElementById('overlayMessage').innerHTML = msg;
   const btn = document.querySelector('#overlay button');
@@ -1132,8 +1150,7 @@ socket.on('matchOver', (data) => {
   matchScore = data.scores; updateMatchInfo(); gameOver = true;
   document.getElementById('passBtn').style.display = "none";
   document.getElementById('rollBtn').disabled = true;
-  applyWinRules(data.winner === myColor);
-  showOverlay(true, data.winner, 0);
+  showOverlay(true, data.winner, 0, data.gamesWon);
 });
 socket.on('diceResult', (data) => {
   if (isBotMode) return;
