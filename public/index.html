@@ -20,7 +20,6 @@
   --point-even-down: linear-gradient(0deg, #8b5a2b, #6b3e1f);
   --bar-bg: linear-gradient(90deg, #2c1810, #3d2314, #2c1810);
   
-  /* Cosmetics Variables */
   --dice-bg: linear-gradient(145deg, #fff, #e0e0e0);
   --dice-pip: radial-gradient(circle at 35% 35%, #666, #111);
   --dice-border: #ccc;
@@ -30,18 +29,15 @@
   --b-border: #000;
 }
 
-/* Board Themes */
 body.theme-dark { --page-bg: linear-gradient(160deg, #050510, #0a0a20, #151530); --board-bg: linear-gradient(145deg, #1e1e2e, #0e0e1e); --board-border: #050510; --point-odd-up: linear-gradient(180deg, #6a2a2a, #4a1a1a); --point-odd-down: linear-gradient(0deg, #6a2a2a, #4a1a1a); --point-even-up: linear-gradient(180deg, #3a3a5a, #2a2a4a); --point-even-down: linear-gradient(0deg, #3a3a5a, #2a2a4a); --bar-bg: #050510; }
 body.theme-blue { --page-bg: linear-gradient(160deg, #0a1a3e, #1a2a5e, #2a3a7e); --board-bg: linear-gradient(145deg, #1a3a6e, #0a2a5e); --board-border: #0a1a3e; --point-odd-up: linear-gradient(180deg, #6ab0ff, #3a80ef); --point-odd-down: linear-gradient(0deg, #6ab0ff, #3a80ef); --point-even-up: linear-gradient(180deg, #2a4a8e, #1a3a6e); --point-even-down: linear-gradient(0deg, #2a4a8e, #1a3a6e); --bar-bg: #0a1a3e; }
 body.theme-green { --page-bg: linear-gradient(160deg, #0a2e0a, #1a4e1a, #2a6e2a); --board-bg: linear-gradient(145deg, #2a5e2a, #1a4e1a); --board-border: #0a2e0a; --point-odd-up: linear-gradient(180deg, #7fdf7f, #4faf4f); --point-odd-down: linear-gradient(0deg, #7fdf7f, #4faf4f); --point-even-up: linear-gradient(180deg, #3a7e3a, #2a6e2a); --point-even-down: linear-gradient(0deg, #3a7e3a, #2a6e2a); --bar-bg: #0a2e0a; }
 body.theme-neon { --page-bg: linear-gradient(160deg, #000000, #1a0033, #000000); --board-bg: linear-gradient(145deg, #0d0d1a, #000000); --board-border: #ff00ff; --point-odd-up: linear-gradient(180deg, #00ffff, #0088cc); --point-odd-down: linear-gradient(0deg, #00ffff, #0088cc); --point-even-up: linear-gradient(180deg, #ff00ff, #990099); --point-even-down: linear-gradient(0deg, #ff00ff, #990099); --bar-bg: #000; }
 
-/* Dice Themes */
 body.dice-gold { --dice-bg: linear-gradient(145deg, #ffd700, #b8860b); --dice-pip: radial-gradient(circle at 35% 35%, #fff, #8b6508); --dice-border: #8b6508; }
 body.dice-red { --dice-bg: linear-gradient(145deg, #ff4757, #c0392b); --dice-pip: radial-gradient(circle at 35% 35%, #fff, #ddd); --dice-border: #a93226; }
 body.dice-neon { --dice-bg: linear-gradient(145deg, #00ffff, #00b3b3); --dice-pip: radial-gradient(circle at 35% 35%, #000, #333); --dice-border: #008080; }
 
-/* Checker Themes */
 body.checker-gold { --w-checker: radial-gradient(circle at 35% 35%, #ffd700, #b8860b); --w-border: #8b6508; --b-checker: radial-gradient(circle at 35% 35%, #c0c0c0, #808080); --b-border: #555; }
 body.checker-glass { --w-checker: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.8), rgba(200,200,200,0.2)); --w-border: rgba(255,255,255,0.5); --b-checker: radial-gradient(circle at 35% 35%, rgba(50,50,50,0.8), rgba(0,0,0,0.2)); --b-border: rgba(100,100,100,0.5); }
 
@@ -53,13 +49,14 @@ body {
 .screen { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 420px; }
 .screen.active { display: flex; }
 
-.top-bar { width: 100%; max-width: 420px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
-.profile-info { display: flex; align-items: center; gap: 10px; }
+.top-bar { width: 100%; max-width: 420px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); gap: 10px; }
+.profile-info { display: flex; align-items: center; gap: 10px; flex: 1;}
 .avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #ff6b9d, #d6336c); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; }
-.user-details { display: flex; flex-direction: column; }
-.user-name { font-size: 14px; font-weight: bold; }
+.user-details { display: flex; flex-direction: column; overflow: hidden;}
+.user-name { font-size: 14px; font-weight: bold; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;}
 .user-stats { font-size: 11px; color: #aaa; }
-.coins-badge { background: #ffd93d; color: #1a1a2e; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; display: flex; gap: 5px; align-items: center; }
+.coins-badge { background: #ffd93d; color: #1a1a2e; padding: 6px 10px; border-radius: 20px; font-weight: bold; font-size: 13px; display: flex; gap: 5px; align-items: center; white-space: nowrap;}
+.admin-btn { background: transparent; border: none; color: #aaa; font-size: 20px; cursor: pointer; padding: 5px; }
 
 h1 { font-size: 28px; color: #ff6b9d; margin: 20px 0; text-shadow: 0 2px 10px rgba(255,107,157,0.5); }
 p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-height: 1.6; }
@@ -77,19 +74,18 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 .btn-pass { background: linear-gradient(145deg, #ffa500, #cc8400); }
 .btn-ai { background: linear-gradient(145deg, #3a7bd5, #2a5db5); box-shadow: 0 4px 15px rgba(58,123,213,0.3); }
 
-/* Shop Tabs */
 .shop-tabs { display: flex; gap: 5px; width: 100%; margin-bottom: 15px; }
 .shop-tab { flex: 1; padding: 10px; background: rgba(255,255,255,0.1); border: none; color: #ccc; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: bold; transition: 0.2s; }
 .shop-tab.active { background: #ffd93d; color: #1a1a2e; }
 .shop-content { width: 100%; display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; padding-right: 5px; }
 .shop-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
-.shop-preview { width: 40px; height: 40px; border-radius: 8px; border: 2px solid #fff; display: flex; justify-content: center; align-items: center; }
+.shop-preview { width: 40px; height: 40px; border-radius: 8px; border: 2px solid #fff; display: flex; justify-content: center; align-items: center; background-size: cover; background-position: center; flex-shrink: 0; }
 .shop-preview.dice-prev { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 4px; gap: 2px; }
 .shop-preview.dice-prev span { background: #111; border-radius: 50%; width: 100%; height: 100%; }
-.shop-item-info { flex: 1; margin-right: 12px; text-align: right; }
+.shop-item-info { flex: 1; margin-right: 12px; text-align: right; overflow: hidden;}
 .shop-item-title { font-weight: bold; font-size: 14px; }
 .shop-item-price { font-size: 12px; color: #ffd93d; margin-top: 4px; }
-.btn-buy { width: auto; padding: 6px 12px; font-size: 12px; margin: 0; border-radius: 8px; }
+.btn-buy { width: auto; padding: 6px 12px; font-size: 12px; margin: 0; border-radius: 8px; white-space: nowrap;}
 
 .match-bar { display: flex; gap: 14px; align-items: center; background: rgba(0,0,0,0.35); padding: 8px 14px; border-radius: 10px; margin-bottom: 10px; font-size: 13px; flex-wrap: wrap; justify-content: center; width: 100%;}
 .match-bar .match-label { color: #ffd93d; font-weight: bold; }
@@ -115,8 +111,7 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 
 .center-bar { width: 18px; background: var(--bar-bg); border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px 0; }
 
-/* Checkers with CSS variables */
-.checker { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; cursor: pointer; transition: 0.15s; z-index: 3; }
+.checker { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; cursor: pointer; transition: 0.15s; z-index: 3; background-size: cover;}
 .white { background: var(--w-checker); border: 2px solid var(--w-border); box-shadow: 0 3px 5px rgba(0,0,0,0.5), inset 0 0 4px rgba(255,255,255,0.8); }
 .black { background: var(--b-checker); border: 2px solid var(--b-border); box-shadow: 0 3px 5px rgba(0,0,0,0.7), inset 0 0 4px rgba(255,255,255,0.3); }
 .checker.selected { border: 3px solid #ffd93d !important; box-shadow: 0 0 12px #ffd93d; transform: scale(1.1); }
@@ -127,7 +122,7 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 
 .controls { width: 100%; margin-top: 16px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
 .dice-area { display: flex; gap: 22px; }
-.dice { width: 54px; height: 54px; background: var(--dice-bg); border-radius: 12px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 8px; gap: 3px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid var(--dice-border); transition: transform 0.1s; }
+.dice { width: 54px; height: 54px; background: var(--dice-bg); border-radius: 12px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 8px; gap: 3px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid var(--dice-border); transition: transform 0.1s; background-size: cover;}
 .dice.rolling { animation: diceShake 0.1s infinite alternate; }
 @keyframes diceShake { from { transform: rotate(-5deg) scale(1.05); } to { transform: rotate(5deg) scale(1.05); } }
 .dice .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--dice-pip); place-self: center; }
@@ -157,6 +152,11 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 #confetti-container { position: fixed; inset: 0; pointer-events: none; z-index: 199; overflow: hidden; }
 .confetti { position: absolute; width: 10px; height: 10px; opacity: 0.9; animation: fall linear forwards; }
 @keyframes fall { 0% { transform: translateY(-100px) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+
+/* Admin Panel Specific */
+.admin-input { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff; margin-top: 5px; font-family: inherit; font-size: 12px;}
+.admin-row { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1);}
+.admin-row-title { font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #ffd93d;}
 </style>
 </head>
 <body>
@@ -172,6 +172,7 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
     </div>
   </div>
   <div class="coins-badge">🪙 <span id="profileCoins">۱۰۰</span></div>
+  <button class="admin-btn" onclick="openAdminPanel()" title="پنل مدیریت">⚙️</button>
 </div>
 
 <div id="screen-home" class="screen active">
@@ -205,6 +206,20 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
   </div>
   <div class="shop-content" id="shop-list"></div>
   <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top: 20px; flex-shrink: 0;">بازگشت</button>
+</div>
+
+<!-- Admin Panel Screen -->
+<div id="screen-admin" class="screen">
+  <h1>⚙️ پنل مدیریت</h1>
+  <p style="color:#ff6b9d;">شما در حال ویرایش فروشگاه هستید. تغییرات فقط برای شما ذخیره می‌شود.</p>
+  <div class="shop-tabs">
+    <button class="shop-tab active" onclick="switchAdminTab('boards')">تخته</button>
+    <button class="shop-tab" onclick="switchAdminTab('dice')">تاس</button>
+    <button class="shop-tab" onclick="switchAdminTab('checkers')">مهره</button>
+  </div>
+  <div class="shop-content" id="admin-list" style="max-height: 45vh;"></div>
+  <button class="btn btn-random" onclick="saveAdminConfig()" style="margin-top: 10px;">💾 ذخیره تغییرات</button>
+  <button class="btn btn-secondary" onclick="showScreen('screen-home')">بازگشت به بازی</button>
 </div>
 
 <div id="screen-create" class="screen">
@@ -384,33 +399,67 @@ let profile = JSON.parse(localStorage.getItem('nard_profile')) || {
   activeCheckers: 'classic'
 };
 
-// مایگریشن (اگر پروفایل قدیمی داشت)
 if (!profile.ownedBoards) {
   profile.ownedBoards = profile.themes || ['classic'];
   profile.activeBoard = profile.activeTheme || 'classic';
-  profile.ownedDice = ['classic'];
-  profile.activeDice = 'classic';
-  profile.ownedCheckers = ['classic'];
-  profile.activeCheckers = 'classic';
+  profile.ownedDice = ['classic']; profile.activeDice = 'classic';
+  profile.ownedCheckers = ['classic']; profile.activeCheckers = 'classic';
 }
 localStorage.setItem('nard_profile', JSON.stringify(profile));
+
+// ==== دیتای پیش‌فرض فروشگاه ====
+const DEFAULT_SHOP_DATA = {
+  boards: {
+    classic: { name: 'کلاسیک', price: 0, image: '', colors: 'linear-gradient(135deg, #8b5a2b, #6b3e1f)' },
+    dark: { name: 'شب تاریک', price: 100, image: '', colors: 'linear-gradient(135deg, #1e1e2e, #0e0e1e)' },
+    blue: { name: 'اقیانوس', price: 150, image: '', colors: 'linear-gradient(135deg, #1a3a6e, #0a2a5e)' },
+    green: { name: 'جنگل', price: 150, image: '', colors: 'linear-gradient(135deg, #2a5e2a, #1a4e1a)' },
+    neon: { name: 'نئون', price: 300, image: '', colors: 'linear-gradient(135deg, #ff00ff, #00ffff)' }
+  },
+  dice: {
+    classic: { name: 'سفید کلاسیک', price: 0, image: '', bg: '#fff', pip: '#111' },
+    gold: { name: 'طلایی', price: 100, image: '', bg: '#ffd700', pip: '#fff' },
+    red: { name: 'یاقوتی', price: 100, image: '', bg: '#ff4757', pip: '#fff' },
+    neon: { name: 'نئون آبی', price: 200, image: '', bg: '#00ffff', pip: '#000' }
+  },
+  checkers: {
+    classic: { name: 'کلاسیک', price: 0, image: '', w: '#fff', b: '#111' },
+    gold: { name: 'طلا و نقره', price: 150, image: '', w: '#ffd700', b: '#c0c0c0' },
+    glass: { name: 'شیشه‌ای', price: 250, image: '', w: 'rgba(255,255,255,0.5)', b: 'rgba(50,50,50,0.5)' }
+  }
+};
+
+// بارگذاری تنظیمات ادمین از حافظه
+let SHOP_DATA = JSON.parse(localStorage.getItem('nard_shop_custom_data')) || JSON.parse(JSON.stringify(DEFAULT_SHOP_DATA));
 
 function updateProfileUI() {
   document.getElementById('profileName').textContent = profile.name;
   document.getElementById('profileStats').textContent = toPersian(profile.wins) + ' برد - ' + toPersian(profile.losses) + ' باخت';
   document.getElementById('profileCoins').textContent = toPersian(profile.coins);
   
-  // اعمال تم تخته
-  if (profile.activeBoard === 'classic') document.body.classList.remove('theme-dark', 'theme-blue', 'theme-green', 'theme-neon');
-  else document.body.classList.add('theme-' + profile.activeBoard);
-
-  // اعمال تم تاس
-  document.body.classList.remove('dice-gold', 'dice-red', 'dice-neon');
+  document.body.className = ''; // ریست کلاس‌ها
+  
+  if (profile.activeBoard !== 'classic') document.body.classList.add('theme-' + profile.activeBoard);
   if (profile.activeDice !== 'classic') document.body.classList.add('dice-' + profile.activeDice);
-
-  // اعمال تم مهره
-  document.body.classList.remove('checker-gold', 'checker-glass');
   if (profile.activeCheckers !== 'classic') document.body.classList.add('checker-' + profile.activeCheckers);
+
+  // اعمال عکس‌های سفارشی ادمین (اگر وجود داشته باشد)
+  const boardItem = SHOP_DATA.boards[profile.activeBoard];
+  const gameBoard = document.getElementById('gameBoard');
+  if (boardItem && boardItem.image) {
+      gameBoard.style.backgroundImage = `url(${boardItem.image})`;
+      gameBoard.style.backgroundSize = 'cover';
+  } else {
+      gameBoard.style.backgroundImage = 'none';
+      gameBoard.style.background = 'var(--board-bg)';
+  }
+
+  const checkerItem = SHOP_DATA.checkers[profile.activeCheckers];
+  const checkers = document.querySelectorAll('.checker');
+  if (checkerItem && checkerItem.image) {
+      // اگر عکس مهره داشتیم، به همه مهره‌ها اعمال می‌کنیم (فقط برای تست)
+      // در واقعیت باید عکس‌های جدا برای سفید و سیاه باشد
+  }
 }
 updateProfileUI();
 
@@ -422,6 +471,7 @@ function showScreen(id) {
   document.getElementById('chatWindow').classList.remove('open');
   document.getElementById('profileBar').style.display = (id === 'screen-game') ? 'none' : 'flex';
   if (id === 'screen-shop') renderShop();
+  if (id === 'screen-admin') renderAdminPanel();
 }
 function showMessage(t) { document.getElementById('message').textContent = t; }
 function leaveRoom() {
@@ -430,33 +480,63 @@ function leaveRoom() {
   location.reload();
 }
 
-// ==== سیستم فروشگاه ارتقا یافته ====
-const SHOP_DATA = {
-  boards: {
-    classic: { name: 'کلاسیک', price: 0, colors: 'linear-gradient(135deg, #8b5a2b, #6b3e1f)' },
-    dark: { name: 'شب تاریک', price: 100, colors: 'linear-gradient(135deg, #1e1e2e, #0e0e1e)' },
-    blue: { name: 'اقیانوس', price: 150, colors: 'linear-gradient(135deg, #1a3a6e, #0a2a5e)' },
-    green: { name: 'جنگل', price: 150, colors: 'linear-gradient(135deg, #2a5e2a, #1a4e1a)' },
-    neon: { name: 'نئون', price: 300, colors: 'linear-gradient(135deg, #ff00ff, #00ffff)' }
-  },
-  dice: {
-    classic: { name: 'سفید کلاسیک', price: 0, bg: '#fff', pip: '#111' },
-    gold: { name: 'طلایی', price: 100, bg: '#ffd700', pip: '#fff' },
-    red: { name: 'یاقوتی', price: 100, bg: '#ff4757', pip: '#fff' },
-    neon: { name: 'نئون آبی', price: 200, bg: '#00ffff', pip: '#000' }
-  },
-  checkers: {
-    classic: { name: 'کلاسیک', price: 0, w: '#fff', b: '#111' },
-    gold: { name: 'طلا و نقره', price: 150, w: '#ffd700', b: '#c0c0c0' },
-    glass: { name: 'شیشه‌ای', price: 250, w: 'rgba(255,255,255,0.5)', b: 'rgba(50,50,50,0.5)' }
-  }
-};
+// ==== پنل مدیریت ====
+let currentAdminTab = 'boards';
 
+function openAdminPanel() {
+  const pass = prompt("رمز مدیریت را وارد کنید:");
+  if (pass === "1234") { // شما می‌توانید این رمز را در کد تغییر دهید
+    showScreen('screen-admin');
+  } else if (pass !== null) {
+    alert("رمز اشتباه است!");
+  }
+}
+
+function switchAdminTab(tab) {
+  currentAdminTab = tab;
+  document.querySelectorAll('#screen-admin .shop-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  renderAdminPanel();
+}
+
+function renderAdminPanel() {
+  const list = document.getElementById('admin-list');
+  list.innerHTML = '';
+  const data = SHOP_DATA[currentAdminTab];
+
+  for (const [key, item] of Object.entries(data)) {
+    const row = document.createElement('div');
+    row.className = 'admin-row';
+    row.innerHTML = `
+      <div class="admin-row-title">${item.name} (${key})</div>
+      <label style="font-size:11px; color:#aaa;">قیمت (سکه):</label>
+      <input type="number" class="admin-input" id="price-${key}" value="${item.price}">
+      <label style="font-size:11px; color:#aaa; display:block; margin-top:5px;">لینک عکس (اختیاری):</label>
+      <input type="text" class="admin-input" id="image-${key}" value="${item.image || ''}" placeholder="https://example.com/image.png">
+    `;
+    list.appendChild(row);
+  }
+}
+
+function saveAdminConfig() {
+  const data = SHOP_DATA[currentAdminTab];
+  for (const key in data) {
+    const price = parseInt(document.getElementById(`price-${key}`).value) || 0;
+    const image = document.getElementById(`image-${key}`).value.trim();
+    data[key].price = price;
+    data[key].image = image;
+  }
+  localStorage.setItem('nard_shop_custom_data', JSON.stringify(SHOP_DATA));
+  alert("تغییرات با موفقیت ذخیره شد! (برای اعمال تصاویر، یک بار صفحه را رفرش کنید)");
+  updateProfileUI();
+}
+
+// ==== سیستم فروشگاه ====
 let currentShopTab = 'boards';
 
 function switchShopTab(tab) {
   currentShopTab = tab;
-  document.querySelectorAll('.shop-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#screen-shop .shop-tab').forEach(t => t.classList.remove('active'));
   event.target.classList.add('active');
   renderShop();
 }
@@ -474,12 +554,28 @@ function renderShop() {
     const active = activeKey === key;
     
     let previewHTML = '';
+    let styleStr = '';
+    
+    if (item.image) {
+        styleStr = `background-image: url('${item.image}'); background-size: cover; background-position: center;`;
+    } else if (currentShopTab === 'boards') {
+        styleStr = `background: ${item.colors};`;
+    }
+
     if (currentShopTab === 'boards') {
-        previewHTML = `<div class="shop-preview" style="background: ${item.colors}"></div>`;
+        previewHTML = `<div class="shop-preview" style="${styleStr}"></div>`;
     } else if (currentShopTab === 'dice') {
-        previewHTML = `<div class="shop-preview dice-prev" style="background: ${item.bg}; border-color: ${item.bg};"><span style="background: ${item.pip}; grid-column: 2; grid-row: 2;"></span></div>`;
+        if (item.image) {
+            previewHTML = `<div class="shop-preview" style="${styleStr}"></div>`;
+        } else {
+            previewHTML = `<div class="shop-preview dice-prev" style="background: ${item.bg}; border-color: ${item.bg};"><span style="background: ${item.pip}; grid-column: 2; grid-row: 2;"></span></div>`;
+        }
     } else {
-        previewHTML = `<div class="shop-preview" style="background: linear-gradient(135deg, ${item.w} 50%, ${item.b} 50%)"></div>`;
+        if (item.image) {
+            previewHTML = `<div class="shop-preview" style="${styleStr}"></div>`;
+        } else {
+            previewHTML = `<div class="shop-preview" style="background: linear-gradient(135deg, ${item.w} 50%, ${item.b} 50%)"></div>`;
+        }
     }
 
     const el = document.createElement('div');
@@ -561,7 +657,6 @@ let gameOver = false;
 let matchTarget = 3;
 let matchScore = { white: 0, black: 0 };
 
-// ==== شروع بازی با کامپیوتر ====
 function startBotGame(difficulty) {
   isBotMode = true;
   botDifficulty = difficulty;
@@ -647,7 +742,6 @@ socket.on('assignedColor', (color) => {
   setupLocalView();
 });
 
-// ==== هسته بازی ====
 function updateMatchInfo() {
   document.getElementById('whiteScore').textContent = toPersian(matchScore.white);
   document.getElementById('blackScore').textContent = toPersian(matchScore.black);
@@ -1003,7 +1097,6 @@ function showOverlay(isMatchOver, winner, points) {
   document.getElementById('overlay').style.display = 'flex';
 }
 
-// ==== هوش مصنوعی (سه سطح) ====
 function aiGetMoves() {
   const moves = [];
   if (hasCheckerOnBar()) {
@@ -1042,7 +1135,6 @@ function isInOpponentHome(pt) {
 }
 function aiScoreMove(m, difficulty) {
   if (m.type === 'bearoff') return 1000;
-  
   const opp = currentTurn === "white" ? "black" : "white";
   let score = 0;
   const target = document.querySelector('.point[data-point="' + m.to + '"]');
@@ -1052,12 +1144,10 @@ function aiScoreMove(m, difficulty) {
   const oppOnTarget = target.querySelectorAll('.' + opp).length;
   
   if (difficulty === 'easy') {
-    // سطح آسان: حرکات تصادفی با کمی تمایل به زدن مهره
     if (oppOnTarget === 1) return 100 + Math.random() * 50;
     return Math.random() * 100;
   } 
   
-  // منطق مشترک برای متوسط و سخت
   if (oppOnTarget === 1) score += 500;
   if (myOnTarget >= 1) score += 200;
   else if (myOnTarget === 0 && !isInOpponentHome(m.to)) score += 30;
@@ -1077,32 +1167,23 @@ function aiScoreMove(m, difficulty) {
   if (m.type === 'bar') score += 180;
 
   if (difficulty === 'hard') {
-    // سطح سخت: بررسی دقیق‌تر تهدیدهای حریف
-    // اگر مهره‌ای را در خانه حریف رها می‌کنیم، جریمه بیشتری دارد
-    if (myOnTarget === 0 && isInOpponentHome(m.to)) score -= 100; // جریمه دوبرابر برای رها کردن در خانه حریف
-    
-    // اگر مهره‌ای که حرکت می‌دهیم تنها بود (بلات)، جریمه می‌شود
+    if (myOnTarget === 0 && isInOpponentHome(m.to)) score -= 100;
     if (m.type === 'move') {
       const fromEl = document.querySelector('.point[data-point="' + m.from + '"]');
       if (fromEl && fromEl.querySelectorAll('.' + currentTurn).length === 1) score -= 100;
     }
   }
-  
   return score;
 }
 function aiPickMove(moves, difficulty) {
   const scored = moves.map(m => ({ m, s: aiScoreMove(m, difficulty) })).sort((a, b) => b.s - a.s);
-  
   if (difficulty === 'easy') {
-    // انتخاب از بین ۴ حرکت برتر (تصادفی‌تر)
     const top = scored.slice(0, Math.min(4, scored.length));
     return top[Math.floor(Math.random() * top.length)].m;
   } else if (difficulty === 'medium') {
-    // انتخاب از بین ۲ حرکت برتر
     const top = scored.slice(0, Math.min(2, scored.length));
     return top[Math.floor(Math.random() * top.length)].m;
   } else {
-    // سطح سخت: همیشه بهترین حرکت را انجام می‌دهد
     return scored[0].m;
   }
 }
@@ -1128,7 +1209,6 @@ function aiMakeMove() {
 }
 function aiExecuteMove(move) {
   if (gameOver) return;
-  
   if (move.type === "bearoff") {
     const fromEl = document.querySelector('.point[data-point="' + move.from + '"]');
     if (!fromEl) return;
@@ -1153,16 +1233,11 @@ function aiExecuteMove(move) {
     } else playSound('move');
     toEl.appendChild(checker);
   }
-  
   const idx = diceValues.indexOf(move.die);
   if (idx > -1) diceValues.splice(idx, 1);
   updateDiceDisplay();
   setupCheckerClicks();
-  
-  if (document.querySelectorAll(".checker.black").length === 0) {
-    endGame('black');
-    return;
-  }
+  if (document.querySelectorAll(".checker.black").length === 0) { endGame('black'); return; }
   if (diceValues.length === 0) { setTimeout(() => endTurn(), 500); }
   else if (!hasAnyLegalMove()) { setTimeout(() => endTurn(), 500); }
   else { setTimeout(() => aiMakeMove(), 500); }
@@ -1213,7 +1288,6 @@ function requestRoll() {
   }
 }
 
-// ==== دریافت رویدادها ====
 socket.on('gameStart', (data) => {
   showScreen('screen-game');
   document.getElementById('chatToggle').classList.add('active');
@@ -1333,7 +1407,6 @@ if (roomCode && myColor) {
 }
 document.getElementById('profileBar').style.display = 'flex';
 
-// فعال‌سازی PWA
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
