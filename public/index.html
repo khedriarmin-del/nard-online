@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1a0033">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2662/2662503.png">
 <title>تخته نرد آنلاین</title>
 <script src="/socket.io/socket.io.js"></script>
 <style>
@@ -147,7 +150,7 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
   <h1>🎲 نرد آنلاین</h1>
   <p>یک اتاق بسازید، به دوستتان بپیوندید یا با حریف تصادفی بازی کنید.</p>
   
-  <button class="btn btn-ai" onclick="startBotGame()">🤖 بازی با کامپیوتر (تست)</button>
+  <button class="btn btn-ai" onclick="startBotGame()">🤖 بازی با کامپیوتر</button>
   <button class="btn btn-random" onclick="findRandomMatch()">🎲 بازی با حریف تصادفی</button>
   <button class="btn btn-online" onclick="showScreen('screen-create')">➕ ساخت اتاق اختصاصی</button>
   <button class="btn btn-secondary" onclick="showScreen('screen-join')">🔑 ورود با کد اتاق</button>
@@ -901,7 +904,7 @@ function showOverlay(isMatchOver, winner, points) {
   document.getElementById('overlay').style.display = 'flex';
 }
 
-// ==== هوش مصنوعی (برای حالت تست) ====
+// ==== هوش مصنوعی ====
 function aiGetMoves() {
   const moves = [];
   if (hasCheckerOnBar()) {
@@ -1036,7 +1039,6 @@ function aiExecuteMove(move) {
   else { setTimeout(() => aiMakeMove(), 500); }
 }
 
-// انیمیشن تاس محلی
 let diceAnimId = null;
 function stopDiceAnim() { if (diceAnimId) { clearInterval(diceAnimId); diceAnimId = null; } }
 function animateDiceThenSet(vals, cb) {
@@ -1201,6 +1203,13 @@ if (roomCode && myColor) {
     showScreen('screen-home');
 }
 document.getElementById('profileBar').style.display = 'flex';
+
+// فعال‌سازی PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
+  });
+}
 </script>
 </body>
 </html>
