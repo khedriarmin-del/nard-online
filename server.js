@@ -27,7 +27,7 @@ function generateCode() {
 }
 
 io.on('connection', (socket) => {
-  socket.on('findMatch', ({ playerId, playerName, entryFee, bonus }) => {
+    socket.on('findMatch', ({ playerId, playerName, entryFee, bonus }) => {
     matchmakingQueue.push({ socketId: socket.id, playerId, playerName, entryFee, bonus });
     
     const opponentIndex = matchmakingQueue.findIndex(p => p.socketId !== socket.id && p.entryFee === entryFee);
@@ -40,18 +40,11 @@ io.on('connection', (socket) => {
       
       const code = generateCode();
       const room = {
-        code,
-        target: 3,
-        roomType: 'random',
-        entryFee: p1.entryFee,
-        bonus: p1.bonus,
+        code, target: 3, roomType: 'random', entryFee: p1.entryFee, bonus: p1.bonus,
         players: { white: p1.socketId, black: p2.socketId },
         playerIds: { white: p1.playerId, black: p2.playerId },
         playerNames: { white: p1.playerName, black: p2.playerName },
-        gameState: null,
-        matchScore: { white: 0, black: 0 },
-        gamesWon: { white: 0, black: 0 },
-        disconnectedAt: null
+        gameState: null, matchScore: { white: 0, black: 0 }, gamesWon: { white: 0, black: 0 }, disconnectedAt: null
       };
       rooms.set(code, room);
       
@@ -59,6 +52,10 @@ io.on('connection', (socket) => {
       const s2 = io.sockets.sockets.get(p2.socketId);
       if (s1) { s1.join(code); s1.roomCode = code; s1.color = 'white'; }
       if (s2) { s2.join(code); s2.roomCode = code; s2.color = 'black'; }
+      
+      // 👇 این دو خط اضافه شد تا رنگ‌ها به گوشی‌ها ارسال شود
+      if (s1) s1.emit('assignedColor', 'white');
+      if (s2) s2.emit('assignedColor', 'black');
       
       const gameData = { code, target: 3, matchScore: room.matchScore, whiteName: p1.playerName, blackName: p2.playerName, entryFee: room.entryFee, bonus: room.bonus, roomType: 'random' };
       io.to(code).emit('gameStart', gameData);
