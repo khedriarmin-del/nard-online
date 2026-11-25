@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nard-cache-v5';
+const CACHE_NAME = 'nard-cache-v8'; // 👈 این خط را تغییر بده
 const urlsToCache = [
   '/',
   '/index.html'
