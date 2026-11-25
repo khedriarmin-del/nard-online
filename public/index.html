@@ -829,7 +829,8 @@ function joinRoom() {
 socket.on('waitingForMatch', () => { document.getElementById('waitText').textContent = 'در حال جستجوی حریف... لطفا صبر کنید.'; });
 socket.on('matchFound', (data) => { roomCode = data.code; sessionStorage.setItem('nard_roomCode', roomCode); });
 socket.on('assignedColor', (color) => {
-  myColor = color; sessionStorage.setItem('nard_myColor', color);
+  myColor = color; 
+  sessionStorage.setItem('nard_myColor', color);
   document.getElementById('myColorDisplay').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
   setupLocalView();
 });
@@ -1383,6 +1384,7 @@ socket.on('gameStart', (data) => {
   currentEntryFee = data.entryFee;
   currentBonus = data.bonus;
   
+  // کسر سکه در شروع بازی
   if (profile.coins >= currentEntryFee) {
       profile.coins -= currentEntryFee;
       localStorage.setItem('nard_profile', JSON.stringify(profile));
@@ -1392,14 +1394,24 @@ socket.on('gameStart', (data) => {
   updateMatchInfo();
   if (data.whiteName) document.getElementById('whiteNameDisplay').textContent = data.whiteName;
   if (data.blackName) document.getElementById('blackNameDisplay').textContent = data.blackName;
+  
   document.getElementById('myColorDisplay').textContent = 'شما: ' + (myColor === 'white' ? 'سفید' : 'مشکی');
   document.getElementById('myColorDisplay').style.color = myColor === 'white' ? '#fff' : '#aaa';
 
-  setupLocalView(); resetBoard();
-  currentTurn = 'white'; gameOver = false;
+  setupLocalView(); 
+  resetBoard();
+  currentTurn = 'white'; 
+  gameOver = false;
   document.getElementById('turnInfo').textContent = 'نوبت: سفید';
-  if (myColor === 'white') { document.getElementById('rollBtn').disabled = false; showMessage("شما سفید هستید. تاس بنداز."); } 
-  else { document.getElementById('rollBtn').disabled = true; showMessage("در انتظار حرکت سفید..."); }
+  
+  // فعال کردن دکمه تاس فقط برای بازیکن سفید
+  if (myColor === 'white') { 
+      document.getElementById('rollBtn').disabled = false; 
+      showMessage("شما سفید هستید. تاس بنداز."); 
+  } else { 
+      document.getElementById('rollBtn').disabled = true; 
+      showMessage("در انتظار حرکت سفید..."); 
+  }
 });
 socket.on('startNextGame', (data) => {
   matchScore = data.scores; updateMatchInfo();
