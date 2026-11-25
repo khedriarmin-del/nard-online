@@ -145,8 +145,9 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 .row { display: flex; height: 150px; gap: 2px; overflow: visible; }
 .point { 
   flex: 1; position: relative; display: flex; flex-direction: column; 
-  align-items: center; gap: 2px; cursor: pointer; z-index: 1; 
-  height: 100%; /* کل ارتفاع ردیف را پر می‌کند تا کلیک روی کل ستون کار کند */
+  align-items: center; cursor: pointer; z-index: 1; 
+  height: 100%;
+  /* gap حذف شد تا فاصله‌ها با جاوا اسکریپت کنترل شوند */
 }
 .row:first-child .point::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 100%; clip-path: polygon(0% 0%, 100% 0%, 50% 100%); z-index: -1; }
 .row:first-child .point:nth-child(odd)::before { background: var(--point-odd-up); }
@@ -157,7 +158,7 @@ p { font-size: 14px; color: #ccc; margin-bottom: 20px; text-align: center; line-
 .row:last-child .point:nth-child(even)::before { background: var(--point-even-down); }
 .row:last-child .point { justify-content: flex-end; padding-bottom: 6px; }
 
-.center-bar { width: 18px; background: var(--bar-bg); border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px 0; }
+.center-bar { width: 18px; background: var(--bar-bg); border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 0; }
 
 .checker { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; cursor: pointer; transition: 0.15s; z-index: 3; background-size: cover;}
 .white { background: var(--w-checker); border: 2px solid var(--w-border); box-shadow: 0 3px 5px rgba(0,0,0,0.5), inset 0 0 4px rgba(255,255,255,0.8); }
@@ -963,6 +964,41 @@ function setDiceFace(el, value) {
 }
 function updateDiceDisplay() { setDiceFace(document.getElementById('dice1'), diceValues[0] || null); setDiceFace(document.getElementById('dice2'), diceValues[1] || null); }
 
+// ================== فشرده‌سازی مهره‌ها ==================
+function updatePointMargins(container) {
+    if (!container) return;
+    const checkers = container.querySelectorAll('.checker');
+    const total = checkers.length;
+    if (total === 0) return;
+
+    const isBar = container.classList.contains('center-bar');
+    const standardGap = isBar ? 3 : 2;
+    const itemHeight = 22; 
+    const maxVisible = 5; // ارتفاع مرجع (۵ مهره)
+    const maxHeight = maxVisible * itemHeight + (maxVisible - 1) * standardGap;
+
+    if (total <= maxVisible) {
+        checkers.forEach((c, idx) => {
+            c.style.marginTop = idx === 0 ? '0px' : `${standardGap}px`;
+        });
+    } else {
+        const currentHeight = total * itemHeight + (total - 1) * standardGap;
+        const totalOverlap = currentHeight - maxHeight;
+        const overlapMargin = totalOverlap / (total - 1);
+
+        checkers.forEach((c, idx) => {
+            c.style.marginTop = idx === 0 ? '0px' : `-${overlapMargin}px`;
+        });
+    }
+}
+
+function updateAllMargins() {
+    document.querySelectorAll('.point').forEach(updatePointMargins);
+    updatePointMargins(document.getElementById('topBar'));
+    updatePointMargins(document.getElementById('bottomBar'));
+}
+// =======================================================
+
 function getBoardState() {
   const state = { points: {}, bar: { white: 0, black: 0 } };
   document.querySelectorAll('.point').forEach(p => {
@@ -980,37 +1016,14 @@ function applyBoardState(state) {
   for (let pt in state.points) {
     const el = document.querySelector(`.point[data-point="${pt}"]`);
     if (!el) continue;
-    const w = state.points[pt].white;
-    const b = state.points[pt].black;
-    const total = w + b;
-    const isTop = Array.from(el.parentElement.parentElement.children).indexOf(el.parentElement) === 0;
-
-    let count = 0;
-    for (let i = 0; i < w; i++) {
-      const div = document.createElement('div');
-      div.className = 'checker white';
-      // اگر مهره‌ها بیشتر از ۵ تا بودند، روی هم سوار شوند تا از کادر بیرون نزنند
-      if (total > 5 && count > 0) {
-          if (isTop) div.style.marginBottom = '-10px';
-          else div.style.marginTop = '-10px';
-      }
-      el.appendChild(div);
-      count++;
-    }
-    for (let i = 0; i < b; i++) {
-      const div = document.createElement('div');
-      div.className = 'checker black';
-      if (total > 5 && count > 0) {
-          if (isTop) div.style.marginBottom = '-10px';
-          else div.style.marginTop = '-10px';
-      }
-      el.appendChild(div);
-      count++;
-    }
+    for (let i = 0; i < state.points[pt].white; i++) el.innerHTML += '<div class="checker white"></div>';
+    for (let i = 0; i < state.points[pt].black; i++) el.innerHTML += '<div class="checker black"></div>';
   }
   const topBar = document.getElementById('topBar'), botBar = document.getElementById('bottomBar');
   for (let i = 0; i < state.bar.white; i++) topBar.innerHTML += '<div class="checker white"></div>';
   for (let i = 0; i < state.bar.black; i++) botBar.innerHTML += '<div class="checker black"></div>';
+  
+  updateAllMargins();
   setupCheckerClicks();
 }
 
@@ -1065,6 +1078,9 @@ document.querySelectorAll(".point").forEach(point => {
     point.appendChild(moved); moved.classList.remove("selected", "can-bear-off"); selectedChecker = null; clearHighlights();
     const idx = diceValues.indexOf(dist); if (idx > -1) diceValues.splice(idx, 1);
     updateDiceDisplay(); setupCheckerClicks(); syncState();
+    
+    updateAllMargins(); // فشرده‌سازی مجدد
+
     if (diceValues.length === 0) { endTurn(); } 
     else if (!hasAnyLegalMove()) { document.getElementById("passBtn").style.display = "block"; showMessage("هیچ حرکتی نداری! پاس بده."); } 
     else showMessage("حرکت انجام شد. " + diceValues.length + " حرکت باقی مونده.");
@@ -1077,6 +1093,9 @@ function tryBearOff(checker) {
   checker.remove(); playSound('bearoff');
   const idx = diceValues.indexOf(die); if (idx > -1) diceValues.splice(idx, 1);
   selectedChecker = null; clearHighlights(); updateDiceDisplay(); setupCheckerClicks(); syncState();
+  
+  updateAllMargins(); // فشرده‌سازی مجدد
+
   if (document.querySelectorAll(".checker." + currentTurn).length === 0) { endGame(currentTurn); return; }
   if (diceValues.length === 0) { endTurn(); } 
   else if (!hasAnyLegalMove()) { document.getElementById("passBtn").style.display = "block"; showMessage("هیچ حرکتی نداری! پاس بده."); } 
@@ -1278,8 +1297,9 @@ function aiMakeMove() {
 }
 function aiExecuteMove(move) {
   if (gameOver) return;
+  let fromEl = null;
   if (move.type === "bearoff") {
-    const fromEl = document.querySelector('.point[data-point="' + move.from + '"]');
+    fromEl = document.querySelector('.point[data-point="' + move.from + '"]');
     if (!fromEl) return;
     const checker = fromEl.querySelector(".black");
     if (!checker) return;
@@ -1287,9 +1307,11 @@ function aiExecuteMove(move) {
   } else {
     let checker, toEl = document.querySelector('.point[data-point="' + move.to + '"]');
     if (!toEl) return;
-    if (move.type === "bar") checker = document.getElementById("bottomBar").querySelector(".black");
-    else {
-      const fromEl = document.querySelector('.point[data-point="' + move.from + '"]');
+    if (move.type === "bar") {
+      checker = document.getElementById("bottomBar").querySelector(".black");
+      fromEl = document.getElementById("bottomBar");
+    } else {
+      fromEl = document.querySelector('.point[data-point="' + move.from + '"]');
       if (!fromEl) return;
       checker = fromEl.querySelector(".black");
     }
@@ -1298,9 +1320,12 @@ function aiExecuteMove(move) {
     if (whiteOnTarget.length === 1) { document.getElementById("topBar").appendChild(whiteOnTarget[0]); playSound('hit'); } 
     else playSound('move');
     toEl.appendChild(checker);
+    updatePointMargins(toEl);
   }
   const idx = diceValues.indexOf(move.die); if (idx > -1) diceValues.splice(idx, 1);
   updateDiceDisplay(); setupCheckerClicks();
+  if (fromEl) updatePointMargins(fromEl);
+
   if (document.querySelectorAll(".checker.black").length === 0) { endGame('black'); return; }
   if (diceValues.length === 0) { setTimeout(() => endTurn(), 500); }
   else if (!hasAnyLegalMove()) { setTimeout(() => endTurn(), 500); }
