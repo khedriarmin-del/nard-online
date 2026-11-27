@@ -254,7 +254,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
         </span>
         <span class="play-arrow">▶</span>
       </button>
-      <button class="play-btn play-btn-ai" onclick="showScreen('screen-ai-setup')">
+                  <button class="play-btn play-btn-ai" onclick="showScreen('screen-ai-setup')">
         <span class="play-icon">🤖</span>
         <span class="play-body">
           <span class="play-title">بازی با کامپیوتر</span>
@@ -262,6 +262,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
         </span>
         <span class="play-arrow">▶</span>
       </button>
+      <button class="btn btn-secondary" onclick="showScreen('screen-join')" style="margin-top: -4px; font-size: 13px; padding: 10px;">🔑 ورود با کد اتاق</button>
     </div>
 
     <div class="side-icons">
@@ -484,7 +485,7 @@ input[type="file"]::file-selector-button { background: #3a5a8a; color: #fff; bor
     <div id="overlayIcon" style="font-size:56px;"></div>
     <h2 id="overlayTitle"></h2>
     <p id="overlayMessage"></p>
-    <button class="btn" onclick="leaveRoom()">بازگشت به منو</button>
+    <button class="btn" id="overlayBtn" onclick="leaveRoom()">بازگشت به منو</button>
   </div>
 </div>
 
@@ -1145,14 +1146,17 @@ function showOverlay(isMatchOver, winner, points, gamesWon) {
   const isMe = winner === myColor;
   
   if (isMatchOver) {
-      if (!isBotMode) {
+      if (isBotMode) {
+          if (isMe) profile.wins += 1;
+          else profile.losses += 1;
+          localStorage.setItem('nard_profile', JSON.stringify(profile));
+          updateProfileUI();
+      } else {
           if (isMe) {
               let winCoins = 0;
-              if (currentRoomType === 'random') {
-                  winCoins = currentEntryFee + currentBonus; 
-              } else if (currentRoomType === 'private') {
-                  winCoins = currentEntryFee; 
-              }
+              if (currentRoomType === 'random') winCoins = currentEntryFee + currentBonus; 
+              else if (currentRoomType === 'private') winCoins = currentEntryFee; 
+              
               profile.coins += winCoins;
               profile.wins += 1;
               
@@ -1187,7 +1191,6 @@ function showOverlay(isMatchOver, winner, points, gamesWon) {
         if (isMe) {
             if (currentRoomType === 'random') msg += '<br><br>🪙 ' + toPersian(currentEntryFee + currentBonus) + ' سکه دریافت کردید!';
             else msg += '<br><br>🪙 ' + toPersian(currentEntryFee) + ' سکه از حریف گرفتید!';
-            
             if (currentRoomType === 'random') {
                 const ratingGain = (gamesWon[myColor] * 5) + 15;
                 msg += '<br>📈 +' + toPersian(ratingGain) + ' امتیاز رتبه';
@@ -1195,7 +1198,6 @@ function showOverlay(isMatchOver, winner, points, gamesWon) {
         } else {
             if (currentRoomType === 'random') msg += '<br><br>🪙 ' + toPersian(currentEntryFee) + ' سکه شما کسر شد.';
             else msg += '<br><br>🪙 ' + toPersian(currentEntryFee) + ' سکه از شما کسر شد.';
-            
             if (currentRoomType === 'random') {
                 const ratingChange = (gamesWon[myColor] * 3) - 5;
                 msg += '<br>📉 ' + toPersian(ratingChange) + ' امتیاز رتبه';
@@ -1203,12 +1205,26 @@ function showOverlay(isMatchOver, winner, points, gamesWon) {
         }
     }
   }
+  
   document.getElementById('overlayMessage').innerHTML = msg;
-  const btn = document.querySelector('#overlay button');
-  if (!isMatchOver) {
-    btn.style.display = 'none';
-    setTimeout(() => { document.getElementById('overlay').style.display = 'none'; btn.style.display = 'block'; }, 2500);
-  } else { btn.style.display = 'block'; }
+  const btn = document.getElementById('overlayBtn');
+  
+  if (isMatchOver) {
+      btn.style.display = 'block';
+      if (isBotMode) {
+          btn.textContent = '🎲 بازی مجدد با کامپیوتر';
+          btn.onclick = () => {
+              document.getElementById('overlay').style.display = 'none';
+              startBotGame(botDifficulty);
+          };
+      } else {
+          btn.textContent = 'بازگشت به منو';
+          btn.onclick = leaveRoom;
+      }
+  } else {
+      btn.style.display = 'none';
+      setTimeout(() => { document.getElementById('overlay').style.display = 'none'; btn.style.display = 'block'; }, 2500);
+  }
   document.getElementById('overlay').style.display = 'flex';
 }
 
