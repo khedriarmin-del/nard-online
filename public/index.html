@@ -771,16 +771,22 @@ function selectFee(f) {
   document.getElementById('btnFee' + f).classList.add('active');
 }
 
-function startBotGame(difficulty) {
-  isBotMode = true; botDifficulty = difficulty; myColor = 'white'; matchTarget = 3; matchScore = { white: 0, black: 0 };
+function startBotGame(difficulty, isNewMatch = true) {
+  isBotMode = true; botDifficulty = difficulty; myColor = 'white'; 
+  if (isNewMatch) {
+      matchTarget = 3; 
+      matchScore = { white: 0, black: 0 };
+  }
   showScreen('screen-game');
   document.getElementById('chatToggle').classList.remove('active');
   updateMatchInfo();
   document.getElementById('whiteNameDisplay').textContent = profile.name;
   document.getElementById('blackNameDisplay').textContent = '🤖 کامپیوتر (' + (difficulty === 'easy' ? 'آسان' : difficulty === 'medium' ? 'متوسط' : 'سخت') + ')';
   document.getElementById('myColorDisplay').textContent = 'شما: سفید';
-  setupLocalView(); resetBoard();
-  currentTurn = 'white'; gameOver = false;
+  setupLocalView(); 
+  resetBoard();
+  currentTurn = 'white'; 
+  gameOver = false;
   document.getElementById('turnInfo').textContent = 'نوبت: سفید';
   document.getElementById('rollBtn').disabled = false;
   showMessage("شما سفید هستید. تاس بنداز.");
@@ -1132,15 +1138,21 @@ function endGame(winner) {
   const points = calculateGamePoints(winner);
   
   if (isBotMode) {
-    matchScore[winner] += points; updateMatchInfo();
+    matchScore[winner] += points; 
+    updateMatchInfo();
     if (matchScore[winner] >= matchTarget) {
       matchOver = true;
-      showOverlay(true, winner, 0); // AI Mode: No rating/coins change
+      showOverlay(true, winner, points, { white: 0, black: 0 }); 
     } else {
-      showOverlay(false, winner, points);
-      setTimeout(() => { document.getElementById('overlay').style.display = 'none'; startBotGame(botDifficulty); }, 2500);
+      showOverlay(false, winner, points, { white: 0, black: 0 });
+      setTimeout(() => { 
+        document.getElementById('overlay').style.display = 'none'; 
+        startBotGame(botDifficulty, false); 
+      }, 2500);
     }
-  } else { socket.emit('gameOver', { winner, points }); }
+  } else { 
+    socket.emit('gameOver', { winner, points }); 
+  }
 }
 function showOverlay(isMatchOver, winner, points, gamesWon) {
   const isMe = winner === myColor;
